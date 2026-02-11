@@ -160,4 +160,4 @@ A: 通常是证书或网络问题，可尝试更新 `certifi` 或切换网络。
 
 如有侵权，请联系：
 
-![contact](assets/contact_qr.jpg)
+<img src="assets/contact_qr.jpg" alt="contact" width="25%">
