@@ -1,4 +1,4 @@
-# TradingAgents/graph/trading_graph.py
+# AlphaNexus/graph/trading_graph.py
 
 import os
 from pathlib import Path
@@ -8,20 +8,20 @@ from typing import Dict, Any, Tuple, List, Optional
 
 from langgraph.prebuilt import ToolNode
 
-from tradingagents.llm_clients import create_llm_client
+from alphanexus.llm_clients import create_llm_client
 
-from tradingagents.agents import *
-from tradingagents.default_config import DEFAULT_CONFIG
-from tradingagents.agents.utils.memory import FinancialSituationMemory
-from tradingagents.agents.utils.agent_states import (
+from alphanexus.agents import *
+from alphanexus.default_config import DEFAULT_CONFIG
+from alphanexus.agents.utils.memory import FinancialSituationMemory
+from alphanexus.agents.utils.agent_states import (
     AgentState,
     InvestDebateState,
     RiskDebateState,
 )
-from tradingagents.dataflows.config import set_config
+from alphanexus.dataflows.config import set_config
 
 # Import the new abstract tool methods from agent_utils
-from tradingagents.agents.utils.agent_utils import (
+from alphanexus.agents.utils.agent_utils import (
     get_stock_data,
     get_indicators,
     get_fundamentals,
@@ -40,7 +40,7 @@ from .reflection import Reflector
 from .signal_processing import SignalProcessor
 
 
-class TradingAgentsGraph:
+class AlphaNexusGraph:
     """Main class that orchestrates the trading agents framework."""
 
     def __init__(
@@ -260,11 +260,11 @@ class TradingAgentsGraph:
         }
 
         # Save to file
-        directory = Path(f"eval_results/{self.ticker}/TradingAgentsStrategy_logs/")
+        directory = Path(f"eval_results/{self.ticker}/AlphaNexusStrategy_logs/")
         directory.mkdir(parents=True, exist_ok=True)
 
         with open(
-            f"eval_results/{self.ticker}/TradingAgentsStrategy_logs/full_states_log_{trade_date}.json",
+            f"eval_results/{self.ticker}/AlphaNexusStrategy_logs/full_states_log_{trade_date}.json",
             "w",
         ) as f:
             json.dump(self.log_states_dict, f, indent=4)

@@ -11,15 +11,15 @@ from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 
-from tradingagents.graph.trading_graph import TradingAgentsGraph
-from tradingagents.default_config import DEFAULT_CONFIG
+from alphanexus.graph.trading_graph import AlphaNexusGraph
+from alphanexus.default_config import DEFAULT_CONFIG
 
 load_dotenv()
 
 APP_DIR = Path(__file__).resolve().parent
 INDEX_HTML = (APP_DIR / "index.html").read_text(encoding="utf-8")
 
-app = FastAPI(title="TradingAgents Web")
+app = FastAPI(title="AlphaNexus Web")
 
 
 class RunRequest(BaseModel):
@@ -174,7 +174,7 @@ def _build_response(final_state: dict, decision: str, meta: dict) -> dict:
 def _run_graph(payload: RunRequest) -> dict:
     config, selected, meta = _prepare_config(payload)
 
-    graph = TradingAgentsGraph(
+    graph = AlphaNexusGraph(
         selected_analysts=selected,
         debug=False,
         config=config,
@@ -199,7 +199,7 @@ def _stream_graph(payload: RunRequest):
         yield _sse_event({"type": "status", "message": "初始化完成，开始分析..."})
         yield _sse_event({"type": "meta", "meta": meta})
 
-        graph = TradingAgentsGraph(
+        graph = AlphaNexusGraph(
             selected_analysts=selected,
             debug=False,
             config=config,

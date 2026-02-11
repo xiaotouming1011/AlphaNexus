@@ -1,7 +1,7 @@
-# TradingAgents/graph/propagation.py
+# AlphaNexus/graph/propagation.py
 
 from typing import Dict, Any, List, Optional
-from tradingagents.agents.utils.agent_states import (
+from alphanexus.agents.utils.agent_states import (
     AgentState,
     InvestDebateState,
     RiskDebateState,

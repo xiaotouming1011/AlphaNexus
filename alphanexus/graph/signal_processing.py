@@ -1,4 +1,4 @@
-# TradingAgents/graph/signal_processing.py
+# AlphaNexus/graph/signal_processing.py
 
 from langchain_openai import ChatOpenAI
 

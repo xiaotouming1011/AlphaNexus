@@ -1,4 +1,4 @@
-参考，使用了Tauric Research 团队创造多智能体交易框架 TradingAgents，为个人学习目的，针对个人学习方向进行修改
+参考，使用了Tauric Research 团队创造多智能体交易框架 AlphaNexus，为个人学习目的，针对个人学习方向进行修改
 
 # AlphaNexus
 
@@ -30,7 +30,7 @@ AlphaNexus/
 │  ├─ app.py
 │  └─ index.html
 ├─ cli/                        # 交互式 CLI
-├─ tradingagents/              # 核心多智能体框架
+├─ alphanexus/              # 核心多智能体框架
 │  ├─ agents/                  # 各类智能体
 │  ├─ dataflows/               # 数据源适配（yfinance/alpha_vantage）
 │  ├─ graph/                   # LangGraph 工作流
@@ -104,8 +104,8 @@ python -m cli.main
 ## Python 调用示例
 
 ```python
-from tradingagents.graph.trading_graph import TradingAgentsGraph
-from tradingagents.default_config import DEFAULT_CONFIG
+from alphanexus.graph.trading_graph import AlphaNexusGraph
+from alphanexus.default_config import DEFAULT_CONFIG
 
 config = DEFAULT_CONFIG.copy()
 config["llm_provider"] = "openai"
@@ -120,7 +120,7 @@ config["data_vendors"] = {
     "news_data": "yfinance",
 }
 
-ta = TradingAgentsGraph(debug=False, config=config)
+ta = AlphaNexusGraph(debug=False, config=config)
 _, decision = ta.propagate("NVDA", "2026-01-15")
 print(decision)
 ```
