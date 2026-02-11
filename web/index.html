@@ -92,10 +92,45 @@
         flex-wrap: wrap;
         align-items: center;
       }
+      .view-switch {
+        display: inline-flex;
+        gap: 6px;
+        padding: 4px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: #fffaf0;
+      }
+      .switch-btn {
+        border: none;
+        background: transparent;
+        color: var(--muted);
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .switch-btn.active {
+        color: #ffffff;
+        background: linear-gradient(135deg, var(--accent), #1aa36d);
+      }
       .layout {
         display: grid;
         grid-template-columns: 380px minmax(0, 1fr);
         gap: 20px;
+      }
+      .subpage.hidden {
+        display: none;
+      }
+      .portfolio-panel {
+        padding: 12px;
+      }
+      .portfolio-frame {
+        width: 100%;
+        min-height: 960px;
+        height: 1200px;
+        border: 0;
+        border-radius: 12px;
+        background: #f3efe8;
       }
       .panel {
         background: var(--panel);
@@ -296,6 +331,9 @@
         .layout { grid-template-columns: 1fr; }
         .row { grid-template-columns: 1fr; }
         .output-grid { grid-template-columns: 1fr; }
+        .portfolio-frame {
+          min-height: 1100px;
+        }
       }
     </style>
   </head>
@@ -307,11 +345,15 @@
           <p>多智能体交易研究界面：实时进度、来源校验、分块报告。</p>
         </div>
         <div class="hero-actions">
-          <a class="badge-link" href="/portfolio">Portfolio Tracker</a>
+          <div class="view-switch" role="tablist" aria-label="页面切换">
+            <button id="tab_research" class="switch-btn active" type="button" data-view="research">研究页</button>
+            <button id="tab_portfolio" class="switch-btn" type="button" data-view="portfolio">组合页</button>
+          </div>
           <span class="badge">Research Use Only</span>
         </div>
       </div>
 
+      <div id="research_view" class="subpage">
       <div class="layout">
         <section class="panel">
           <h2>Run</h2>
@@ -426,6 +468,20 @@
           </div>
         </section>
       </div>
+      </div>
+
+      <div id="portfolio_view" class="subpage hidden">
+        <section class="panel portfolio-panel">
+          <h2>Portfolio</h2>
+          <iframe
+            id="portfolio_iframe"
+            class="portfolio-frame"
+            src="/portfolio?embed=1"
+            title="Portfolio Tracker"
+            loading="lazy"
+          ></iframe>
+        </section>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -434,6 +490,10 @@
       const form = document.getElementById("run-form");
       const statusEl = document.getElementById("status");
       const runBtn = document.getElementById("run-btn");
+      const researchViewEl = document.getElementById("research_view");
+      const portfolioViewEl = document.getElementById("portfolio_view");
+      const portfolioIframeEl = document.getElementById("portfolio_iframe");
+      const viewSwitchButtons = Array.from(document.querySelectorAll(".switch-btn"));
       const tradeDateInput = document.getElementById("trade_date");
       const providerEl = document.getElementById("provider");
       const deepModelEl = document.getElementById("deep_model");
@@ -473,6 +533,42 @@
       if (window.marked) {
         marked.setOptions({ breaks: true, gfm: true });
       }
+
+      function switchView(viewName, updateHash = true) {
+        const isPortfolio = viewName === "portfolio";
+        researchViewEl.classList.toggle("hidden", isPortfolio);
+        portfolioViewEl.classList.toggle("hidden", !isPortfolio);
+        viewSwitchButtons.forEach((btn) => {
+          const active = btn.dataset.view === viewName;
+          btn.classList.toggle("active", active);
+          btn.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        if (updateHash) {
+          window.history.replaceState(null, "", isPortfolio ? "#portfolio" : "#research");
+        }
+      }
+
+      viewSwitchButtons.forEach((btn) => {
+        btn.addEventListener("click", () => switchView(btn.dataset.view || "research"));
+      });
+
+      window.addEventListener("hashchange", () => {
+        const view = window.location.hash === "#portfolio" ? "portfolio" : "research";
+        switchView(view, false);
+      });
+
+      window.addEventListener("message", (event) => {
+        if (!portfolioIframeEl || event.source !== portfolioIframeEl.contentWindow) return;
+        const payload = event.data || {};
+        if (payload.type !== "portfolio-height") return;
+        const height = Number(payload.height || 0);
+        if (height > 0) {
+          portfolioIframeEl.style.height = `${Math.max(height + 24, 900)}px`;
+        }
+      });
+
+      const initialView = window.location.hash === "#portfolio" ? "portfolio" : "research";
+      switchView(initialView, false);
 
       function renderMarkdown(target, text) {
         if (!target) return;

@@ -4,6 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AlphaNexus Portfolio</title>
+    <script>
+      if (new URLSearchParams(window.location.search).get("embed") === "1") {
+        document.documentElement.classList.add("embed-mode");
+      }
+    </script>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Serif+SC:wght@500;700&display=swap");
 
@@ -33,11 +38,19 @@
           radial-gradient(circle at 90% 12%, #dff6f2 0, transparent 40%),
           var(--bg);
       }
+      html.embed-mode body {
+        background: transparent;
+      }
 
       .shell {
         max-width: 1280px;
         margin: 28px auto 56px;
         padding: 0 20px;
+      }
+      html.embed-mode .shell {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
       }
 
       .hero {
@@ -46,6 +59,9 @@
         gap: 16px;
         align-items: flex-end;
         margin-bottom: 18px;
+      }
+      html.embed-mode .hero {
+        display: none;
       }
 
       .hero h1 {
@@ -88,6 +104,9 @@
         border-radius: 16px;
         box-shadow: var(--shadow);
         padding: 16px;
+      }
+      html.embed-mode .panel {
+        box-shadow: none;
       }
 
       .panel h2 {
@@ -547,6 +566,7 @@
         renderWarnings(data.warnings || []);
         renderLineChart(data, lineMode.value);
         renderStackedArea(data);
+        notifyParentHeight();
       }
 
       async function loadPortfolio(endpoint) {
@@ -582,12 +602,22 @@
         if (latestData) renderLineChart(latestData, lineMode.value);
       });
 
+      function notifyParentHeight() {
+        if (window.parent === window) return;
+        const height = document.documentElement.scrollHeight || document.body.scrollHeight || 0;
+        window.parent.postMessage({ type: "portfolio-height", height }, "*");
+      }
+
       window.addEventListener("resize", () => {
         lineChart.resize();
         stackedChart.resize();
+        notifyParentHeight();
       });
 
       loadPortfolio("/api/portfolio/data");
+      window.addEventListener("load", notifyParentHeight);
+      setTimeout(notifyParentHeight, 200);
+      setTimeout(notifyParentHeight, 1000);
     </script>
   </body>
 </html>
