@@ -153,3 +153,11 @@ A: 通常是证书或网络问题，可尝试更新 `certifi` 或切换网络。
 ## License
 
 本项目基于上游开源项目进行学习性改造，遵循原项目 LICENSE。
+
+---
+
+## 联系
+
+如有侵权，请联系：
+
+![contact](assets/contact_qr.jpg)
