@@ -13,11 +13,18 @@ from pydantic import BaseModel, Field
 
 from alphanexus.graph.trading_graph import AlphaNexusGraph
 from alphanexus.default_config import DEFAULT_CONFIG
+from alphanexus.dataflows.errors import (
+    DataflowAuthError,
+    DataflowBadRequestError,
+    DataflowError,
+)
+from web.portfolio_service import build_portfolio_timeseries
 
 load_dotenv()
 
 APP_DIR = Path(__file__).resolve().parent
 INDEX_HTML = (APP_DIR / "index.html").read_text(encoding="utf-8")
+PORTFOLIO_HTML = (APP_DIR / "portfolio.html").read_text(encoding="utf-8")
 
 app = FastAPI(title="AlphaNexus Web")
 
@@ -33,6 +40,13 @@ class RunRequest(BaseModel):
     quick_think_llm: str | None = None
     selected_analysts: list[str] | None = None
     config_overrides: dict | None = None
+
+
+class PortfolioRequest(BaseModel):
+    symbols: list[str] | None = None
+    allocation: dict[str, float] | None = None
+    total_value: float = Field(default=200000.0, gt=0)
+    alpha_vantage_key: str | None = None
 
 
 def _prepare_config(payload: RunRequest):
@@ -185,6 +199,47 @@ def _run_graph(payload: RunRequest) -> dict:
     return _build_response(final_state, decision, meta)
 
 
+def _portfolio_error_payload(exc: Exception) -> dict:
+    if isinstance(exc, DataflowError):
+        return {
+            "error_code": exc.error_code,
+            "message": str(exc),
+            "vendor": exc.vendor,
+            "retryable": exc.retryable,
+        }
+    return {
+        "error_code": "PORTFOLIO_ERROR",
+        "message": str(exc),
+        "vendor": None,
+        "retryable": False,
+    }
+
+
+def _run_portfolio(payload: PortfolioRequest) -> dict:
+    try:
+        return build_portfolio_timeseries(
+            symbols=payload.symbols,
+            allocation=payload.allocation,
+            total_value=payload.total_value,
+            api_key=(payload.alpha_vantage_key or "").strip() or None,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=_portfolio_error_payload(
+                DataflowBadRequestError(str(exc), vendor="portfolio_service")
+            ),
+        ) from exc
+    except DataflowAuthError as exc:
+        raise HTTPException(status_code=401, detail=_portfolio_error_payload(exc)) from exc
+    except DataflowBadRequestError as exc:
+        raise HTTPException(status_code=400, detail=_portfolio_error_payload(exc)) from exc
+    except DataflowError as exc:
+        raise HTTPException(status_code=502, detail=_portfolio_error_payload(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=_portfolio_error_payload(exc)) from exc
+
+
 def _sse_event(payload: dict, event: str | None = None) -> str:
     message = ""
     if event:
@@ -263,6 +318,11 @@ def index() -> HTMLResponse:
     return HTMLResponse(content=INDEX_HTML)
 
 
+@app.get("/portfolio", response_class=HTMLResponse)
+def portfolio_page() -> HTMLResponse:
+    return HTMLResponse(content=PORTFOLIO_HTML)
+
+
 @app.post("/api/run")
 async def run(payload: RunRequest) -> JSONResponse:
     result = await run_in_threadpool(_run_graph, payload)
@@ -277,6 +337,31 @@ async def run_stream(payload: RunRequest) -> StreamingResponse:
 @app.get("/api/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+@app.get("/api/portfolio/health")
+def portfolio_health() -> dict:
+    return {"status": "ok", "service": "portfolio"}
+
+
+@app.get("/api/portfolio/data")
+async def portfolio_data_get() -> JSONResponse:
+    payload = PortfolioRequest()
+    result = await run_in_threadpool(_run_portfolio, payload)
+    return JSONResponse(content={"ok": True, "data": result})
+
+
+@app.post("/api/portfolio/data")
+async def portfolio_data_post(payload: PortfolioRequest) -> JSONResponse:
+    result = await run_in_threadpool(_run_portfolio, payload)
+    return JSONResponse(content={"ok": True, "data": result})
+
+
+@app.post("/api/portfolio/refresh")
+async def portfolio_refresh(payload: PortfolioRequest) -> JSONResponse:
+    # Current service always attempts live MCP first, then falls back to cache.
+    result = await run_in_threadpool(_run_portfolio, payload)
+    return JSONResponse(content={"ok": True, "data": result})
 
 
 if __name__ == "__main__":

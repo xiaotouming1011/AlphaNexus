@@ -19,6 +19,10 @@ AlphaNexus 是一个基于多智能体协作的交易研究实验项目，面向
   - SSE 流式进度输出
   - Markdown 渲染报告
   - 信息来源链接展示与导出
+- Portfolio Tracker 子页面（`/portfolio`）支持：
+  - 基于 Alpha Vantage MCP 的 3 股票组合跟踪
+  - Live 失败自动回退本地缓存（图例显示 `cached`）
+  - Line / Stacked Area 双图表可视化
 
 ---
 
@@ -29,6 +33,8 @@ AlphaNexus/
 ├─ web/                        # Web 端（FastAPI + SSE + 前端）
 │  ├─ app.py
 │  └─ index.html
+│  ├─ portfolio.html
+│  └─ portfolio_service.py
 ├─ cli/                        # 交互式 CLI
 ├─ alphanexus/              # 核心多智能体框架
 │  ├─ agents/                  # 各类智能体
@@ -81,6 +87,11 @@ uvicorn web.app:app --host 127.0.0.1 --port 8001
 http://127.0.0.1:8001
 ```
 
+Portfolio 子页面：
+```
+http://127.0.0.1:8001/portfolio
+```
+
 Web 端支持：
 - 供应商/模型选择（下拉）
 - 数据源切换（yfinance / Alpha Vantage）
@@ -88,6 +99,13 @@ Web 端支持：
 - Markdown 渲染报告
 - 结果导出（Markdown / JSON）
 - 信息来源链接展示（便于人工核验）
+- Portfolio 图表页（组合价值与权重轨迹）
+
+Portfolio API：
+- `GET /api/portfolio/data`：默认参数拉取组合数据
+- `POST /api/portfolio/data`：自定义 symbols/allocation/total_value/key
+- `POST /api/portfolio/refresh`：强制刷新（依然是 live 优先，失败回退缓存）
+- `GET /api/portfolio/health`：健康检查
 
 ---
 
@@ -141,6 +159,9 @@ A: 这是常见限制，可切换到 Alpha Vantage 并填写 API Key。
 
 **Q: Web 端报 SSL 错误？**
 A: 通常是证书或网络问题，可尝试更新 `certifi` 或切换网络。
+
+**Q: Portfolio 页面为什么只看到约 100 个交易日？**
+A: Alpha Vantage 免费 key 对 `TIME_SERIES_DAILY` 的 `outputsize=full` 有权限限制，系统会自动降级到 compact，并在页面 warnings 中提示。
 
 ---
 

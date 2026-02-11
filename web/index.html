@@ -77,6 +77,21 @@
         color: #8a5b10;
         font-size: 12px;
       }
+      .badge-link {
+        padding: 6px 12px;
+        border: 1px solid #cde5df;
+        border-radius: 999px;
+        background: #eefaf7;
+        color: #246c60;
+        font-size: 12px;
+        text-decoration: none;
+      }
+      .hero-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
       .layout {
         display: grid;
         grid-template-columns: 380px minmax(0, 1fr);
@@ -291,7 +306,10 @@
           <h1>AlphaNexus</h1>
           <p>多智能体交易研究界面：实时进度、来源校验、分块报告。</p>
         </div>
-        <span class="badge">Research Use Only</span>
+        <div class="hero-actions">
+          <a class="badge-link" href="/portfolio">Portfolio Tracker</a>
+          <span class="badge">Research Use Only</span>
+        </div>
       </div>
 
       <div class="layout">

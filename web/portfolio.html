@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AlphaNexus Portfolio</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Serif+SC:wght@500;700&display=swap");
+
+      :root {
+        --bg: #f3efe8;
+        --panel: #ffffff;
+        --ink: #1f2a38;
+        --muted: #5b6470;
+        --accent: #126e82;
+        --accent-2: #f08a24;
+        --danger: #d64545;
+        --ok: #1f8a5b;
+        --line: #e6dfd2;
+        --shadow: 0 18px 36px rgba(24, 38, 56, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        font-family: "Space Grotesk", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+        background:
+          radial-gradient(circle at 8% 4%, #fff6dd 0, transparent 38%),
+          radial-gradient(circle at 90% 12%, #dff6f2 0, transparent 40%),
+          var(--bg);
+      }
+
+      .shell {
+        max-width: 1280px;
+        margin: 28px auto 56px;
+        padding: 0 20px;
+      }
+
+      .hero {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: flex-end;
+        margin-bottom: 18px;
+      }
+
+      .hero h1 {
+        margin: 0 0 8px;
+        font-family: "Noto Serif SC", serif;
+        font-size: 34px;
+        letter-spacing: 0.01em;
+      }
+
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .pill {
+        border: 1px solid var(--line);
+        background: #fffaf0;
+        color: #855814;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 12px;
+        text-decoration: none;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 340px minmax(0, 1fr);
+        gap: 18px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        padding: 16px;
+      }
+
+      .panel h2 {
+        margin: 0 0 12px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #6b7683;
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      input {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 14px;
+        background: #fffefb;
+      }
+
+      .btn-row {
+        display: flex;
+        gap: 8px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 11px 14px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .primary {
+        background: linear-gradient(135deg, var(--accent), #159f7f);
+        color: #fff;
+      }
+
+      .secondary {
+        background: #f2f6fb;
+        color: #33465c;
+        border: 1px solid #d9e1ec;
+      }
+
+      button:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+
+      .status {
+        font-size: 13px;
+        color: var(--muted);
+        min-height: 20px;
+      }
+
+      .status.ok { color: var(--ok); }
+      .status.err { color: var(--danger); }
+
+      .warn-box {
+        margin-top: 8px;
+        border: 1px solid #f4c27d;
+        background: #fff7ea;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 12px;
+        color: #8a5d1f;
+      }
+
+      .warn-box.hidden {
+        display: none;
+      }
+
+      .summary {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .summary .item {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        padding: 10px;
+      }
+
+      .summary .k {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .summary .v {
+        margin-top: 4px;
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .chart-card {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        padding: 12px;
+        margin-top: 10px;
+      }
+
+      .chart-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .chart-head h3 {
+        margin: 0;
+        font-size: 14px;
+      }
+
+      .chart {
+        width: 100%;
+        height: 360px;
+      }
+
+      .toggle {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 6px 10px;
+        font-size: 13px;
+        background: #fff;
+      }
+
+      @media (max-width: 1024px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .summary {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 700px) {
+        .hero {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .row {
+          grid-template-columns: 1fr;
+        }
+        .summary {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="hero">
+        <div>
+          <h1>Portfolio Tracker</h1>
+          <p>基于 Alpha Vantage MCP 的组合估值与权重轨迹（含缓存回退标识）。</p>
+        </div>
+        <div class="hero-actions">
+          <a class="pill" href="/">返回研究页</a>
+          <span class="pill">AlphaNexus / localhost</span>
+        </div>
+      </div>
+
+      <div class="layout">
+        <section class="panel">
+          <h2>配置</h2>
+          <div class="form-grid">
+            <div class="row">
+              <div>
+                <label for="symbol1">股票 1</label>
+                <input id="symbol1" value="AAPL" />
+              </div>
+              <div>
+                <label for="alloc1">权重 %</label>
+                <input id="alloc1" type="number" value="45" min="1" max="99" />
+              </div>
+            </div>
+            <div class="row">
+              <div>
+                <label for="symbol2">股票 2</label>
+                <input id="symbol2" value="MSFT" />
+              </div>
+              <div>
+                <label for="alloc2">权重 %</label>
+                <input id="alloc2" type="number" value="35" min="1" max="99" />
+              </div>
+            </div>
+            <div class="row">
+              <div>
+                <label for="symbol3">股票 3</label>
+                <input id="symbol3" value="NVDA" />
+              </div>
+              <div>
+                <label for="alloc3">权重 %</label>
+                <input id="alloc3" type="number" value="20" min="1" max="99" />
+              </div>
+            </div>
+            <div>
+              <label for="totalValue">组合总额（USD）</label>
+              <input id="totalValue" type="number" value="200000" min="1000" />
+            </div>
+            <div>
+              <label for="alphaKey">Alpha Vantage API Key（可选）</label>
+              <input id="alphaKey" type="password" placeholder="留空则读取环境变量" />
+            </div>
+            <div class="btn-row">
+              <button id="loadBtn" class="primary">加载组合</button>
+              <button id="refreshBtn" class="secondary">刷新（Live优先）</button>
+            </div>
+            <div id="status" class="status"></div>
+            <div id="warnBox" class="warn-box hidden"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>图表</h2>
+          <div class="summary">
+            <div class="item">
+              <div class="k">As Of</div>
+              <div id="asOf" class="v">-</div>
+            </div>
+            <div class="item">
+              <div class="k">Data Range</div>
+              <div id="range" class="v">-</div>
+            </div>
+            <div class="item">
+              <div class="k">Total Value</div>
+              <div id="total" class="v">-</div>
+            </div>
+            <div class="item">
+              <div class="k">Cache Fallback</div>
+              <div id="cached" class="v">-</div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-head">
+              <h3>Line Chart</h3>
+              <select id="lineMode" class="toggle">
+                <option value="total">总组合价值</option>
+                <option value="individual">个股价值</option>
+              </select>
+            </div>
+            <div id="lineChart" class="chart"></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-head">
+              <h3>Stacked Area + Secondary Axis</h3>
+            </div>
+            <div id="stackedChart" class="chart"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <script>
+      const loadBtn = document.getElementById("loadBtn");
+      const refreshBtn = document.getElementById("refreshBtn");
+      const lineMode = document.getElementById("lineMode");
+      const statusEl = document.getElementById("status");
+      const warnBox = document.getElementById("warnBox");
+      const asOfEl = document.getElementById("asOf");
+      const rangeEl = document.getElementById("range");
+      const totalEl = document.getElementById("total");
+      const cachedEl = document.getElementById("cached");
+
+      const lineChart = echarts.init(document.getElementById("lineChart"));
+      const stackedChart = echarts.init(document.getElementById("stackedChart"));
+
+      let latestData = null;
+
+      function fmtMoney(v) {
+        if (v == null || Number.isNaN(Number(v))) return "-";
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 0,
+        }).format(v);
+      }
+
+      function getPayload() {
+        const symbols = [
+          document.getElementById("symbol1").value.trim().toUpperCase(),
+          document.getElementById("symbol2").value.trim().toUpperCase(),
+          document.getElementById("symbol3").value.trim().toUpperCase(),
+        ];
+        const allocation = {
+          [symbols[0]]: Number(document.getElementById("alloc1").value || 0),
+          [symbols[1]]: Number(document.getElementById("alloc2").value || 0),
+          [symbols[2]]: Number(document.getElementById("alloc3").value || 0),
+        };
+        return {
+          symbols,
+          allocation,
+          total_value: Number(document.getElementById("totalValue").value || 200000),
+          alpha_vantage_key: document.getElementById("alphaKey").value.trim() || null,
+        };
+      }
+
+      function setBusy(busy) {
+        loadBtn.disabled = busy;
+        refreshBtn.disabled = busy;
+      }
+
+      function setStatus(text, kind) {
+        statusEl.textContent = text || "";
+        statusEl.className = "status";
+        if (kind === "ok") statusEl.classList.add("ok");
+        if (kind === "err") statusEl.classList.add("err");
+      }
+
+      function renderWarnings(warnings) {
+        if (!warnings || warnings.length === 0) {
+          warnBox.classList.add("hidden");
+          warnBox.innerHTML = "";
+          return;
+        }
+        warnBox.classList.remove("hidden");
+        warnBox.innerHTML = warnings.map((w) => `<div>• ${w}</div>`).join("");
+      }
+
+      function renderSummary(data) {
+        asOfEl.textContent = data.as_of || "-";
+        rangeEl.textContent = `${data.data_start_date || "-"} ~ ${data.data_end_date || "-"}`;
+        totalEl.textContent = fmtMoney(data.total_value);
+        cachedEl.textContent = data.cached_any ? "Yes" : "No";
+      }
+
+      function renderLineChart(data, mode) {
+        const dates = data.timeline.map((x) => x.date);
+        const legendMap = {};
+        for (const item of data.symbols) {
+          legendMap[item.symbol] = item.legend_label || item.symbol;
+        }
+
+        let series = [];
+        if (mode === "total") {
+          series = [
+            {
+              name: "Portfolio Total",
+              type: "line",
+              smooth: true,
+              showSymbol: false,
+              lineStyle: { width: 3, color: "#126e82" },
+              data: data.timeline.map((x) => x.total_value),
+            },
+          ];
+        } else {
+          for (const meta of data.symbols) {
+            series.push({
+              name: legendMap[meta.symbol],
+              type: "line",
+              smooth: true,
+              showSymbol: false,
+              data: data.timeline.map((x) => x.stock_values[meta.symbol]),
+            });
+          }
+        }
+
+        lineChart.setOption({
+          tooltip: { trigger: "axis" },
+          legend: { top: 4 },
+          grid: { left: 46, right: 20, top: 40, bottom: 34 },
+          xAxis: { type: "category", data: dates },
+          yAxis: {
+            type: "value",
+            axisLabel: {
+              formatter: (v) => `$${Math.round(v).toLocaleString()}`,
+            },
+          },
+          series,
+        });
+      }
+
+      function renderStackedArea(data) {
+        const dates = data.timeline.map((x) => x.date);
+        const legendMap = {};
+        for (const item of data.symbols) {
+          legendMap[item.symbol] = item.legend_label || item.symbol;
+        }
+
+        const areaSeries = data.symbols.map((meta) => ({
+          name: legendMap[meta.symbol],
+          type: "line",
+          stack: "weight",
+          areaStyle: { opacity: 0.55 },
+          smooth: true,
+          showSymbol: false,
+          yAxisIndex: 0,
+          data: data.timeline.map((x) => Number((x.stock_weights[meta.symbol] * 100).toFixed(2))),
+        }));
+
+        areaSeries.push({
+          name: "Portfolio Total",
+          type: "line",
+          smooth: true,
+          showSymbol: false,
+          yAxisIndex: 1,
+          lineStyle: { width: 2.6, color: "#f08a24" },
+          data: data.timeline.map((x) => x.total_value),
+        });
+
+        stackedChart.setOption({
+          tooltip: { trigger: "axis" },
+          legend: { top: 4 },
+          grid: { left: 46, right: 56, top: 40, bottom: 34 },
+          xAxis: { type: "category", data: dates },
+          yAxis: [
+            {
+              type: "value",
+              name: "Allocation %",
+              min: 0,
+              max: 100,
+              axisLabel: { formatter: "{value}%" },
+            },
+            {
+              type: "value",
+              name: "Total Value",
+              axisLabel: {
+                formatter: (v) => `$${Math.round(v / 1000)}k`,
+              },
+            },
+          ],
+          series: areaSeries,
+        });
+      }
+
+      function renderAll(data) {
+        latestData = data;
+        renderSummary(data);
+        renderWarnings(data.warnings || []);
+        renderLineChart(data, lineMode.value);
+        renderStackedArea(data);
+      }
+
+      async function loadPortfolio(endpoint) {
+        setBusy(true);
+        setStatus("加载中...", null);
+        try {
+          const res = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(getPayload()),
+          });
+
+          const body = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            const detail = body.detail || {};
+            const msg = detail.message || `请求失败 (${res.status})`;
+            const code = detail.error_code ? `[${detail.error_code}] ` : "";
+            throw new Error(`${code}${msg}`);
+          }
+
+          renderAll(body.data);
+          setStatus("完成", "ok");
+        } catch (err) {
+          setStatus(`出错: ${err.message}`, "err");
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      loadBtn.addEventListener("click", () => loadPortfolio("/api/portfolio/data"));
+      refreshBtn.addEventListener("click", () => loadPortfolio("/api/portfolio/refresh"));
+      lineMode.addEventListener("change", () => {
+        if (latestData) renderLineChart(latestData, lineMode.value);
+      });
+
+      window.addEventListener("resize", () => {
+        lineChart.resize();
+        stackedChart.resize();
+      });
+
+      loadPortfolio("/api/portfolio/data");
+    </script>
+  </body>
+</html>
