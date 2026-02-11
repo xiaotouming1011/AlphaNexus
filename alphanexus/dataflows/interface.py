@@ -22,7 +22,12 @@ from .alpha_vantage import (
     get_news as get_alpha_vantage_news,
     get_global_news as get_alpha_vantage_global_news,
 )
-from .alpha_vantage_common import AlphaVantageRateLimitError
+from .errors import (
+    DataflowError,
+    DataflowUpstreamError,
+    normalize_dataflow_error,
+    should_fallback_on_error,
+)
 
 # Configuration and routing logic
 from .config import get_config
@@ -135,7 +140,7 @@ def route_to_vendor(method: str, *args, **kwargs):
     """Route method calls to appropriate vendor implementation with fallback support."""
     category = get_category_for_method(method)
     vendor_config = get_vendor(category, method)
-    primary_vendors = [v.strip() for v in vendor_config.split(',')]
+    primary_vendors = [v.strip() for v in vendor_config.split(",") if v.strip()]
 
     if method not in VENDOR_METHODS:
         raise ValueError(f"Method '{method}' not supported")
@@ -147,6 +152,8 @@ def route_to_vendor(method: str, *args, **kwargs):
         if vendor not in fallback_vendors:
             fallback_vendors.append(vendor)
 
+    errors: list[DataflowError] = []
+
     for vendor in fallback_vendors:
         if vendor not in VENDOR_METHODS[method]:
             continue
@@ -156,7 +163,24 @@ def route_to_vendor(method: str, *args, **kwargs):
 
         try:
             return impl_func(*args, **kwargs)
-        except AlphaVantageRateLimitError:
-            continue  # Only rate limits trigger fallback
+        except Exception as exc:
+            normalized = normalize_dataflow_error(exc, vendor=vendor, method=method)
+            errors.append(normalized)
+
+            if should_fallback_on_error(normalized):
+                continue
+            raise normalized from exc
+
+    if errors:
+        last_error = errors[-1]
+        failure_summary = "; ".join(
+            f"{err.vendor or 'unknown'}:{err.error_code}" for err in errors
+        )
+        raise DataflowUpstreamError(
+            f"All vendors failed for '{method}': {failure_summary}",
+            vendor=last_error.vendor,
+            method=method,
+            retryable=all(err.retryable for err in errors),
+        ) from last_error
 
     raise RuntimeError(f"No available vendor for '{method}'")

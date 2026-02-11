@@ -4,26 +4,90 @@ from dateutil.relativedelta import relativedelta
 import yfinance as yf
 import os
 from .stockstats_utils import StockstatsUtils
+from .errors import (
+    DataflowBadRequestError,
+    DataflowNoDataError,
+    DataflowRateLimitError,
+    DataflowTimeoutError,
+    DataflowUpstreamError,
+)
+
+try:
+    from yfinance.exceptions import YFRateLimitError
+except Exception:
+    YFRateLimitError = None
+
+
+def _to_yfinance_error(exc: Exception, method: str) -> Exception:
+    message = str(exc)
+    lowered = message.lower()
+
+    if YFRateLimitError and isinstance(exc, YFRateLimitError):
+        return DataflowRateLimitError(
+            f"yfinance rate limited: {message}",
+            vendor="yfinance",
+            method=method,
+        )
+
+    if "too many requests" in lowered or "rate limit" in lowered:
+        return DataflowRateLimitError(
+            f"yfinance rate limited: {message}",
+            vendor="yfinance",
+            method=method,
+        )
+
+    if "timed out" in lowered or "timeout" in lowered or "operation timed out" in lowered:
+        return DataflowTimeoutError(
+            f"yfinance timeout: {message}",
+            vendor="yfinance",
+            method=method,
+        )
+
+    if "ssl" in lowered or "connection reset" in lowered or "failed to perform" in lowered:
+        return DataflowUpstreamError(
+            f"yfinance connection error: {message}",
+            vendor="yfinance",
+            method=method,
+            retryable=True,
+        )
+
+    return DataflowUpstreamError(
+        f"yfinance request failed: {message}",
+        vendor="yfinance",
+        method=method,
+        retryable=True,
+    )
 
 def get_YFin_data_online(
     symbol: Annotated[str, "ticker symbol of the company"],
     start_date: Annotated[str, "Start date in yyyy-mm-dd format"],
     end_date: Annotated[str, "End date in yyyy-mm-dd format"],
 ):
+    try:
+        datetime.strptime(start_date, "%Y-%m-%d")
+        datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError as exc:
+        raise DataflowBadRequestError(
+            "start_date/end_date 格式应为 YYYY-MM-DD",
+            vendor="yfinance",
+            method="get_stock_data",
+        ) from exc
 
-    datetime.strptime(start_date, "%Y-%m-%d")
-    datetime.strptime(end_date, "%Y-%m-%d")
+    try:
+        # Create ticker object
+        ticker = yf.Ticker(symbol.upper())
 
-    # Create ticker object
-    ticker = yf.Ticker(symbol.upper())
-
-    # Fetch historical data for the specified date range
-    data = ticker.history(start=start_date, end=end_date)
+        # Fetch historical data for the specified date range
+        data = ticker.history(start=start_date, end=end_date)
+    except Exception as exc:
+        raise _to_yfinance_error(exc, "get_stock_data") from exc
 
     # Check if data is empty
     if data.empty:
-        return (
-            f"No data found for symbol '{symbol}' between {start_date} and {end_date}"
+        raise DataflowNoDataError(
+            f"No data found for symbol '{symbol}' between {start_date} and {end_date}",
+            vendor="yfinance",
+            method="get_stock_data",
         )
 
     # Remove timezone info from index for cleaner output
@@ -162,8 +226,7 @@ def get_stock_stats_indicators_window(
         for date_str, value in date_values:
             ind_string += f"{date_str}: {value}\n"
         
-    except Exception as e:
-        print(f"Error getting bulk stockstats data: {e}")
+    except Exception:
         # Fallback to original implementation if bulk method fails
         ind_string = ""
         curr_date_dt = datetime.strptime(curr_date, "%Y-%m-%d")
@@ -284,11 +347,12 @@ def get_stockstats_indicator(
             indicator,
             curr_date,
         )
-    except Exception as e:
-        print(
-            f"Error getting stockstats indicator data for indicator {indicator} on {curr_date}: {e}"
+    except Exception:
+        raise DataflowUpstreamError(
+            f"Error getting stockstats indicator data for indicator {indicator} on {curr_date}",
+            vendor="yfinance",
+            method="get_indicators",
         )
-        return ""
 
     return str(indicator_value)
 

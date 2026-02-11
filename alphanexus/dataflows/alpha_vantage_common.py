@@ -4,14 +4,25 @@ import pandas as pd
 import json
 from datetime import datetime
 from io import StringIO
+from .errors import (
+    DataflowAuthError,
+    DataflowBadRequestError,
+    DataflowRateLimitError,
+    DataflowTimeoutError,
+    DataflowUpstreamError,
+)
 
 API_BASE_URL = "https://www.alphavantage.co/query"
+REQUEST_TIMEOUT_SECONDS = 15
 
 def get_api_key() -> str:
     """Retrieve the API key for Alpha Vantage from environment variables."""
     api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
     if not api_key:
-        raise ValueError("ALPHA_VANTAGE_API_KEY environment variable is not set.")
+        raise DataflowAuthError(
+            "ALPHA_VANTAGE_API_KEY environment variable is not set.",
+            vendor="alpha_vantage",
+        )
     return api_key
 
 def format_datetime_for_api(date_input) -> str:
@@ -35,9 +46,55 @@ def format_datetime_for_api(date_input) -> str:
     else:
         raise ValueError(f"Date must be string or datetime object, got {type(date_input)}")
 
-class AlphaVantageRateLimitError(Exception):
+class AlphaVantageRateLimitError(DataflowRateLimitError):
     """Exception raised when Alpha Vantage API rate limit is exceeded."""
-    pass
+    def __init__(self, message: str):
+        super().__init__(message, vendor="alpha_vantage")
+
+
+def _parse_alpha_vantage_json_error(function_name: str, payload: dict) -> Exception | None:
+    """Extract API-level errors from Alpha Vantage JSON payloads."""
+    note = payload.get("Note")
+    information = payload.get("Information")
+    error_message = payload.get("Error Message")
+
+    for candidate in (note, information):
+        if not candidate:
+            continue
+        lowered = candidate.lower()
+        if "rate limit" in lowered or "thank you for using alpha vantage" in lowered:
+            return AlphaVantageRateLimitError(
+                f"Alpha Vantage rate limit exceeded for {function_name}: {candidate}"
+            )
+        if "not entitled" in lowered or "api key" in lowered:
+            return DataflowAuthError(
+                f"Alpha Vantage auth error for {function_name}: {candidate}",
+                vendor="alpha_vantage",
+                method=function_name,
+            )
+        return DataflowUpstreamError(
+            f"Alpha Vantage upstream error for {function_name}: {candidate}",
+            vendor="alpha_vantage",
+            method=function_name,
+            retryable=True,
+        )
+
+    if error_message:
+        lowered = error_message.lower()
+        if "invalid" in lowered or "parameter" in lowered:
+            return DataflowBadRequestError(
+                f"Alpha Vantage bad request for {function_name}: {error_message}",
+                vendor="alpha_vantage",
+                method=function_name,
+            )
+        return DataflowUpstreamError(
+            f"Alpha Vantage error for {function_name}: {error_message}",
+            vendor="alpha_vantage",
+            method=function_name,
+            retryable=False,
+        )
+
+    return None
 
 def _make_api_request(function_name: str, params: dict) -> dict | str:
     """Helper function to make API requests and handle responses.
@@ -63,19 +120,58 @@ def _make_api_request(function_name: str, params: dict) -> dict | str:
         # Remove entitlement if it's None or empty
         api_params.pop("entitlement", None)
     
-    response = requests.get(API_BASE_URL, params=api_params)
-    response.raise_for_status()
+    try:
+        response = requests.get(
+            API_BASE_URL,
+            params=api_params,
+            timeout=REQUEST_TIMEOUT_SECONDS,
+        )
+    except requests.Timeout as exc:
+        raise DataflowTimeoutError(
+            f"Alpha Vantage timeout for {function_name}",
+            vendor="alpha_vantage",
+            method=function_name,
+        ) from exc
+    except requests.RequestException as exc:
+        raise DataflowUpstreamError(
+            f"Alpha Vantage request failed for {function_name}: {exc}",
+            vendor="alpha_vantage",
+            method=function_name,
+            retryable=True,
+        ) from exc
+
+    if response.status_code == 429:
+        raise AlphaVantageRateLimitError(
+            f"Alpha Vantage rate limit exceeded for {function_name} (HTTP 429)"
+        )
+    if response.status_code in (401, 403):
+        raise DataflowAuthError(
+            f"Alpha Vantage auth error for {function_name} (HTTP {response.status_code})",
+            vendor="alpha_vantage",
+            method=function_name,
+        )
+    if response.status_code >= 500:
+        raise DataflowUpstreamError(
+            f"Alpha Vantage upstream failure for {function_name} (HTTP {response.status_code})",
+            vendor="alpha_vantage",
+            method=function_name,
+            retryable=True,
+        )
+    if response.status_code >= 400:
+        raise DataflowBadRequestError(
+            f"Alpha Vantage request rejected for {function_name} (HTTP {response.status_code})",
+            vendor="alpha_vantage",
+            method=function_name,
+        )
 
     response_text = response.text
     
     # Check if response is JSON (error responses are typically JSON)
     try:
         response_json = json.loads(response_text)
-        # Check for rate limit error
-        if "Information" in response_json:
-            info_message = response_json["Information"]
-            if "rate limit" in info_message.lower() or "api key" in info_message.lower():
-                raise AlphaVantageRateLimitError(f"Alpha Vantage rate limit exceeded: {info_message}")
+        parsed_error = _parse_alpha_vantage_json_error(function_name, response_json)
+        if parsed_error:
+            raise parsed_error
     except json.JSONDecodeError:
         # Response is not JSON (likely CSV data), which is normal
         pass
@@ -116,7 +212,10 @@ def _filter_csv_by_date_range(csv_data: str, start_date: str, end_date: str) -> 
         # Convert back to CSV string
         return filtered_df.to_csv(index=False)
 
-    except Exception as e:
-        # If filtering fails, return original data with a warning
-        print(f"Warning: Failed to filter CSV data by date range: {e}")
-        return csv_data
+    except Exception as exc:
+        raise DataflowUpstreamError(
+            f"Failed to filter Alpha Vantage CSV by date range: {exc}",
+            vendor="alpha_vantage",
+            method="filter_csv_by_date_range",
+            retryable=True,
+        ) from exc
