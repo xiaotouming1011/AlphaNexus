@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AlphaNexus</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=ZCOOL+XiaoWei&display=swap");
+
+      :root {
+        color-scheme: light;
+        --bg: #f5f1ea;
+        --panel: #ffffff;
+        --ink: #1c1f26;
+        --muted: #59606a;
+        --accent: #1b8e7c;
+        --accent-2: #f0b44d;
+        --border: #e4ded3;
+        --shadow: 0 16px 40px rgba(18, 28, 45, 0.12);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+        color: var(--ink);
+        background: radial-gradient(circle at 20% 10%, #fff3d8 0, transparent 45%),
+          radial-gradient(circle at 90% 20%, #d9f2ed 0, transparent 50%),
+          var(--bg);
+      }
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        z-index: -1;
+        width: 420px;
+        height: 420px;
+        border-radius: 50%;
+        filter: blur(40px);
+        opacity: 0.35;
+      }
+      body::before {
+        top: -120px;
+        left: -80px;
+        background: #f6c97d;
+      }
+      body::after {
+        bottom: -120px;
+        right: -80px;
+        background: #7fd6c4;
+      }
+      .shell {
+        max-width: 1200px;
+        margin: 36px auto 60px;
+        padding: 0 24px;
+      }
+      .hero {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 24px;
+      }
+      .hero h1 {
+        font-family: "ZCOOL XiaoWei", serif;
+        font-size: 34px;
+        margin: 0 0 8px 0;
+      }
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+      }
+      .badge {
+        padding: 6px 12px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: #fff7e6;
+        color: #8a5b10;
+        font-size: 12px;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 380px minmax(0, 1fr);
+        gap: 20px;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        padding: 18px;
+        animation: rise 600ms ease;
+      }
+      @keyframes rise {
+        from { transform: translateY(12px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+      .panel h2 {
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #7b828c;
+        margin: 0 0 12px 0;
+      }
+      form {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        margin-bottom: 6px;
+        color: var(--muted);
+      }
+      input[type="text"],
+      input[type="date"],
+      input[type="password"],
+      select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 14px;
+        background: #fffdfa;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .analysts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .analysts label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--ink);
+        background: #f7f7f2;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 6px 12px;
+      }
+      button.primary {
+        padding: 12px 16px;
+        background: linear-gradient(135deg, var(--accent), #1aa36d);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        cursor: pointer;
+      }
+      button.primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .status {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        margin: 12px 0 8px;
+        flex-wrap: wrap;
+      }
+      .actions button {
+        border: 1px solid var(--border);
+        background: #fff;
+        padding: 8px 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .actions button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .output-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .section {
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 12px;
+        background: #fff;
+        animation: fadeIn 500ms ease;
+      }
+      .section.hidden {
+        display: none;
+      }
+      .section h3 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+      }
+      .plain {
+        white-space: pre-wrap;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .report-list {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .source-list {
+        margin: 0;
+        padding-left: 18px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 12px;
+      }
+      .meta span {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 4px 10px;
+        background: #f7f5f0;
+      }
+      .markdown {
+        font-size: 13px;
+        line-height: 1.7;
+        color: #2a2f3a;
+      }
+      .markdown h1, .markdown h2, .markdown h3 {
+        margin: 0.6em 0 0.4em;
+      }
+      .markdown p {
+        margin: 0.4em 0;
+      }
+      .markdown ul, .markdown ol {
+        padding-left: 18px;
+        margin: 0.4em 0;
+      }
+      .markdown code {
+        background: #f1eee8;
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-size: 12px;
+      }
+      .markdown pre {
+        background: #0b1020;
+        color: #d9e3ff;
+        padding: 12px;
+        border-radius: 10px;
+        overflow: auto;
+      }
+      .markdown table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 8px;
+        font-size: 12px;
+      }
+      .markdown th, .markdown td {
+        border: 1px solid #e0e0e0;
+        padding: 6px 8px;
+        text-align: left;
+      }
+      .markdown blockquote {
+        border-left: 3px solid var(--accent);
+        margin: 8px 0;
+        padding-left: 10px;
+        color: #55606c;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @media (max-width: 980px) {
+        .layout { grid-template-columns: 1fr; }
+        .row { grid-template-columns: 1fr; }
+        .output-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="hero">
+        <div>
+          <h1>AlphaNexus</h1>
+          <p>多智能体交易研究界面：实时进度、来源校验、分块报告。</p>
+        </div>
+        <span class="badge">Research Use Only</span>
+      </div>
+
+      <div class="layout">
+        <section class="panel">
+          <h2>Run</h2>
+          <form id="run-form">
+            <div>
+              <label for="ticker">股票代码</label>
+              <input id="ticker" type="text" value="NVDA" />
+            </div>
+            <div>
+              <label for="trade_date">交易日期</label>
+              <input id="trade_date" type="date" />
+            </div>
+            <div>
+              <label for="provider">LLM 供应商</label>
+              <select id="provider">
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic (Claude)</option>
+                <option value="google">Google (Gemini)</option>
+                <option value="xai">xAI (Grok)</option>
+                <option value="openrouter">OpenRouter</option>
+                <option value="ollama">Ollama (Local)</option>
+              </select>
+            </div>
+            <div>
+              <label for="api_key">API Key</label>
+              <input id="api_key" type="password" placeholder="仅用于本次请求，不会保存" />
+            </div>
+            <div class="row">
+              <div>
+                <label for="deep_model">深度模型</label>
+                <select id="deep_model"></select>
+              </div>
+              <div>
+                <label for="quick_model">快速模型</label>
+                <select id="quick_model"></select>
+              </div>
+            </div>
+            <div class="row">
+              <div>
+                <label for="data_vendor">数据源</label>
+                <select id="data_vendor">
+                  <option value="yfinance">yfinance</option>
+                  <option value="alpha_vantage">Alpha Vantage</option>
+                </select>
+              </div>
+              <div>
+                <label for="alpha_key">Alpha Vantage API Key</label>
+                <input id="alpha_key" type="password" placeholder="仅 Alpha Vantage 需要" />
+              </div>
+            </div>
+            <div class="analysts">
+              <label><input type="checkbox" value="market" checked /> 市场分析</label>
+              <label><input type="checkbox" value="social" checked /> 社媒情绪</label>
+              <label><input type="checkbox" value="news" checked /> 新闻宏观</label>
+              <label><input type="checkbox" value="fundamentals" checked /> 基本面</label>
+            </div>
+            <button id="run-btn" class="primary" type="submit">开始分析</button>
+            <div class="status" id="status"></div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>Output</h2>
+          <div class="actions">
+            <button id="download-btn" type="button" disabled>下载报告（Markdown）</button>
+            <button id="download-json-btn" type="button" disabled>下载 JSON</button>
+          </div>
+          <div class="output-grid">
+            <div class="section" id="meta_section">
+              <h3>配置</h3>
+              <div class="meta" id="meta_content"></div>
+            </div>
+            <div class="section" id="progress_section">
+              <h3>进度</h3>
+              <div class="plain" id="progress"></div>
+            </div>
+            <div class="section hidden" id="decision_section">
+              <h3>最终决策</h3>
+              <div class="markdown" id="decision"></div>
+            </div>
+            <div class="section hidden" id="sources_section">
+              <h3>信息来源</h3>
+              <ul class="source-list" id="sources"></ul>
+            </div>
+            <div class="section hidden" id="investment_section">
+              <h3>投资计划（Judge）</h3>
+              <div class="markdown" id="investment_plan"></div>
+            </div>
+            <div class="section hidden" id="trader_section">
+              <h3>交易员计划（Trader）</h3>
+              <div class="markdown" id="trader_plan"></div>
+            </div>
+          </div>
+
+          <div class="report-list">
+            <div class="section hidden" id="market_section">
+              <h3>市场分析</h3>
+              <div class="markdown" id="market_report"></div>
+            </div>
+            <div class="section hidden" id="sentiment_section">
+              <h3>社媒情绪</h3>
+              <div class="markdown" id="sentiment_report"></div>
+            </div>
+            <div class="section hidden" id="news_section">
+              <h3>新闻宏观</h3>
+              <div class="markdown" id="news_report"></div>
+            </div>
+            <div class="section hidden" id="fundamentals_section">
+              <h3>基本面</h3>
+              <div class="markdown" id="fundamentals_report"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+    <script>
+      const form = document.getElementById("run-form");
+      const statusEl = document.getElementById("status");
+      const runBtn = document.getElementById("run-btn");
+      const tradeDateInput = document.getElementById("trade_date");
+      const providerEl = document.getElementById("provider");
+      const deepModelEl = document.getElementById("deep_model");
+      const quickModelEl = document.getElementById("quick_model");
+      const dataVendorEl = document.getElementById("data_vendor");
+      const alphaKeyEl = document.getElementById("alpha_key");
+
+      const metaContentEl = document.getElementById("meta_content");
+      const progressEl = document.getElementById("progress");
+      const decisionEl = document.getElementById("decision");
+      const sourcesEl = document.getElementById("sources");
+      const investmentPlanEl = document.getElementById("investment_plan");
+      const traderPlanEl = document.getElementById("trader_plan");
+      const marketReportEl = document.getElementById("market_report");
+      const sentimentReportEl = document.getElementById("sentiment_report");
+      const newsReportEl = document.getElementById("news_report");
+      const fundamentalsReportEl = document.getElementById("fundamentals_report");
+
+      const sections = {
+        decision: document.getElementById("decision_section"),
+        sources: document.getElementById("sources_section"),
+        investment: document.getElementById("investment_section"),
+        trader: document.getElementById("trader_section"),
+        market: document.getElementById("market_section"),
+        sentiment: document.getElementById("sentiment_section"),
+        news: document.getElementById("news_section"),
+        fundamentals: document.getElementById("fundamentals_section"),
+      };
+
+      const downloadBtn = document.getElementById("download-btn");
+      const downloadJsonBtn = document.getElementById("download-json-btn");
+
+      const today = new Date();
+      const pad = (n) => String(n).padStart(2, "0");
+      tradeDateInput.value = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+
+      if (window.marked) {
+        marked.setOptions({ breaks: true, gfm: true });
+      }
+
+      function renderMarkdown(target, text) {
+        if (!target) return;
+        const raw = text || "";
+        if (window.marked && window.DOMPurify) {
+          const html = marked.parse(raw);
+          target.innerHTML = DOMPurify.sanitize(html);
+        } else {
+          target.textContent = raw;
+        }
+      }
+
+      const modelOptions = {
+        openai: ["gpt-5.2", "gpt-5.1", "gpt-5", "gpt-5-mini", "gpt-5-nano", "gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano", "o4-mini", "o3", "o3-mini", "o1", "o1-preview", "gpt-4o", "gpt-4o-mini"],
+        anthropic: ["claude-opus-4-5", "claude-sonnet-4-5", "claude-haiku-4-5", "claude-opus-4-1-20250805", "claude-sonnet-4-20250514", "claude-3-7-sonnet-20250219", "claude-3-5-haiku-20241022", "claude-3-5-sonnet-20241022"],
+        google: ["gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.0-flash-lite"],
+        xai: ["grok-4-1-fast", "grok-4-1-fast-reasoning", "grok-4-1-fast-non-reasoning", "grok-4", "grok-4-0709", "grok-4-fast-reasoning", "grok-4-fast-non-reasoning"],
+        openrouter: ["openai/gpt-5.2", "openai/gpt-5-mini", "anthropic/claude-sonnet-4-5", "google/gemini-2.5-pro"],
+        ollama: ["llama3.1:8b", "llama3.1:70b", "qwen2.5:7b", "qwen2.5:14b", "mistral:7b"],
+      };
+
+      function populateSelect(selectEl, provider, defaultValue) {
+        selectEl.innerHTML = "";
+        const defaultOption = document.createElement("option");
+        defaultOption.value = "";
+        defaultOption.textContent = "默认（推荐）";
+        selectEl.appendChild(defaultOption);
+
+        const options = modelOptions[provider] || [];
+        for (const model of options) {
+          const opt = document.createElement("option");
+          opt.value = model;
+          opt.textContent = model;
+          selectEl.appendChild(opt);
+        }
+        if (defaultValue) selectEl.value = defaultValue;
+      }
+
+      function refreshModelOptions() {
+        const provider = providerEl.value;
+        populateSelect(deepModelEl, provider);
+        populateSelect(quickModelEl, provider);
+      }
+
+      providerEl.addEventListener("change", refreshModelOptions);
+      refreshModelOptions();
+
+      dataVendorEl.addEventListener("change", () => {
+        alphaKeyEl.disabled = dataVendorEl.value !== "alpha_vantage";
+      });
+      alphaKeyEl.disabled = dataVendorEl.value !== "alpha_vantage";
+
+      function showSection(sectionEl) {
+        sectionEl.classList.remove("hidden");
+      }
+
+      function clearOutputs() {
+        progressEl.textContent = "";
+        decisionEl.textContent = "";
+        sourcesEl.innerHTML = "";
+        investmentPlanEl.textContent = "";
+        traderPlanEl.textContent = "";
+        marketReportEl.textContent = "";
+        sentimentReportEl.textContent = "";
+        newsReportEl.textContent = "";
+        fundamentalsReportEl.textContent = "";
+        Object.values(sections).forEach((el) => el.classList.add("hidden"));
+      }
+
+      function renderMeta(meta) {
+        metaContentEl.innerHTML = "";
+        if (!meta) return;
+        const items = [
+          `供应商: ${meta.llm_provider || ""}`,
+          `深度模型: ${meta.deep_think_llm || ""}`,
+          `快速模型: ${meta.quick_think_llm || ""}`,
+          `数据源: ${meta.data_vendor || ""}`,
+        ];
+        for (const text of items) {
+          const span = document.createElement("span");
+          span.textContent = text;
+          metaContentEl.appendChild(span);
+        }
+      }
+
+      function extractUrls(text) {
+        if (!text) return [];
+        const regex = /https?:\/\/[^\s\]\)"'>]+/g;
+        const matches = text.match(regex) || [];
+        return matches.map((m) => m.replace(/[\).,;\]]+$/, ""));
+      }
+
+      function getHostname(url) {
+        try {
+          return new URL(url).hostname.replace(/^www\./, "");
+        } catch (e) {
+          return "unknown";
+        }
+      }
+
+      function shortenText(text, maxLen) {
+        if (!text) return "";
+        if (text.length <= maxLen) return text;
+        return `${text.slice(0, maxLen - 1)}…`;
+      }
+
+      function extractNewsSources(markdown, fallbackDate) {
+        if (!markdown) return [];
+        const lines = markdown.split("\n");
+        let currentTitle = "";
+        let currentSource = "";
+        const results = [];
+        for (const line of lines) {
+          const titleMatch = line.match(/^###\s*(.+?)\s*\(source:\s*(.+?)\)\s*$/i);
+          if (titleMatch) {
+            currentTitle = titleMatch[1].trim();
+            currentSource = titleMatch[2].trim();
+            continue;
+          }
+          const linkMatch = line.match(/Link:\s*(https?:\/\/\S+)/i);
+          if (linkMatch) {
+            const url = linkMatch[1].replace(/[\).,;\]]+$/, "");
+            results.push({
+              title: currentTitle,
+              source: currentSource,
+              url,
+              date: fallbackDate,
+            });
+            currentTitle = "";
+            currentSource = "";
+          }
+        }
+        return results;
+      }
+
+      function buildSourceLabel(entry, fallbackDate) {
+        const date = entry.date || fallbackDate || "";
+        const source = entry.source || (entry.url ? getHostname(entry.url) : "");
+        const title = entry.title ? shortenText(entry.title, 64) : "";
+        const parts = [date, source].filter(Boolean);
+        if (title) parts.push(title);
+        return parts.join(" | ") || entry.url || "来源";
+      }
+
+      function dedupeEntries(entries) {
+        const seen = new Set();
+        return entries.filter((item) => {
+          const key = item.url || `${item.source}|${item.title}|${item.date}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      }
+
+      let lastResult = null;
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearOutputs();
+        lastResult = null;
+        downloadBtn.disabled = true;
+        downloadJsonBtn.disabled = true;
+        statusEl.textContent = "运行中，请稍候...";
+        runBtn.disabled = true;
+
+        const ticker = document.getElementById("ticker").value.trim();
+        const trade_date = document.getElementById("trade_date").value;
+        const provider = providerEl.value;
+        const api_key = document.getElementById("api_key").value.trim();
+        const data_vendor = dataVendorEl.value;
+        const alpha_vantage_key = alphaKeyEl.value.trim();
+        const deep_think_llm = deepModelEl.value || null;
+        const quick_think_llm = quickModelEl.value || null;
+        const selected_analysts = Array.from(
+          document.querySelectorAll('.analysts input[type="checkbox"]:checked')
+        ).map((el) => el.value);
+
+        try {
+          const res = await fetch("/api/run/stream", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ticker,
+              trade_date,
+              selected_analysts,
+              provider,
+              api_key,
+              data_vendor,
+              alpha_vantage_key,
+              deep_think_llm,
+              quick_think_llm,
+            }),
+          });
+
+          if (!res.ok) {
+            const errText = await res.text();
+            throw new Error(errText || `请求失败: ${res.status}`);
+          }
+          if (!res.body) {
+            throw new Error("浏览器不支持流式响应");
+          }
+
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder("utf-8");
+          let buffer = "";
+
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const parts = buffer.split("\n\n");
+            buffer = parts.pop() || "";
+            for (const part of parts) {
+              const lines = part.split("\n");
+              const dataLine = lines.find((line) => line.startsWith("data:"));
+              if (!dataLine) continue;
+              const jsonText = dataLine.slice(5).trim();
+              if (!jsonText) continue;
+              const payload = JSON.parse(jsonText);
+
+              if (payload.type === "meta") {
+                renderMeta(payload.meta);
+              } else if (payload.type === "status") {
+                statusEl.textContent = payload.message || "运行中...";
+                progressEl.textContent += `${payload.message}\n`;
+              } else if (payload.type === "report") {
+                const content = payload.content || "";
+                if (payload.report_type === "market_report") {
+                  renderMarkdown(marketReportEl, content);
+                  showSection(sections.market);
+                }
+                if (payload.report_type === "sentiment_report") {
+                  renderMarkdown(sentimentReportEl, content);
+                  showSection(sections.sentiment);
+                }
+                if (payload.report_type === "news_report") {
+                  renderMarkdown(newsReportEl, content);
+                  showSection(sections.news);
+                }
+                if (payload.report_type === "fundamentals_report") {
+                  renderMarkdown(fundamentalsReportEl, content);
+                  showSection(sections.fundamentals);
+                }
+                progressEl.textContent += `${payload.label} 完成\n`;
+              } else if (payload.type === "summary") {
+                if (payload.summary_type === "investment_plan") {
+                  renderMarkdown(investmentPlanEl, payload.content || "");
+                  showSection(sections.investment);
+                }
+                if (payload.summary_type === "trader_investment_plan") {
+                  renderMarkdown(traderPlanEl, payload.content || "");
+                  showSection(sections.trader);
+                }
+                if (payload.summary_type === "final_trade_decision") {
+                  renderMarkdown(decisionEl, payload.content || "");
+                  showSection(sections.decision);
+                }
+                progressEl.textContent += `${payload.label} 完成\n`;
+              } else if (payload.type === "final") {
+                lastResult = payload.data;
+                if (lastResult?.decision) {
+                  renderMarkdown(
+                    decisionEl,
+                    `**核心决策**：${lastResult.decision}\n\n${lastResult.final_trade_decision || ""}`
+                  );
+                  showSection(sections.decision);
+                }
+                const tradeDate = lastResult?.trade_date || "";
+                let entries = [];
+                entries = entries.concat(
+                  extractNewsSources(lastResult?.reports?.news_report || "", tradeDate)
+                );
+                entries = entries.concat(
+                  extractNewsSources(lastResult?.reports?.sentiment_report || "", tradeDate)
+                );
+
+                if (entries.length === 0) {
+                  const urlFallbacks = lastResult?.sources?.length
+                    ? lastResult.sources
+                    : [
+                        ...extractUrls(lastResult?.final_trade_decision || ""),
+                        ...extractUrls(lastResult?.investment_plan || ""),
+                        ...extractUrls(lastResult?.trader_investment_plan || ""),
+                        ...extractUrls(lastResult?.reports?.news_report || ""),
+                        ...extractUrls(lastResult?.reports?.sentiment_report || ""),
+                      ];
+                  entries = urlFallbacks.map((url) => ({
+                    title: "",
+                    source: getHostname(url),
+                    url,
+                    date: tradeDate,
+                  }));
+                }
+
+                if (entries.length === 0 && lastResult?.meta?.data_vendor) {
+                  entries = [{
+                    title: "",
+                    source: `数据源：${lastResult.meta.data_vendor}`,
+                    url: "",
+                    date: tradeDate,
+                  }];
+                }
+
+                entries = dedupeEntries(entries);
+
+                if (entries.length > 0) {
+                  sourcesEl.innerHTML = "";
+                  for (const entry of entries) {
+                    const li = document.createElement("li");
+                    const label = buildSourceLabel(entry, tradeDate);
+                    if (entry.url && entry.url.startsWith("http")) {
+                      const a = document.createElement("a");
+                      a.href = entry.url;
+                      a.target = "_blank";
+                      a.rel = "noreferrer";
+                      a.textContent = label;
+                      li.appendChild(a);
+                    } else {
+                      li.textContent = label;
+                    }
+                    sourcesEl.appendChild(li);
+                  }
+                  showSection(sections.sources);
+                }
+                renderMeta(lastResult?.meta);
+                downloadBtn.disabled = false;
+                downloadJsonBtn.disabled = false;
+                statusEl.textContent = "完成";
+              } else if (payload.type === "error") {
+                statusEl.textContent = `出错: ${payload.message}`;
+                progressEl.textContent += `出错: ${payload.message}\n`;
+              }
+            }
+          }
+        } catch (err) {
+          statusEl.textContent = `出错: ${err.message}`;
+        } finally {
+          runBtn.disabled = false;
+        }
+      });
+
+      downloadBtn.addEventListener("click", () => {
+        if (!lastResult) return;
+        const fallbackSources = (lastResult.sources && lastResult.sources.length > 0)
+          ? lastResult.sources
+          : (lastResult.meta?.data_vendor ? [`数据源：${lastResult.meta.data_vendor}`] : []);
+        const lines = [];
+        lines.push("# AlphaNexus Report");
+        lines.push(`- Ticker: ${lastResult.ticker || ""}`);
+        lines.push(`- Trade Date: ${lastResult.trade_date || ""}`);
+        lines.push("");
+        lines.push("## Decision");
+        lines.push(lastResult.decision || "");
+        lines.push("");
+        lines.push("## Final Trade Decision");
+        lines.push(lastResult.final_trade_decision || "");
+        lines.push("");
+        lines.push("## Investment Plan");
+        lines.push(lastResult.investment_plan || "");
+        lines.push("");
+        lines.push("## Trader Plan");
+        lines.push(lastResult.trader_investment_plan || "");
+        lines.push("");
+        lines.push("## Sources");
+        fallbackSources.forEach((s) => lines.push(`- ${s}`));
+        lines.push("");
+        lines.push("## Reports");
+        lines.push("### Market");
+        lines.push(lastResult.reports?.market_report || "");
+        lines.push("");
+        lines.push("### Sentiment");
+        lines.push(lastResult.reports?.sentiment_report || "");
+        lines.push("");
+        lines.push("### News");
+        lines.push(lastResult.reports?.news_report || "");
+        lines.push("");
+        lines.push("### Fundamentals");
+        lines.push(lastResult.reports?.fundamentals_report || "");
+
+        const blob = new Blob([lines.join("\n")], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `alphanexus_${lastResult.ticker || "report"}.md`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+
+      downloadJsonBtn.addEventListener("click", () => {
+        if (!lastResult) return;
+        const blob = new Blob([JSON.stringify(lastResult, null, 2)], { type: "application/json;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `alphanexus_${lastResult.ticker || "report"}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+    </script>
+  </body>
+</html>
