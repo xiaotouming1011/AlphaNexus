@@ -1,4 +1,4 @@
-参考，使用了Tauric Research 团队创造多智能体交易框架 AlphaNexus，为个人学习目的，针对个人学习方向进行修改
+参考，使用了Tauric Research 团队创造多智能体交易框架 [TradingAgents](https://github.com/TauricResearch/TradingAgents.git)，为个人学习目的，针对个人学习方向进行修改
 
 # AlphaNexus
 
