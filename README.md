@@ -1,47 +1,52 @@
-参考，使用了Tauric Research 团队创造多智能体交易框架 [TradingAgents](https://github.com/TauricResearch/TradingAgents.git)，为个人学习目的，针对个人学习方向进行修改
-
 # AlphaNexus
 
-AlphaNexus 是一个基于多智能体协作的交易研究实验项目，面向**个人学习与研究**。项目使用多角色（分析师、研究员、交易员、风控）对同一标的进行多角度分析与辩论，并输出最终交易建议与报告。
+## 致谢与来源
 
-> 重要提示：本项目仅用于研究与学习，不构成任何投资建议。
+参考并学习了 Tauric Research 团队创造的多智能体交易框架 [TradingAgents](https://github.com/TauricResearch/TradingAgents.git)，本仓库为个人学习目的的改造版本。
+
+> 重要提示：本项目仅用于学习与研究，不构成任何投资建议。
 
 ---
 
-## 核心能力
+## 项目简介
 
-- 多智能体协作流程（市场 / 新闻 / 情绪 / 基本面 → 多空辩论 → 风控裁决）
-- 支持多家 LLM 供应商（OpenAI / Anthropic / Google / xAI / OpenRouter / Ollama）
-- 支持数据源切换（yfinance / Alpha Vantage）
-- Web 端（AlphaNexus UI）支持：
-  - 供应商与模型下拉选择
-  - 数据源切换与 API Key 输入
-  - SSE 流式进度输出
-  - Markdown 渲染报告
-  - 信息来源链接展示与导出
-- Portfolio Tracker 子页面（`/portfolio`）支持：
-  - 基于 Alpha Vantage MCP 的 3 股票组合跟踪
-  - Live 失败自动回退本地缓存（图例显示 `cached`）
-  - Line / Stacked Area 双图表可视化
+AlphaNexus 是一个多智能体交易研究项目。系统会让市场、新闻、情绪、基本面等分析角色协同输出报告，再经过研究与风控流程，给出最终交易结论。
+
+当前仓库同时提供：
+
+- CLI 交互式运行
+- Web 研究页（流式输出、来源展示、报告导出）
+- Web 组合页（Portfolio Tracker，可视化组合价值与权重）
+
+---
+
+## 当前功能进度
+
+- 多供应商 LLM：OpenAI / Anthropic / Google / xAI / OpenRouter / Ollama
+- 数据源切换：yfinance / Alpha Vantage
+- 研究页：模型下拉选择、SSE 流式进度、Markdown 渲染、来源链接展示、报告导出（Markdown / JSON）
+- 组合页：可在统一入口通过顶部按钮切换，也可直达 `http://127.0.0.1:8001/portfolio`
+- 组合页图表：Line（组合总值/个股切换）+ Stacked Area（权重）+ Secondary Axis（总值）
+- 组合页容错：Alpha Vantage MCP 失败时回退本地缓存，并在图例标记 `(cached)`
 
 ---
 
 ## 目录结构
 
-```
+```text
 AlphaNexus/
-├─ web/                        # Web 端（FastAPI + SSE + 前端）
+├─ alphanexus/                  # 核心多智能体框架
+│  ├─ agents/
+│  ├─ dataflows/
+│  ├─ graph/
+│  └─ llm_clients/
+├─ cli/                         # CLI 入口
+├─ web/                         # FastAPI + Web 前端
 │  ├─ app.py
-│  └─ index.html
+│  ├─ index.html
 │  ├─ portfolio.html
 │  └─ portfolio_service.py
-├─ cli/                        # 交互式 CLI
-├─ alphanexus/              # 核心多智能体框架
-│  ├─ agents/                  # 各类智能体
-│  ├─ dataflows/               # 数据源适配（yfinance/alpha_vantage）
-│  ├─ graph/                   # LangGraph 工作流
-│  └─ llm_clients/             # 多供应商 LLM 客户端
-├─ main.py                     # 示例脚本
+├─ assets/
 ├─ requirements.txt
 └─ pyproject.toml
 ```
@@ -58,122 +63,100 @@ pip install -r requirements.txt
 
 ### 2) 配置环境变量（可选）
 
-项目支持将 Key 通过 Web 表单传入，但也可以写入 `.env`：
-
 ```bash
 cp .env.example .env
 ```
 
-示例（按需填写）：
+可配置项（按需）：
+
+```env
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+GOOGLE_API_KEY=
+XAI_API_KEY=
+OPENROUTER_API_KEY=
+ALPHA_VANTAGE_API_KEY=
+PORTFOLIO_AV_MIN_INTERVAL_SECONDS=1.5
 ```
-OPENAI_API_KEY=...
-ANTHROPIC_API_KEY=...
-GOOGLE_API_KEY=...
-XAI_API_KEY=...
-OPENROUTER_API_KEY=...
-ALPHA_VANTAGE_API_KEY=...
-```
+
+说明：
+
+- Web 表单也支持临时输入 API Key，不写入磁盘
+- `PORTFOLIO_AV_MIN_INTERVAL_SECONDS` 用于控制组合页请求间隔，默认 `1.5` 秒
 
 ---
 
-## Web 端（AlphaNexus）
+## 启动方式
+
+### Web
 
 ```bash
 uvicorn web.app:app --host 127.0.0.1 --port 8001
 ```
 
-浏览器访问：
-```
-http://127.0.0.1:8001
-```
+访问地址：
 
-Portfolio 子页面：
-```
-http://127.0.0.1:8001/portfolio
-```
+- 统一入口：`http://127.0.0.1:8001/`
+- 组合页直达：`http://127.0.0.1:8001/portfolio`
 
-Web 端支持：
-- 供应商/模型选择（下拉）
-- 数据源切换（yfinance / Alpha Vantage）
-- SSE 流式进度输出
-- Markdown 渲染报告
-- 结果导出（Markdown / JSON）
-- 信息来源链接展示（便于人工核验）
-- Portfolio 图表页（组合价值与权重轨迹）
-
-Portfolio API：
-- `GET /api/portfolio/data`：默认参数拉取组合数据
-- `POST /api/portfolio/data`：自定义 symbols/allocation/total_value/key
-- `POST /api/portfolio/refresh`：强制刷新（依然是 live 优先，失败回退缓存）
-- `GET /api/portfolio/health`：健康检查
-
----
-
-## CLI 使用
+### CLI
 
 ```bash
 python -m cli.main
 ```
 
-可在 CLI 中选择标的、日期、研究深度、模型等参数。
+---
+
+## Web API
+
+- `POST /api/run`：同步运行一次研究流程
+- `POST /api/run/stream`：SSE 流式运行研究流程
+- `GET /api/health`：服务健康检查
+- `GET /api/portfolio/data`：用默认参数获取组合数据
+- `POST /api/portfolio/data`：自定义 symbols / allocation / total_value / key
+- `POST /api/portfolio/refresh`：刷新组合数据
+- `GET /api/portfolio/health`：组合服务健康检查
+
+---
+
+## Portfolio 数据策略（当前实现）
+
+- 使用 Alpha Vantage MCP 的 `TIME_SERIES_DAILY`，固定 `outputsize=compact`
+- 每只股票仅使用最新约 100 个交易日数据
+- 请求为串行节流，避免并发触发免费额度瞬时限制
+- Live 请求失败时读取本地缓存：`results/portfolio_cache/`
+
+说明：即使做了串行与缓存，Alpha Vantage 免费计划仍有 `25 requests/day` 限制。
 
 ---
 
 ## Python 调用示例
 
 ```python
-from alphanexus.graph.trading_graph import AlphaNexusGraph
 from alphanexus.default_config import DEFAULT_CONFIG
+from alphanexus.graph.trading_graph import AlphaNexusGraph
 
 config = DEFAULT_CONFIG.copy()
 config["llm_provider"] = "openai"
 config["deep_think_llm"] = "gpt-5.2"
 config["quick_think_llm"] = "gpt-5-mini"
 
-# 数据源设置
-config["data_vendors"] = {
-    "core_stock_apis": "yfinance",
-    "technical_indicators": "yfinance",
-    "fundamental_data": "yfinance",
-    "news_data": "yfinance",
-}
-
-ta = AlphaNexusGraph(debug=False, config=config)
-_, decision = ta.propagate("NVDA", "2026-01-15")
+graph = AlphaNexusGraph(debug=False, config=config)
+state, decision = graph.propagate("NVDA", "2026-01-15")
 print(decision)
 ```
 
 ---
 
-## 数据源说明
-
-- **yfinance**：无需 API Key，但可能出现限流/超时。
-- **Alpha Vantage**：需要 `ALPHA_VANTAGE_API_KEY`，稳定性更高。
-
----
-
-## 常见问题
-
-**Q: yfinance 报错 Rate Limit？**
-A: 这是常见限制，可切换到 Alpha Vantage 并填写 API Key。
-
-**Q: Web 端报 SSL 错误？**
-A: 通常是证书或网络问题，可尝试更新 `certifi` 或切换网络。
-
-**Q: Portfolio 页面为什么只看到约 100 个交易日？**
-A: Alpha Vantage 免费 key 对 `TIME_SERIES_DAILY` 的 `outputsize=full` 有权限限制，系统会自动降级到 compact，并在页面 warnings 中提示。
-
----
-
 ## 免责声明
 
-本项目仅用于个人研究与学习，不构成任何投资建议或交易指引。请自行承担使用本项目带来的风险。
+本项目仅用于个人学习与研究，不构成投资建议。请自行评估风险并独立决策。
 
 ---
 
 ## License
 
-本项目基于上游开源项目进行学习性改造，遵循原项目 LICENSE。
+本仓库遵循项目内 `LICENSE`。如你继续分发或商用，请确保同时满足上游许可证要求。
 
 ---
 
