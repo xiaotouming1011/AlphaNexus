@@ -18,6 +18,7 @@ from alphanexus.dataflows.errors import (
     DataflowBadRequestError,
     DataflowError,
 )
+from alphanexus.knowledge import get_company_graph_store
 from web.portfolio_service import build_portfolio_timeseries
 
 load_dotenv()
@@ -153,7 +154,21 @@ def _extract_sources(texts: list[str]) -> list[str]:
     return urls
 
 
+def _company_graph_payload(ticker: str) -> dict:
+    store = get_company_graph_store()
+    snap = store.get_impact_snapshot(ticker, max_hops=2, max_edges=24)
+    return {
+        "focus_symbol": snap.get("focus_symbol"),
+        "focus_name": snap.get("focus_name"),
+        "focus_industry": snap.get("focus_industry"),
+        "nodes": snap.get("nodes", []),
+        "links": snap.get("links", []),
+        "impact_paths": snap.get("impact_paths", []),
+    }
+
+
 def _build_response(final_state: dict, decision: str, meta: dict) -> dict:
+    ticker = final_state.get("company_of_interest")
     reports = {
         "market_report": final_state.get("market_report"),
         "sentiment_report": final_state.get("sentiment_report"),
@@ -173,7 +188,7 @@ def _build_response(final_state: dict, decision: str, meta: dict) -> dict:
     )
 
     return {
-        "ticker": final_state.get("company_of_interest"),
+        "ticker": ticker,
         "trade_date": final_state.get("trade_date"),
         "decision": decision,
         "final_trade_decision": final_state.get("final_trade_decision"),
@@ -181,6 +196,7 @@ def _build_response(final_state: dict, decision: str, meta: dict) -> dict:
         "trader_investment_plan": final_state.get("trader_investment_plan"),
         "reports": reports,
         "sources": sources,
+        "company_graph": _company_graph_payload(ticker or ""),
         "meta": meta,
     }
 
@@ -337,6 +353,12 @@ async def run_stream(payload: RunRequest) -> StreamingResponse:
 @app.get("/api/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+@app.get("/api/company-graph/{ticker}")
+def company_graph(ticker: str) -> JSONResponse:
+    payload = _company_graph_payload(ticker)
+    return JSONResponse(content={"ok": True, "data": payload})
 
 
 @app.get("/api/portfolio/health")

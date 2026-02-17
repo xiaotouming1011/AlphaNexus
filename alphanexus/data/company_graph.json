@@ -1,0 +1,227 @@
+{
+  "version": "2026-02-17",
+  "notes": "Curated relationship graph for cross-company impact reasoning. Verify live ownership data before trading.",
+  "nodes": [
+    {"symbol": "AAPL", "name": "Apple", "industry": "Consumer Electronics"},
+    {"symbol": "MSFT", "name": "Microsoft", "industry": "Software & Cloud"},
+    {"symbol": "GOOGL", "name": "Alphabet", "industry": "Internet & Cloud"},
+    {"symbol": "AMZN", "name": "Amazon", "industry": "E-commerce & Cloud"},
+    {"symbol": "META", "name": "Meta Platforms", "industry": "Internet Platforms"},
+    {"symbol": "NVDA", "name": "NVIDIA", "industry": "Semiconductors"},
+    {"symbol": "AMD", "name": "Advanced Micro Devices", "industry": "Semiconductors"},
+    {"symbol": "INTC", "name": "Intel", "industry": "Semiconductors"},
+    {"symbol": "TSM", "name": "Taiwan Semiconductor", "industry": "Semiconductor Foundry"},
+    {"symbol": "ASML", "name": "ASML", "industry": "Semiconductor Equipment"},
+    {"symbol": "AVGO", "name": "Broadcom", "industry": "Semiconductors"},
+    {"symbol": "QCOM", "name": "Qualcomm", "industry": "Semiconductors"},
+    {"symbol": "SMCI", "name": "Super Micro Computer", "industry": "Server Hardware"},
+    {"symbol": "ANET", "name": "Arista Networks", "industry": "Networking"},
+    {"symbol": "CRM", "name": "Salesforce", "industry": "Software"},
+    {"symbol": "ORCL", "name": "Oracle", "industry": "Software & Cloud"},
+    {"symbol": "BRK.B", "name": "Berkshire Hathaway", "industry": "Holding Company"},
+    {"symbol": "QQQ", "name": "Invesco QQQ ETF", "industry": "ETF"},
+    {"symbol": "SPY", "name": "SPDR S&P 500 ETF", "industry": "ETF"}
+  ],
+  "edges": [
+    {
+      "source": "ASML",
+      "target": "TSM",
+      "relation": "SUPPLIES_TO",
+      "description": "ASML supplies advanced lithography systems used by TSMC.",
+      "confidence": "high",
+      "tags": ["supply_chain", "semiconductor"]
+    },
+    {
+      "source": "TSM",
+      "target": "AAPL",
+      "relation": "MANUFACTURES_FOR",
+      "description": "TSMC manufactures key Apple SoC products.",
+      "confidence": "high",
+      "tags": ["supply_chain", "semiconductor"]
+    },
+    {
+      "source": "TSM",
+      "target": "NVDA",
+      "relation": "MANUFACTURES_FOR",
+      "description": "TSMC manufactures advanced AI chips for NVIDIA.",
+      "confidence": "high",
+      "tags": ["supply_chain", "ai"]
+    },
+    {
+      "source": "TSM",
+      "target": "AMD",
+      "relation": "MANUFACTURES_FOR",
+      "description": "TSMC manufactures CPUs/GPUs for AMD.",
+      "confidence": "high",
+      "tags": ["supply_chain"]
+    },
+    {
+      "source": "TSM",
+      "target": "QCOM",
+      "relation": "MANUFACTURES_FOR",
+      "description": "TSMC manufactures advanced mobile chips for Qualcomm.",
+      "confidence": "high",
+      "tags": ["supply_chain", "mobile"]
+    },
+    {
+      "source": "NVDA",
+      "target": "MSFT",
+      "relation": "SUPPLIES_TO",
+      "description": "NVIDIA supplies AI accelerators to Microsoft cloud and AI workloads.",
+      "confidence": "high",
+      "tags": ["ai", "cloud"]
+    },
+    {
+      "source": "NVDA",
+      "target": "AMZN",
+      "relation": "SUPPLIES_TO",
+      "description": "NVIDIA supplies AI accelerators to AWS infrastructure.",
+      "confidence": "high",
+      "tags": ["ai", "cloud"]
+    },
+    {
+      "source": "NVDA",
+      "target": "GOOGL",
+      "relation": "SUPPLIES_TO",
+      "description": "NVIDIA supplies AI accelerators to Google Cloud.",
+      "confidence": "high",
+      "tags": ["ai", "cloud"]
+    },
+    {
+      "source": "NVDA",
+      "target": "META",
+      "relation": "SUPPLIES_TO",
+      "description": "Meta purchases NVIDIA accelerators for recommendation and GenAI infrastructure.",
+      "confidence": "high",
+      "tags": ["ai"]
+    },
+    {
+      "source": "AVGO",
+      "target": "GOOGL",
+      "relation": "SUPPLIES_TO",
+      "description": "Broadcom provides networking/custom silicon components used by hyperscalers.",
+      "confidence": "medium",
+      "tags": ["networking", "ai"]
+    },
+    {
+      "source": "AVGO",
+      "target": "META",
+      "relation": "SUPPLIES_TO",
+      "description": "Broadcom networking components are used in large data center deployments.",
+      "confidence": "medium",
+      "tags": ["networking", "ai"]
+    },
+    {
+      "source": "ANET",
+      "target": "MSFT",
+      "relation": "SUPPLIES_TO",
+      "description": "Arista networking gear is used in cloud data center buildouts.",
+      "confidence": "medium",
+      "tags": ["networking", "cloud"]
+    },
+    {
+      "source": "SMCI",
+      "target": "NVDA",
+      "relation": "DEPENDS_ON",
+      "description": "Supermicro server demand is partially linked to NVIDIA GPU platform cycles.",
+      "confidence": "medium",
+      "tags": ["server", "ai"]
+    },
+    {
+      "source": "AAPL",
+      "target": "QCOM",
+      "relation": "USES_PLATFORM",
+      "description": "Apple smartphone products historically use Qualcomm modem technologies in portions of lineup.",
+      "confidence": "medium",
+      "tags": ["mobile"]
+    },
+    {
+      "source": "MSFT",
+      "target": "AMZN",
+      "relation": "COMPETES_WITH",
+      "description": "Microsoft Azure and AWS compete in cloud infrastructure and enterprise AI.",
+      "confidence": "high",
+      "tags": ["competition", "cloud"]
+    },
+    {
+      "source": "MSFT",
+      "target": "GOOGL",
+      "relation": "COMPETES_WITH",
+      "description": "Microsoft and Google compete in cloud, productivity suites, and AI platforms.",
+      "confidence": "high",
+      "tags": ["competition", "cloud", "ai"]
+    },
+    {
+      "source": "AMZN",
+      "target": "GOOGL",
+      "relation": "COMPETES_WITH",
+      "description": "Amazon and Google compete in cloud and digital advertising ecosystems.",
+      "confidence": "high",
+      "tags": ["competition"]
+    },
+    {
+      "source": "NVDA",
+      "target": "AMD",
+      "relation": "COMPETES_WITH",
+      "description": "NVIDIA and AMD compete across GPUs, AI accelerators, and data center compute.",
+      "confidence": "high",
+      "tags": ["competition", "semiconductor"]
+    },
+    {
+      "source": "NVDA",
+      "target": "INTC",
+      "relation": "COMPETES_WITH",
+      "description": "NVIDIA and Intel compete in data center AI and accelerated computing.",
+      "confidence": "high",
+      "tags": ["competition", "semiconductor"]
+    },
+    {
+      "source": "BRK.B",
+      "target": "AAPL",
+      "relation": "HOLDS_STAKE",
+      "description": "Berkshire Hathaway has historically disclosed a significant Apple equity position.",
+      "confidence": "medium",
+      "tags": ["holding", "filings_historical"]
+    },
+    {
+      "source": "QQQ",
+      "target": "NVDA",
+      "relation": "HOLDS_STAKE",
+      "description": "QQQ index methodology gives meaningful weight to large-cap tech including NVIDIA.",
+      "confidence": "medium",
+      "tags": ["holding", "index"]
+    },
+    {
+      "source": "QQQ",
+      "target": "MSFT",
+      "relation": "HOLDS_STAKE",
+      "description": "QQQ index methodology gives meaningful weight to large-cap tech including Microsoft.",
+      "confidence": "medium",
+      "tags": ["holding", "index"]
+    },
+    {
+      "source": "QQQ",
+      "target": "AAPL",
+      "relation": "HOLDS_STAKE",
+      "description": "QQQ index methodology gives meaningful weight to large-cap tech including Apple.",
+      "confidence": "medium",
+      "tags": ["holding", "index"]
+    },
+    {
+      "source": "SPY",
+      "target": "AAPL",
+      "relation": "HOLDS_STAKE",
+      "description": "SPY tracks S&P 500 and includes Apple as a major constituent.",
+      "confidence": "medium",
+      "tags": ["holding", "index"]
+    },
+    {
+      "source": "SPY",
+      "target": "MSFT",
+      "relation": "HOLDS_STAKE",
+      "description": "SPY tracks S&P 500 and includes Microsoft as a major constituent.",
+      "confidence": "medium",
+      "tags": ["holding", "index"]
+    }
+  ]
+}

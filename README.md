@@ -25,6 +25,7 @@ AlphaNexus 是一个多智能体交易研究项目。系统会让市场、新闻
 - 多供应商 LLM：OpenAI / Anthropic / Google / xAI / OpenRouter / Ollama
 - 数据源切换：yfinance / Alpha Vantage
 - 研究页：模型下拉选择、SSE 流式进度、Markdown 渲染、来源链接展示、报告导出（Markdown / JSON）
+- 关系图谱：内置公司关系图数据库（供应链/合作/竞争/持股），用于跨公司新闻影响分析
 - 组合页：可在统一入口通过顶部按钮切换，也可直达 `http://127.0.0.1:8001/portfolio`
 - 组合页图表：Line（组合总值/个股切换）+ Stacked Area（权重）+ Secondary Axis（总值）
 - 组合页容错：Alpha Vantage MCP 失败时回退本地缓存，并在图例标记 `(cached)`
@@ -77,12 +78,14 @@ XAI_API_KEY=
 OPENROUTER_API_KEY=
 ALPHA_VANTAGE_API_KEY=
 PORTFOLIO_AV_MIN_INTERVAL_SECONDS=1.5
+ALPHANEXUS_GRAPH_DB_PATH=
 ```
 
 说明：
 
 - Web 表单也支持临时输入 API Key，不写入磁盘
 - `PORTFOLIO_AV_MIN_INTERVAL_SECONDS` 用于控制组合页请求间隔，默认 `1.5` 秒
+- `ALPHANEXUS_GRAPH_DB_PATH` 可指定自定义公司关系图 JSON 文件路径（默认使用 `alphanexus/data/company_graph.json`）
 
 ---
 
@@ -112,6 +115,7 @@ python -m cli.main
 - `POST /api/run`：同步运行一次研究流程
 - `POST /api/run/stream`：SSE 流式运行研究流程
 - `GET /api/health`：服务健康检查
+- `GET /api/company-graph/{ticker}`：获取指定公司的关系图谱快照
 - `GET /api/portfolio/data`：用默认参数获取组合数据
 - `POST /api/portfolio/data`：自定义 symbols / allocation / total_value / key
 - `POST /api/portfolio/refresh`：刷新组合数据

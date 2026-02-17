@@ -1,7 +1,13 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 import time
 import json
-from alphanexus.agents.utils.agent_utils import get_stock_data, get_indicators
+from alphanexus.agents.utils.agent_utils import (
+    get_stock_data,
+    get_indicators,
+    get_company_relationships,
+    get_company_impact_context,
+)
+from alphanexus.knowledge import get_company_graph_store
 from alphanexus.dataflows.config import get_config
 
 
@@ -11,10 +17,13 @@ def create_market_analyst(llm):
         current_date = state["trade_date"]
         ticker = state["company_of_interest"]
         company_name = state["company_of_interest"]
+        graph_context = get_company_graph_store().build_prompt_context(ticker, max_hops=2)
 
         tools = [
             get_stock_data,
             get_indicators,
+            get_company_relationships,
+            get_company_impact_context,
         ]
 
         system_message = (
@@ -45,6 +54,8 @@ Volume-Based Indicators:
 - Select indicators that provide diverse and complementary information. Avoid redundancy (e.g., do not select both rsi and stochrsi). Also briefly explain why they are suitable for the given market context. When you tool call, please use the exact name of the indicators provided above as they are defined parameters, otherwise your call will fail. Please make sure to call get_stock_data first to retrieve the CSV that is needed to generate indicators. Then use get_indicators with the specific indicator names. Write a very detailed and nuanced report of the trends you observe. Do not simply state the trends are mixed, provide detailed and finegrained analysis and insights that may help traders make decisions."""
             + """ Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."""
             + " 请始终用中文回答（专有名词、股票代码、指标缩写可保留英文）。如需引用英文原句，可保留原文并用中文说明。"
+            + " 在解释技术信号时，请结合 get_company_relationships/get_company_impact_context 的产业链关系判断外溢风险。"
+            + f"\\n\\n{graph_context}"
         )
 
         prompt = ChatPromptTemplate.from_messages(

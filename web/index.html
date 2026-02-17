@@ -5,27 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AlphaNexus</title>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=ZCOOL+XiaoWei&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@500;700&display=swap");
 
       :root {
         color-scheme: light;
-        --bg: #f5f1ea;
+        --bg: #eef2f6;
         --panel: #ffffff;
-        --ink: #1c1f26;
-        --muted: #59606a;
-        --accent: #1b8e7c;
-        --accent-2: #f0b44d;
-        --border: #e4ded3;
-        --shadow: 0 16px 40px rgba(18, 28, 45, 0.12);
+        --ink: #0d1726;
+        --muted: #4c5b70;
+        --accent: #0f766e;
+        --accent-2: #dd6b20;
+        --border: #d7dee8;
+        --shadow: 0 12px 28px rgba(10, 36, 74, 0.1);
+        --grid-line: rgba(10, 31, 68, 0.06);
       }
       * { box-sizing: border-box; }
       body {
         margin: 0;
-        font-family: "Space Grotesk", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+        font-family: "IBM Plex Sans", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
         color: var(--ink);
-        background: radial-gradient(circle at 20% 10%, #fff3d8 0, transparent 45%),
-          radial-gradient(circle at 90% 20%, #d9f2ed 0, transparent 50%),
+        background:
+          linear-gradient(var(--grid-line) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+          radial-gradient(circle at 8% -10%, #c2efe6 0, transparent 32%),
+          radial-gradient(circle at 95% 0%, #f8dcb7 0, transparent 35%),
           var(--bg);
+        background-size: 28px 28px, 28px 28px, auto, auto, auto;
       }
       body::before,
       body::after {
@@ -39,18 +44,18 @@
         opacity: 0.35;
       }
       body::before {
-        top: -120px;
-        left: -80px;
-        background: #f6c97d;
+        top: -140px;
+        left: -100px;
+        background: #65d4be;
       }
       body::after {
-        bottom: -120px;
-        right: -80px;
-        background: #7fd6c4;
+        bottom: -160px;
+        right: -120px;
+        background: #ffd089;
       }
       .shell {
         max-width: 1200px;
-        margin: 36px auto 60px;
+        margin: 28px auto 56px;
         padding: 0 24px;
       }
       .hero {
@@ -58,12 +63,18 @@
         align-items: flex-end;
         justify-content: space-between;
         gap: 24px;
-        margin-bottom: 24px;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #ffffff 0%, #f2f8ff 100%);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 20px 22px;
+        box-shadow: var(--shadow);
       }
       .hero h1 {
-        font-family: "ZCOOL XiaoWei", serif;
-        font-size: 34px;
+        font-family: "Noto Serif SC", "Songti SC", serif;
+        font-size: 32px;
         margin: 0 0 8px 0;
+        letter-spacing: 0.02em;
       }
       .hero p {
         margin: 0;
@@ -79,10 +90,10 @@
       }
       .badge-link {
         padding: 6px 12px;
-        border: 1px solid #cde5df;
+        border: 1px solid #bcd5cf;
         border-radius: 999px;
-        background: #eefaf7;
-        color: #246c60;
+        background: #e8f6f3;
+        color: #1d645a;
         font-size: 12px;
         text-decoration: none;
       }
@@ -98,7 +109,7 @@
         padding: 4px;
         border: 1px solid var(--border);
         border-radius: 999px;
-        background: #fffaf0;
+        background: #f8fbff;
       }
       .switch-btn {
         border: none;
@@ -111,7 +122,7 @@
       }
       .switch-btn.active {
         color: #ffffff;
-        background: linear-gradient(135deg, var(--accent), #1aa36d);
+        background: linear-gradient(135deg, #0f766e, #0b568f);
       }
       .layout {
         display: grid;
@@ -135,7 +146,7 @@
       .panel {
         background: var(--panel);
         border: 1px solid var(--border);
-        border-radius: 18px;
+        border-radius: 16px;
         box-shadow: var(--shadow);
         padding: 18px;
         animation: rise 600ms ease;
@@ -171,7 +182,7 @@
         border: 1px solid var(--border);
         border-radius: 10px;
         font-size: 14px;
-        background: #fffdfa;
+        background: #fdfefe;
       }
       .row {
         display: grid;
@@ -196,7 +207,7 @@
       }
       button.primary {
         padding: 12px 16px;
-        background: linear-gradient(135deg, var(--accent), #1aa36d);
+        background: linear-gradient(135deg, #0f766e, #0b568f);
         color: white;
         border: none;
         border-radius: 12px;
@@ -239,7 +250,7 @@
         border: 1px solid var(--border);
         border-radius: 14px;
         padding: 12px;
-        background: #fff;
+        background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
         animation: fadeIn 500ms ease;
       }
       .section.hidden {
@@ -322,6 +333,47 @@
         margin: 8px 0;
         padding-left: 10px;
         color: #55606c;
+      }
+      .graph-head {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .graph-pill {
+        border: 1px solid #c9d6e8;
+        background: #eef4fd;
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-size: 12px;
+        color: #254261;
+      }
+      .graph-paths {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 10px;
+      }
+      .graph-paths ul {
+        margin: 0;
+        padding-left: 18px;
+      }
+      .graph-table-wrap {
+        overflow: auto;
+      }
+      .graph-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      .graph-table th, .graph-table td {
+        border: 1px solid #dde5f0;
+        padding: 6px 8px;
+        text-align: left;
+        white-space: nowrap;
+      }
+      .graph-table th {
+        background: #f2f7ff;
+        color: #294665;
       }
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(6px); }
@@ -438,6 +490,24 @@
               <h3>信息来源</h3>
               <ul class="source-list" id="sources"></ul>
             </div>
+            <div class="section hidden" id="company_graph_section">
+              <h3>公司关系图谱</h3>
+              <div class="graph-head" id="graph_head"></div>
+              <div class="graph-paths" id="graph_paths"></div>
+              <div class="graph-table-wrap">
+                <table class="graph-table">
+                  <thead>
+                    <tr>
+                      <th>Source</th>
+                      <th>Relation</th>
+                      <th>Target</th>
+                      <th>Hop</th>
+                    </tr>
+                  </thead>
+                  <tbody id="graph_links"></tbody>
+                </table>
+              </div>
+            </div>
             <div class="section hidden" id="investment_section">
               <h3>投资计划（Judge）</h3>
               <div class="markdown" id="investment_plan"></div>
@@ -505,6 +575,9 @@
       const progressEl = document.getElementById("progress");
       const decisionEl = document.getElementById("decision");
       const sourcesEl = document.getElementById("sources");
+      const graphHeadEl = document.getElementById("graph_head");
+      const graphPathsEl = document.getElementById("graph_paths");
+      const graphLinksEl = document.getElementById("graph_links");
       const investmentPlanEl = document.getElementById("investment_plan");
       const traderPlanEl = document.getElementById("trader_plan");
       const marketReportEl = document.getElementById("market_report");
@@ -515,6 +588,7 @@
       const sections = {
         decision: document.getElementById("decision_section"),
         sources: document.getElementById("sources_section"),
+        companyGraph: document.getElementById("company_graph_section"),
         investment: document.getElementById("investment_section"),
         trader: document.getElementById("trader_section"),
         market: document.getElementById("market_section"),
@@ -629,6 +703,9 @@
         progressEl.textContent = "";
         decisionEl.textContent = "";
         sourcesEl.innerHTML = "";
+        graphHeadEl.innerHTML = "";
+        graphPathsEl.innerHTML = "";
+        graphLinksEl.innerHTML = "";
         investmentPlanEl.textContent = "";
         traderPlanEl.textContent = "";
         marketReportEl.textContent = "";
@@ -721,6 +798,53 @@
           seen.add(key);
           return true;
         });
+      }
+
+      function renderCompanyGraph(graph) {
+        graphHeadEl.innerHTML = "";
+        graphPathsEl.innerHTML = "";
+        graphLinksEl.innerHTML = "";
+        if (!graph || !Array.isArray(graph.links) || graph.links.length === 0) return;
+
+        const headItems = [
+          `目标: ${graph.focus_symbol || ""}`,
+          `名称: ${graph.focus_name || ""}`,
+          `行业: ${graph.focus_industry || ""}`,
+        ];
+        for (const text of headItems) {
+          const span = document.createElement("span");
+          span.className = "graph-pill";
+          span.textContent = text;
+          graphHeadEl.appendChild(span);
+        }
+
+        const paths = (graph.impact_paths || []).slice(0, 6);
+        if (paths.length > 0) {
+          const ul = document.createElement("ul");
+          for (const path of paths) {
+            const li = document.createElement("li");
+            li.textContent = path;
+            ul.appendChild(li);
+          }
+          graphPathsEl.appendChild(ul);
+        }
+
+        for (const link of graph.links.slice(0, 20)) {
+          const tr = document.createElement("tr");
+          const columns = [
+            link.source || "",
+            link.relation_label || link.relation || "",
+            link.target || "",
+            String(link.hop || ""),
+          ];
+          for (const text of columns) {
+            const td = document.createElement("td");
+            td.textContent = text;
+            tr.appendChild(td);
+          }
+          graphLinksEl.appendChild(tr);
+        }
+        showSection(sections.companyGraph);
       }
 
       let lastResult = null;
@@ -893,6 +1017,7 @@
                   }
                   showSection(sections.sources);
                 }
+                renderCompanyGraph(lastResult?.company_graph);
                 renderMeta(lastResult?.meta);
                 downloadBtn.disabled = false;
                 downloadJsonBtn.disabled = false;
@@ -934,6 +1059,22 @@
         lines.push("");
         lines.push("## Sources");
         fallbackSources.forEach((s) => lines.push(`- ${s}`));
+        lines.push("");
+        lines.push("## Company Graph");
+        if (lastResult.company_graph?.links?.length) {
+          lines.push(`- Focus: ${lastResult.company_graph.focus_symbol || ""}`);
+          lines.push(`- Industry: ${lastResult.company_graph.focus_industry || ""}`);
+          lines.push("");
+          lines.push("### Impact Paths");
+          (lastResult.company_graph.impact_paths || []).slice(0, 8).forEach((p) => lines.push(`- ${p}`));
+          lines.push("");
+          lines.push("### Links");
+          (lastResult.company_graph.links || []).slice(0, 20).forEach((link) => {
+            lines.push(`- ${link.source} -> ${link.target} | ${link.relation} | hop=${link.hop}`);
+          });
+        } else {
+          lines.push("- No graph data");
+        }
         lines.push("");
         lines.push("## Reports");
         lines.push("### Market");

@@ -1,7 +1,12 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 import time
 import json
-from alphanexus.agents.utils.agent_utils import get_news
+from alphanexus.agents.utils.agent_utils import (
+    get_news,
+    get_company_relationships,
+    get_company_impact_context,
+)
+from alphanexus.knowledge import get_company_graph_store
 from alphanexus.dataflows.config import get_config
 
 
@@ -10,16 +15,21 @@ def create_social_media_analyst(llm):
         current_date = state["trade_date"]
         ticker = state["company_of_interest"]
         company_name = state["company_of_interest"]
+        graph_context = get_company_graph_store().build_prompt_context(ticker, max_hops=2)
 
         tools = [
             get_news,
+            get_company_relationships,
+            get_company_impact_context,
         ]
 
         system_message = (
-            "You are a social media and company specific news researcher/analyst tasked with analyzing social media posts, recent company news, and public sentiment for a specific company over the past week. You will be given a company's name your objective is to write a comprehensive long report detailing your analysis, insights, and implications for traders and investors on this company's current state after looking at social media and what people are saying about that company, analyzing sentiment data of what people feel each day about the company, and looking at recent company news. Use the get_news(query, start_date, end_date) tool to search for company-specific news and social media discussions. Try to look at all sources possible from social media to sentiment to news. Do not simply state the trends are mixed, provide detailed and finegrained analysis and insights that may help traders make decisions."
+            "You are a social media and company specific news researcher/analyst tasked with analyzing social media posts, recent company news, and public sentiment for a specific company over the past week. You will be given a company's name your objective is to write a comprehensive long report detailing your analysis, insights, and implications for traders and investors on this company's current state after looking at social media and what people are saying about that company, analyzing sentiment data of what people feel each day about the company, and looking at recent company news. Use get_news(query, start_date, end_date) to collect evidence, and use get_company_relationships/get_company_impact_context to analyze spillover impact to suppliers/customers/competitors/holders. Try to look at all sources possible from social media to sentiment to news. Do not simply state the trends are mixed, provide detailed and finegrained analysis and insights that may help traders make decisions."
             + """ Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."""
             + " 请始终用中文回答（专有名词、股票代码、指标缩写可保留英文）。如需引用英文原句，可保留原文并用中文说明。"
             + " 请保留每条新闻的来源与链接（如有），并在报告末尾添加 Sources 列表（逐条列出链接）。"
+            + " 报告中必须包含《关联公司影响链》小节，给出至少 2 条可执行的影响传导判断。"
+            + f"\\n\\n{graph_context}"
         )
 
         prompt = ChatPromptTemplate.from_messages(

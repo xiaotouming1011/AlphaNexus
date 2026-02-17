@@ -1,7 +1,16 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 import time
 import json
-from alphanexus.agents.utils.agent_utils import get_fundamentals, get_balance_sheet, get_cashflow, get_income_statement, get_insider_transactions
+from alphanexus.agents.utils.agent_utils import (
+    get_fundamentals,
+    get_balance_sheet,
+    get_cashflow,
+    get_income_statement,
+    get_insider_transactions,
+    get_company_relationships,
+    get_company_impact_context,
+)
+from alphanexus.knowledge import get_company_graph_store
 from alphanexus.dataflows.config import get_config
 
 
@@ -10,12 +19,15 @@ def create_fundamentals_analyst(llm):
         current_date = state["trade_date"]
         ticker = state["company_of_interest"]
         company_name = state["company_of_interest"]
+        graph_context = get_company_graph_store().build_prompt_context(ticker, max_hops=2)
 
         tools = [
             get_fundamentals,
             get_balance_sheet,
             get_cashflow,
             get_income_statement,
+            get_company_relationships,
+            get_company_impact_context,
         ]
 
         system_message = (
@@ -23,6 +35,8 @@ def create_fundamentals_analyst(llm):
             + " Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."
             + " Use the available tools: `get_fundamentals` for comprehensive company analysis, `get_balance_sheet`, `get_cashflow`, and `get_income_statement` for specific financial statements."
             + " 请始终用中文回答（专有名词、股票代码、指标缩写可保留英文）。如需引用英文原句，可保留原文并用中文说明。"
+            + " 报告中请结合关联公司图谱，单独给出《基本面外溢影响》小节。"
+            + f"\\n\\n{graph_context}"
         )
 
         prompt = ChatPromptTemplate.from_messages(

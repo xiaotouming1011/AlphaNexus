@@ -30,7 +30,9 @@ from alphanexus.agents.utils.agent_utils import (
     get_income_statement,
     get_news,
     get_insider_transactions,
-    get_global_news
+    get_global_news,
+    get_company_relationships,
+    get_company_impact_context,
 )
 
 from .conditional_logic import ConditionalLogic
@@ -165,12 +167,16 @@ class AlphaNexusGraph:
                     get_stock_data,
                     # Technical indicators
                     get_indicators,
+                    # Cross-company relationship graph
+                    get_company_relationships,
                 ]
             ),
             "social": ToolNode(
                 [
                     # News tools for social media analysis
                     get_news,
+                    get_company_relationships,
+                    get_company_impact_context,
                 ]
             ),
             "news": ToolNode(
@@ -179,6 +185,8 @@ class AlphaNexusGraph:
                     get_news,
                     get_global_news,
                     get_insider_transactions,
+                    get_company_relationships,
+                    get_company_impact_context,
                 ]
             ),
             "fundamentals": ToolNode(
@@ -188,6 +196,7 @@ class AlphaNexusGraph:
                     get_balance_sheet,
                     get_cashflow,
                     get_income_statement,
+                    get_company_relationships,
                 ]
             ),
         }
