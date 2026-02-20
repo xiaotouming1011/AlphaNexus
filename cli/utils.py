@@ -140,6 +140,7 @@ def select_shallow_thinking_agent(provider) -> str:
             ("Claude Sonnet 4 - High-performance", "claude-sonnet-4-20250514"),
         ],
         "google": [
+            ("Gemini 3.1 - New generation", "gemini-3.1"),
             ("Gemini 3 Flash - Next-gen fast", "gemini-3-flash-preview"),
             ("Gemini 2.5 Flash - Balanced, recommended", "gemini-2.5-flash"),
             ("Gemini 3 Pro - Reasoning-first", "gemini-3-pro-preview"),
@@ -208,6 +209,7 @@ def select_deep_thinking_agent(provider) -> str:
             ("Claude Sonnet 4 - High-performance", "claude-sonnet-4-20250514"),
         ],
         "google": [
+            ("Gemini 3.1 - New generation", "gemini-3.1"),
             ("Gemini 3 Pro - Reasoning-first", "gemini-3-pro-preview"),
             ("Gemini 3 Flash - Next-gen fast", "gemini-3-flash-preview"),
             ("Gemini 2.5 Flash - Balanced, recommended", "gemini-2.5-flash"),

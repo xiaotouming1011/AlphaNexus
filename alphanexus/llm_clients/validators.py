@@ -41,6 +41,8 @@ VALID_MODELS = {
         "claude-3-5-sonnet-20241022",
     ],
     "google": [
+        # Gemini 3.1 series
+        "gemini-3.1",
         # Gemini 3 series (preview)
         "gemini-3-pro-preview",
         "gemini-3-flash-preview",
