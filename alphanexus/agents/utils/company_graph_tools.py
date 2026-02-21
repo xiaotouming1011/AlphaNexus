@@ -42,8 +42,10 @@ def get_company_relationships(
     lines.append("")
     lines.append("### 关键关系")
     for row in snap["links"][:max_edges]:
+        relation_text = row.get("relation_label") or row.get("relation") or "关系"
+        desc_text = row.get("description_cn") or row.get("description") or ""
         lines.append(
-            f"- {row['source']} -> {row['target']} | {row['relation']} | hop={row['hop']} | {row['description']}"
+            f"- {row['source']} -> {row['target']} | {relation_text} | hop={row['hop']} | {desc_text}"
         )
 
     lines.append("")
@@ -56,7 +58,17 @@ def get_company_relationships(
     compact = {
         "focus_symbol": snap["focus_symbol"],
         "focus_industry": snap["focus_industry"],
-        "links": snap["links"][:max_edges],
+        "links": [
+            {
+                "source": row["source"],
+                "target": row["target"],
+                "relation": row.get("relation_label") or row.get("relation") or "关系",
+                "relation_code": row.get("relation"),
+                "hop": row.get("hop"),
+                "description": row.get("description_cn") or row.get("description") or "",
+            }
+            for row in snap["links"][:max_edges]
+        ],
     }
     lines.append("```json")
     lines.append(json.dumps(compact, ensure_ascii=False, indent=2))

@@ -15,15 +15,59 @@ from typing import Dict, List, Optional, Tuple
 
 
 _RELATION_LABELS = {
-    "SUPPLIES_TO": "supply",
-    "MANUFACTURES_FOR": "manufacturing",
-    "PARTNERS_WITH": "partnership",
-    "COMPETES_WITH": "competition",
-    "HOLDS_STAKE": "holding",
-    "SELLS_TO": "customer",
-    "DEPENDS_ON": "dependency",
-    "USES_PLATFORM": "platform",
+    "SUPPLIES_TO": "供应",
+    "MANUFACTURES_FOR": "代工/制造",
+    "PARTNERS_WITH": "合作",
+    "COMPETES_WITH": "竞争",
+    "HOLDS_STAKE": "持股",
+    "SELLS_TO": "销售",
+    "DEPENDS_ON": "依赖",
+    "USES_PLATFORM": "平台依赖",
 }
+
+_INDUSTRY_LABELS = {
+    "Semiconductors": "半导体",
+    "Semiconductor Foundry": "半导体晶圆代工",
+    "Semiconductor Equipment": "半导体设备",
+    "Consumer Electronics": "消费电子",
+    "E-commerce & Cloud": "电商与云计算",
+    "ETF": "交易型基金(ETF)",
+    "Holding Company": "控股公司",
+    "Internet & Cloud": "互联网与云计算",
+    "Internet Platforms": "互联网平台",
+    "Networking": "网络设备",
+    "Server Hardware": "服务器硬件",
+    "Software": "软件",
+    "Software & Cloud": "软件与云计算",
+    "Unknown": "未知",
+}
+
+
+def _to_cn_industry(industry: str) -> str:
+    value = (industry or "").strip()
+    if not value:
+        return "未知"
+    return _INDUSTRY_LABELS.get(value, value)
+
+
+def _to_cn_description(source: str, target: str, relation: str, description: str) -> str:
+    raw = (description or "").strip()
+    # If already Chinese (or mixed with Chinese), keep as-is.
+    if any("\u4e00" <= ch <= "\u9fff" for ch in raw):
+        return raw
+
+    relation_label = _RELATION_LABELS.get(relation, "关联")
+    templates = {
+        "SUPPLIES_TO": f"{source}向{target}提供关键产品/服务。",
+        "MANUFACTURES_FOR": f"{source}为{target}提供制造或代工能力。",
+        "PARTNERS_WITH": f"{source}与{target}存在战略合作关系。",
+        "COMPETES_WITH": f"{source}与{target}在核心业务上存在竞争关系。",
+        "HOLDS_STAKE": f"{source}与{target}存在股权关系（持股）。",
+        "SELLS_TO": f"{source}向{target}销售产品或服务。",
+        "DEPENDS_ON": f"{source}在业务上依赖{target}。",
+        "USES_PLATFORM": f"{source}依赖或使用{target}的平台/生态能力。",
+    }
+    return templates.get(relation, f"{source}与{target}存在{relation_label}关系。")
 
 
 @dataclass(frozen=True)
@@ -108,7 +152,7 @@ class CompanyGraphStore:
             self.nodes[symbol] = CompanyNode(
                 symbol=symbol,
                 name=str(item.get("name", symbol)).strip() or symbol,
-                industry=str(item.get("industry", "Unknown")).strip() or "Unknown",
+                industry=_to_cn_industry(str(item.get("industry", "Unknown")).strip() or "Unknown"),
             )
             self.out_edges[symbol] = []
             self.in_edges[symbol] = []
@@ -182,8 +226,11 @@ class CompanyGraphStore:
                         "source": edge.source,
                         "target": edge.target,
                         "relation": edge.relation,
-                        "relation_label": _RELATION_LABELS.get(edge.relation, "relation"),
+                        "relation_label": _RELATION_LABELS.get(edge.relation, "关系"),
                         "description": edge.description,
+                        "description_cn": _to_cn_description(
+                            edge.source, edge.target, edge.relation, edge.description
+                        ),
                         "confidence": edge.confidence,
                         "tags": list(edge.tags),
                         "hop": depth + 1,
@@ -216,7 +263,7 @@ class CompanyGraphStore:
             return {
                 "focus_symbol": ticker,
                 "focus_name": ticker,
-                "focus_industry": "Unknown",
+                "focus_industry": "未知",
                 "nodes": [],
                 "links": [],
                 "impact_paths": [],
@@ -245,9 +292,9 @@ class CompanyGraphStore:
 
         impact_paths: List[str] = []
         for link in links[:10]:
-            relation_text = _RELATION_LABELS.get(link["relation"], "relation")
+            relation_text = _RELATION_LABELS.get(link["relation"], "关系")
             impact_paths.append(
-                f"{link['source']} -> {link['target']} ({relation_text}): {link['description']}"
+                f"{link['source']} -> {link['target']}（{relation_text}）：{link.get('description_cn') or link['description']}"
             )
 
         return {
@@ -264,29 +311,29 @@ class CompanyGraphStore:
         snap = self.get_impact_snapshot(symbol, max_hops=max_hops, max_edges=max_edges)
         if not snap.get("links"):
             return (
-                f"## Company Graph Context\n"
-                f"- Focus: {snap.get('focus_symbol', symbol.upper())}\n"
-                "- No relationship record found in local graph DB."
+                f"## 公司关系图谱上下文\n"
+                f"- 目标公司：{snap.get('focus_symbol', symbol.upper())}\n"
+                "- 本地图谱中暂无该公司的关系记录。"
             )
 
         lines: List[str] = []
-        lines.append("## Company Graph Context")
+        lines.append("## 公司关系图谱上下文")
         lines.append(
-            f"- Focus: {snap['focus_symbol']} ({snap['focus_name']}) | Industry: {snap['focus_industry']}"
+            f"- 目标公司：{snap['focus_symbol']}（{snap['focus_name']}） | 行业：{snap['focus_industry']}"
         )
-        lines.append("- Relationship edges:")
+        lines.append("- 关系边：")
 
         for link in snap["links"][:12]:
             relation_text = _RELATION_LABELS.get(link["relation"], link["relation"])
             lines.append(
-                f"  - {link['source']} -> {link['target']} [{relation_text}] | {link['description']}"
+                f"  - {link['source']} -> {link['target']} [{relation_text}] | {link.get('description_cn') or link['description']}"
             )
 
-        lines.append("- Suggested impact channels to evaluate in news analysis:")
-        lines.append("  - Supply chain shock propagation (upstream -> foundry -> downstream)")
-        lines.append("  - Hyperscaler capex changes to AI semiconductor demand")
-        lines.append("  - Competitor reaction and substitution risk")
-        lines.append("  - Strategic holdings/partnership spillover risk")
+        lines.append("- 新闻分析建议重点评估的影响通道：")
+        lines.append("  - 供应链冲击传导（上游 -> 代工 -> 下游）")
+        lines.append("  - 云厂商资本开支变化对 AI 半导体需求的影响")
+        lines.append("  - 竞争对手反应与替代风险")
+        lines.append("  - 股权关系/战略合作导致的外溢风险")
         return "\n".join(lines)
 
 
