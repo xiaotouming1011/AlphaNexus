@@ -42,7 +42,7 @@ VALID_MODELS = {
     ],
     "google": [
         # Gemini 3.1 series
-        "gemini-3.1",
+        "gemini-3.1-pro-preview",
         # Gemini 3 series (preview)
         "gemini-3-pro-preview",
         "gemini-3-flash-preview",
