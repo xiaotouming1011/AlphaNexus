@@ -137,6 +137,19 @@ python -m cli.main
 
 ---
 
+## 生产部署（Ubuntu + Nginx + Jenkins）
+
+已提供完整部署资产与操作手册：
+
+- 手册：`docs/deploy-ubuntu.md`
+- systemd：`deploy/systemd/alphanexus-web.service`
+- Nginx：`deploy/nginx/alphanexus.conf`
+- Pipeline：`deploy/Jenkinsfile`
+- 发布脚本：`deploy/scripts/deploy.sh`
+- 回滚脚本：`deploy/scripts/rollback.sh`
+
+---
+
 ## Web API
 
 - `POST /api/run`：同步运行研究流程

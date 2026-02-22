@@ -1,0 +1,106 @@
+pipeline {
+  agent any
+
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+  }
+
+  environment {
+    DEPLOY_CMD = '/usr/local/bin/alphanexus-deploy'
+    ROLLBACK_CMD = '/usr/local/bin/alphanexus-rollback'
+    HEALTH_URL = 'http://127.0.0.1:8002/api/health'
+  }
+
+  triggers {
+    githubPush()
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+        sh 'git rev-parse --abbrev-ref HEAD'
+        sh 'git rev-parse --short HEAD'
+      }
+    }
+
+    stage('Prepare') {
+      steps {
+        script {
+          env.RELEASE_ID = sh(
+            returnStdout: true,
+            script: "date +%Y%m%d%H%M%S"
+          ).trim()
+        }
+        echo "Release ID: ${env.RELEASE_ID}"
+      }
+    }
+
+    stage('Validate') {
+      steps {
+        sh '''
+          set -euo pipefail
+          python3 -m py_compile \
+            web/app.py \
+            web/portfolio_service.py \
+            alphanexus/default_config.py \
+            alphanexus/graph/trading_graph.py \
+            alphanexus/graph/conditional_logic.py
+        '''
+      }
+    }
+
+    stage('Manual Approval') {
+      steps {
+        timeout(time: 30, unit: 'MINUTES') {
+          input message: "Deploy release ${env.RELEASE_ID} to production?"
+        }
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'prod_env_file', variable: 'PROD_ENV_FILE')
+        ]) {
+          sh '''
+            set -euo pipefail
+            ENV_TMP="${WORKSPACE}/.prod.env"
+            printf '%s\n' "${PROD_ENV_FILE}" > "${ENV_TMP}"
+            chmod 600 "${ENV_TMP}"
+            sudo "${DEPLOY_CMD}" "${RELEASE_ID}" "${WORKSPACE}" "${ENV_TMP}"
+            rm -f "${ENV_TMP}"
+          '''
+        }
+      }
+    }
+
+    stage('Health Check') {
+      steps {
+        sh '''
+          set -euo pipefail
+          curl -fsS --max-time 10 "${HEALTH_URL}"
+        '''
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "Deployment succeeded: ${env.RELEASE_ID}"
+    }
+    failure {
+      echo "Deployment failed, trying rollback..."
+      sh '''
+        set +e
+        sudo "${ROLLBACK_CMD}"
+        exit 0
+      '''
+    }
+    always {
+      sh 'rm -f "${WORKSPACE}/.prod.env" || true'
+    }
+  }
+}
