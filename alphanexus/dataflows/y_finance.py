@@ -3,7 +3,10 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import yfinance as yf
 import os
+from pathlib import Path
+import pandas as pd
 from .stockstats_utils import StockstatsUtils
+from .config import get_config
 from .errors import (
     DataflowBadRequestError,
     DataflowNoDataError,
@@ -73,19 +76,86 @@ def get_YFin_data_online(
             method="get_stock_data",
         ) from exc
 
+    def _cache_file_path(symbol_upper: str, s: str, e: str) -> Path:
+        config = get_config()
+        cache_dir = Path(config.get("data_cache_dir", "data"))
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        return cache_dir / f"{symbol_upper}-YFin-data-{s}-{e}.csv"
+
+    def _write_cache(symbol_upper: str, s: str, e: str, data_df) -> None:
+        try:
+            cache_file = _cache_file_path(symbol_upper, s, e)
+            data_df.to_csv(cache_file, index=True)
+        except Exception:
+            # 缓存写入失败不影响主流程
+            pass
+
+    def _load_cached(symbol_upper: str, s: str, e: str) -> str | None:
+        config = get_config()
+        cache_dir = Path(config.get("data_cache_dir", "data"))
+        if not cache_dir.exists():
+            return None
+
+        # 先尝试精确命中，再回退到该标的任意历史缓存
+        exact = _cache_file_path(symbol_upper, s, e)
+        candidates = [exact] if exact.exists() else []
+        if not candidates:
+            candidates = sorted(
+                cache_dir.glob(f"{symbol_upper}-YFin-data-*.csv"),
+                key=lambda p: p.stat().st_mtime,
+                reverse=True,
+            )
+
+        for path in candidates:
+            try:
+                df = pd.read_csv(path)
+                if "Date" not in df.columns:
+                    continue
+                df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+                start_dt = pd.to_datetime(s)
+                end_dt = pd.to_datetime(e)
+                filtered = df[(df["Date"] >= start_dt) & (df["Date"] < end_dt)].copy()
+                if filtered.empty:
+                    continue
+
+                filtered["Date"] = filtered["Date"].dt.strftime("%Y-%m-%d")
+                csv_string = filtered.to_csv(index=False)
+                header = f"# Stock data for {symbol_upper} from {s} to {e} (cached)\n"
+                header += f"# Total records: {len(filtered)}\n"
+                header += f"# Cache file: {path.name}\n"
+                header += f"# Data loaded on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                return header + csv_string
+            except Exception:
+                continue
+
+        return None
+
+    symbol_upper = symbol.upper()
+
     try:
         # Create ticker object
-        ticker = yf.Ticker(symbol.upper())
+        ticker = yf.Ticker(symbol_upper)
 
         # Fetch historical data for the specified date range
         data = ticker.history(start=start_date, end=end_date)
     except Exception as exc:
-        raise _to_yfinance_error(exc, "get_stock_data") from exc
+        normalized = _to_yfinance_error(exc, "get_stock_data")
+        if isinstance(
+            normalized,
+            (DataflowRateLimitError, DataflowTimeoutError, DataflowUpstreamError),
+        ):
+            cached = _load_cached(symbol_upper, start_date, end_date)
+            if cached:
+                return cached
+        raise normalized from exc
 
     # Check if data is empty
     if data.empty:
+        cached = _load_cached(symbol_upper, start_date, end_date)
+        if cached:
+            return cached
         raise DataflowNoDataError(
-            f"No data found for symbol '{symbol}' between {start_date} and {end_date}",
+            f"No data found for symbol '{symbol_upper}' between {start_date} and {end_date}",
             vendor="yfinance",
             method="get_stock_data",
         )
@@ -101,10 +171,11 @@ def get_YFin_data_online(
             data[col] = data[col].round(2)
 
     # Convert DataFrame to CSV string
+    _write_cache(symbol_upper, start_date, end_date, data)
     csv_string = data.to_csv()
 
     # Add header information
-    header = f"# Stock data for {symbol.upper()} from {start_date} to {end_date}\n"
+    header = f"# Stock data for {symbol_upper} from {start_date} to {end_date}\n"
     header += f"# Total records: {len(data)}\n"
     header += f"# Data retrieved on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
 

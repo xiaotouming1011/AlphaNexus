@@ -250,7 +250,7 @@ def _prepare_config(payload: RunRequest):
     provider = (
         payload.provider
         or (payload.config_overrides or {}).get("llm_provider")
-        or "google"
+        or "deepseek"
     ).lower()
     allowed_providers = {"openai", "anthropic", "google", "xai", "openrouter", "ollama", "deepseek"}
     if provider not in allowed_providers:
