@@ -1,34 +1,52 @@
 # AlphaNexus
 
-## 致谢与来源
-
-参考并学习了 Tauric Research 团队创造的多智能体交易框架 [TradingAgents](https://github.com/TauricResearch/TradingAgents.git)，本仓库为个人学习目的的改造版本。
-
 > 重要提示：本项目仅用于学习与研究，不构成任何投资建议。
 
 ---
 
 ## 项目简介
 
-AlphaNexus 是一个多智能体交易研究项目。系统会让市场、新闻、情绪、基本面等分析角色协同输出报告，再经过研究与风控流程，给出最终交易结论。
-
-当前仓库同时提供：
-
-- CLI 交互式运行
-- Web 研究页（流式输出、来源展示、报告导出）
-- Web 组合页（Portfolio Tracker，可视化组合价值与权重）
+AlphaNexus 是一个多智能体交易研究系统，覆盖「分析 -> 研究辩论 -> 风控辩论 -> 交易结论」完整链路。  
+当前支持 CLI 与 Web，Web 内置研究页 + 组合页两个子页面。
 
 ---
 
-## 当前功能进度
+## 近期更新（2026-02）
 
-- 多供应商 LLM：OpenAI / Anthropic / Google / xAI / OpenRouter / Ollama
-- 数据源切换：yfinance / Alpha Vantage
-- 研究页：模型下拉选择、SSE 流式进度、Markdown 渲染、来源链接展示、报告导出（Markdown / JSON）
-- 关系图谱：内置公司关系图数据库（供应链/合作/竞争/持股），用于跨公司新闻影响分析
-- 组合页：可在统一入口通过顶部按钮切换，也可直达 `http://127.0.0.1:8001/portfolio`
-- 组合页图表：Line（组合总值/个股切换）+ Stacked Area（权重）+ Secondary Axis（总值）
-- 组合页容错：Alpha Vantage MCP 失败时回退本地缓存，并在图例标记 `(cached)`
+- 研究页与组合页统一在同一入口切换（`/` 内切换，`/portfolio` 仍可直达）
+- 研究页支持 SSE 流式进度、阶段百分比、逐模块输出
+- 辩论流程升级为真实多轮模式（支持 adaptive/fixed，且最少 2 轮）
+- Bull/Bear 与 Aggressive/Conservative/Neutral 以“对话气泡”方式展示
+- 交易日期改为“截至该日期（ET）”语义，不是只看当天
+- 休市日允许继续分析（给出休市提示，不再拦截运行）
+- 来源展示改为集中式 Sources 列表（已取消正文小角标）
+- 默认可走服务端 API Key（前端留空时自动使用服务端环境变量）
+- 增加公司关系图谱展示（产业链/合作/竞争/持股等影响路径）
+
+---
+
+## 功能概览
+
+### 研究页（Web）
+
+- 股票代码/公司名识别（内置热门美股名单）
+- 分析模块四选一：市场分析 / 社媒情绪 / 新闻宏观 / 基本面
+- LLM 供应商与模型选择：OpenAI / Anthropic / Google / xAI / OpenRouter / Ollama
+- 数据源切换：Alpha Vantage / yfinance
+- Markdown 渲染输出、报告下载（Markdown/JSON）
+- Sources 区域集中展示来源链接（可直接跳转外部站点）
+
+### 组合页（Web Portfolio）
+
+- 组合总值与个股价值折线图切换
+- 权重堆叠面积图 + 组合总值辅助线
+- Alpha Vantage 串行限流请求 + 失败回退本地缓存
+- 缓存命中会在图例标记 `(cached)`
+
+### 图谱能力
+
+- 内置公司关系图数据库（`alphanexus/data/company_graph.json`）
+- 支持跨公司影响链路展示，辅助新闻/事件外溢判断
 
 ---
 
@@ -40,6 +58,7 @@ AlphaNexus/
 │  ├─ agents/
 │  ├─ dataflows/
 │  ├─ graph/
+│  ├─ knowledge/
 │  └─ llm_clients/
 ├─ cli/                         # CLI 入口
 ├─ web/                         # FastAPI + Web 前端
@@ -47,6 +66,7 @@ AlphaNexus/
 │  ├─ index.html
 │  ├─ portfolio.html
 │  └─ portfolio_service.py
+├─ spec_coding/                 # 协作文档（spec / changelog）
 ├─ assets/
 ├─ requirements.txt
 └─ pyproject.toml
@@ -56,13 +76,13 @@ AlphaNexus/
 
 ## 快速开始
 
-### 1) 安装依赖
+### 1. 安装依赖
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2) 配置环境变量（可选）
+### 2. 配置环境变量（可选但推荐）
 
 ```bash
 cp .env.example .env
@@ -83,9 +103,10 @@ ALPHANEXUS_GRAPH_DB_PATH=
 
 说明：
 
-- Web 表单也支持临时输入 API Key，不写入磁盘
-- `PORTFOLIO_AV_MIN_INTERVAL_SECONDS` 用于控制组合页请求间隔，默认 `1.5` 秒
-- `ALPHANEXUS_GRAPH_DB_PATH` 可指定自定义公司关系图 JSON 文件路径（默认使用 `alphanexus/data/company_graph.json`）
+- Web 表单支持临时输入 API Key，不写入磁盘
+- 若前端不填 Key，后端自动读取服务端环境变量
+- `PORTFOLIO_AV_MIN_INTERVAL_SECONDS` 控制组合页 Alpha Vantage 请求间隔
+- `ALPHANEXUS_GRAPH_DB_PATH` 可替换自定义图谱文件
 
 ---
 
@@ -97,9 +118,15 @@ ALPHANEXUS_GRAPH_DB_PATH=
 uvicorn web.app:app --host 127.0.0.1 --port 8001
 ```
 
+如果 `8001` 被占用，可改为 `8002`：
+
+```bash
+uvicorn web.app:app --host 127.0.0.1 --port 8002
+```
+
 访问地址：
 
-- 统一入口：`http://127.0.0.1:8001/`
+- 统一入口：`http://127.0.0.1:8001/`（或 `8002`）
 - 组合页直达：`http://127.0.0.1:8001/portfolio`
 
 ### CLI
@@ -112,25 +139,23 @@ python -m cli.main
 
 ## Web API
 
-- `POST /api/run`：同步运行一次研究流程
+- `POST /api/run`：同步运行研究流程
 - `POST /api/run/stream`：SSE 流式运行研究流程
 - `GET /api/health`：服务健康检查
-- `GET /api/company-graph/{ticker}`：获取指定公司的关系图谱快照
-- `GET /api/portfolio/data`：用默认参数获取组合数据
-- `POST /api/portfolio/data`：自定义 symbols / allocation / total_value / key
+- `GET /api/company-graph/{ticker}`：公司关系图谱快照
+- `GET /api/portfolio/data`：默认参数获取组合数据
+- `POST /api/portfolio/data`：自定义 symbols/allocation/total_value/key
 - `POST /api/portfolio/refresh`：刷新组合数据
 - `GET /api/portfolio/health`：组合服务健康检查
 
 ---
 
-## Portfolio 数据策略（当前实现）
+## 数据与日期语义
 
-- 使用 Alpha Vantage MCP 的 `TIME_SERIES_DAILY`，固定 `outputsize=compact`
-- 每只股票仅使用最新约 100 个交易日数据
-- 请求为串行节流，避免并发触发免费额度瞬时限制
-- Live 请求失败时读取本地缓存：`results/portfolio_cache/`
-
-说明：即使做了串行与缓存，Alpha Vantage 免费计划仍有 `25 requests/day` 限制。
+- `trade_date` 使用美东时间（ET）
+- 语义为“截至该日期”的分析窗口（不是仅当天）
+- 若选择休市日：允许分析继续进行；价格类数据可能参考最近交易日
+- Alpha Vantage 免费计划有额度限制（典型为 `25 requests/day`，并有频率限制）
 
 ---
 
@@ -160,7 +185,13 @@ print(decision)
 
 ## License
 
-本仓库遵循项目内 `LICENSE`。如你继续分发或商用，请确保同时满足上游许可证要求。
+本仓库遵循项目内 `LICENSE`。如继续分发或商用，请确保同时满足上游许可证要求。
+
+---
+
+## 致谢与来源
+
+参考并学习了 Tauric Research 团队创造的多智能体交易框架 [TradingAgents](https://github.com/TauricResearch/TradingAgents.git)，本仓库为个人学习目的的改造版本。
 
 ---
 
