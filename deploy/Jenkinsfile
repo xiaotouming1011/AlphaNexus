@@ -41,7 +41,7 @@ pipeline {
     stage('Validate') {
       steps {
         sh '''
-          set -euo pipefail
+          set -eu
           python3 -m py_compile \
             web/app.py \
             web/portfolio_service.py \
@@ -66,7 +66,7 @@ pipeline {
           string(credentialsId: 'prod_env_file', variable: 'PROD_ENV_FILE')
         ]) {
           sh '''
-            set -euo pipefail
+            set -eu
             ENV_TMP="${WORKSPACE}/.prod.env"
             printf '%s\n' "${PROD_ENV_FILE}" > "${ENV_TMP}"
             chmod 600 "${ENV_TMP}"
@@ -80,7 +80,7 @@ pipeline {
     stage('Health Check') {
       steps {
         sh '''
-          set -euo pipefail
+          set -eu
           curl -fsS --max-time 10 "${HEALTH_URL}"
         '''
       }
