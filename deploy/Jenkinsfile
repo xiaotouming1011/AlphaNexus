@@ -1,6 +1,14 @@
 pipeline {
   agent any
 
+  parameters {
+    booleanParam(
+      name: 'REQUIRE_APPROVAL',
+      defaultValue: false,
+      description: '是否在部署前需要人工确认'
+    )
+  }
+
   options {
     timestamps()
     disableConcurrentBuilds()
@@ -53,6 +61,9 @@ pipeline {
     }
 
     stage('Manual Approval') {
+      when {
+        expression { return params.REQUIRE_APPROVAL }
+      }
       steps {
         timeout(time: 30, unit: 'MINUTES') {
           input message: "Deploy release ${env.RELEASE_ID} to production?"
