@@ -73,18 +73,11 @@ pipeline {
 
     stage('Deploy') {
       steps {
-        withCredentials([
-          string(credentialsId: 'prod_env_file', variable: 'PROD_ENV_FILE')
-        ]) {
-          sh '''
-            set -eu
-            ENV_TMP="${WORKSPACE}/.prod.env"
-            printf '%s\n' "${PROD_ENV_FILE}" > "${ENV_TMP}"
-            chmod 600 "${ENV_TMP}"
-            sudo "${DEPLOY_CMD}" "${RELEASE_ID}" "${WORKSPACE}" "${ENV_TMP}"
-            rm -f "${ENV_TMP}"
-          '''
-        }
+        sh '''
+          set -eu
+          # 生产密钥统一放在服务器 /etc/alphanexus.env，不再依赖 Jenkins 密文覆盖
+          sudo "${DEPLOY_CMD}" "${RELEASE_ID}" "${WORKSPACE}"
+        '''
       }
     }
 
@@ -109,9 +102,6 @@ pipeline {
         sudo "${ROLLBACK_CMD}"
         exit 0
       '''
-    }
-    always {
-      sh 'rm -f "${WORKSPACE}/.prod.env" || true'
     }
   }
 }
