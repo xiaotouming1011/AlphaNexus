@@ -9,100 +9,83 @@
 
       :root {
         color-scheme: light;
-        --bg: #eef2f6;
+        --bg: #eef3f7;
         --panel: #ffffff;
-        --ink: #0d1726;
-        --muted: #4c5b70;
+        --ink: #0f1b2d;
+        --muted: #4f5f77;
         --accent: #0f766e;
-        --accent-2: #dd6b20;
-        --border: #d7dee8;
-        --shadow: 0 12px 28px rgba(10, 36, 74, 0.1);
-        --grid-line: rgba(10, 31, 68, 0.06);
+        --accent-2: #0b568f;
+        --border: #d4deea;
+        --shadow: 0 14px 32px rgba(12, 33, 65, 0.12);
+        --ok: #0f8a4c;
+        --warn: #b55a16;
+        --danger: #c0392b;
       }
-      * { box-sizing: border-box; }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         margin: 0;
         font-family: "IBM Plex Sans", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
         color: var(--ink);
         background:
-          linear-gradient(var(--grid-line) 1px, transparent 1px),
-          linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
-          radial-gradient(circle at 8% -10%, #c2efe6 0, transparent 32%),
-          radial-gradient(circle at 95% 0%, #f8dcb7 0, transparent 35%),
+          radial-gradient(circle at 10% -8%, #c7efe5 0, transparent 35%),
+          radial-gradient(circle at 94% -5%, #f7dfc2 0, transparent 34%),
+          linear-gradient(rgba(12, 43, 86, 0.05) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(12, 43, 86, 0.05) 1px, transparent 1px),
           var(--bg);
-        background-size: 28px 28px, 28px 28px, auto, auto, auto;
+        background-size: auto, auto, 28px 28px, 28px 28px, auto;
       }
-      body::before,
-      body::after {
-        content: "";
-        position: fixed;
-        z-index: -1;
-        width: 420px;
-        height: 420px;
-        border-radius: 50%;
-        filter: blur(40px);
-        opacity: 0.35;
-      }
-      body::before {
-        top: -140px;
-        left: -100px;
-        background: #65d4be;
-      }
-      body::after {
-        bottom: -160px;
-        right: -120px;
-        background: #ffd089;
-      }
+
       .shell {
-        max-width: 1200px;
+        max-width: 1260px;
         margin: 28px auto 56px;
         padding: 0 24px;
       }
+
       .hero {
         display: flex;
-        align-items: flex-end;
         justify-content: space-between;
-        gap: 24px;
+        align-items: flex-end;
+        gap: 20px;
         margin-bottom: 20px;
-        background: linear-gradient(135deg, #ffffff 0%, #f2f8ff 100%);
+        background: linear-gradient(135deg, #ffffff 0%, #f4f9ff 100%);
         border: 1px solid var(--border);
         border-radius: 18px;
         padding: 20px 22px;
         box-shadow: var(--shadow);
       }
+
       .hero h1 {
+        margin: 0 0 8px;
         font-family: "Noto Serif SC", "Songti SC", serif;
         font-size: 32px;
-        margin: 0 0 8px 0;
         letter-spacing: 0.02em;
       }
+
       .hero p {
         margin: 0;
         color: var(--muted);
       }
+
+      .hero-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
       .badge {
         padding: 6px 12px;
         border: 1px solid var(--border);
         border-radius: 999px;
-        background: #fff7e6;
-        color: #8a5b10;
+        background: #fff7e9;
+        color: #8c5b10;
         font-size: 12px;
       }
-      .badge-link {
-        padding: 6px 12px;
-        border: 1px solid #bcd5cf;
-        border-radius: 999px;
-        background: #e8f6f3;
-        color: #1d645a;
-        font-size: 12px;
-        text-decoration: none;
-      }
-      .hero-actions {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        align-items: center;
-      }
+
       .view-switch {
         display: inline-flex;
         gap: 6px;
@@ -111,6 +94,7 @@
         border-radius: 999px;
         background: #f8fbff;
       }
+
       .switch-btn {
         border: none;
         background: transparent;
@@ -120,271 +104,574 @@
         font-size: 12px;
         cursor: pointer;
       }
+
       .switch-btn.active {
-        color: #ffffff;
-        background: linear-gradient(135deg, #0f766e, #0b568f);
+        color: #fff;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
       }
-      .layout {
-        display: grid;
-        grid-template-columns: 380px minmax(0, 1fr);
-        gap: 20px;
-      }
+
       .subpage.hidden {
         display: none;
       }
-      .portfolio-panel {
-        padding: 12px;
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 860px);
+        gap: 20px;
+        align-items: start;
+        justify-content: center;
       }
-      .portfolio-frame {
+
+      .layout.idle {
+        grid-template-columns: minmax(0, 860px);
+        justify-content: center;
+      }
+
+      .run-panel,
+      .output-panel {
         width: 100%;
-        min-height: 960px;
-        height: 1200px;
-        border: 0;
-        border-radius: 12px;
-        background: #f3efe8;
       }
+
       .panel {
         background: var(--panel);
         border: 1px solid var(--border);
         border-radius: 16px;
         box-shadow: var(--shadow);
         padding: 18px;
-        animation: rise 600ms ease;
+        animation: rise 420ms ease;
       }
-      @keyframes rise {
-        from { transform: translateY(12px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
+
+      .panel.hidden {
+        display: none;
       }
+
       .panel h2 {
+        margin: 0 0 14px;
         font-size: 16px;
+        color: #6f7986;
         text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: #7b828c;
-        margin: 0 0 12px 0;
+        letter-spacing: 0.11em;
       }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
       form {
         display: grid;
-        grid-template-columns: 1fr;
         gap: 14px;
       }
+
       label {
         display: block;
         font-size: 12px;
-        margin-bottom: 6px;
         color: var(--muted);
+        margin-bottom: 6px;
       }
+
       input[type="text"],
       input[type="date"],
       input[type="password"],
       select {
         width: 100%;
-        padding: 10px 12px;
         border: 1px solid var(--border);
         border-radius: 10px;
+        padding: 10px 12px;
         font-size: 14px;
-        background: #fdfefe;
+        background: #fdfeff;
       }
+
+      .field-note {
+        margin-top: 6px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .field-note.warn {
+        color: var(--warn);
+      }
+
+      .field-note.error {
+        color: var(--danger);
+      }
+
+      .date-holiday-list {
+        margin-top: 4px;
+        font-size: 12px;
+        color: #6d7785;
+      }
+
+      .analyst-wrap {
+        display: grid;
+        gap: 8px;
+      }
+
+      .analyst-wheel {
+        width: 240px;
+        height: 240px;
+        margin: 0 auto;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid #c9d1de;
+        background: #e8edf4;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+
+      .wheel-segment {
+        border: 1px solid #d1d8e3;
+        background: #edf1f6;
+        color: #5d6776;
+        font-size: 14px;
+        cursor: pointer;
+        padding: 12px;
+        transition: all 180ms ease;
+      }
+
+      .wheel-segment span {
+        display: inline-block;
+        max-width: 88px;
+        line-height: 1.4;
+      }
+
+      .wheel-segment.active {
+        background: #1f9b5f;
+        color: #ffffff;
+        font-weight: 600;
+        border-color: #1b8a54;
+        box-shadow: inset 0 0 0 999px rgba(31, 155, 95, 0.16);
+      }
+
+      .analyst-selected {
+        text-align: center;
+        font-size: 12px;
+        color: #375371;
+      }
+
+      details.advanced {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px 12px;
+        background: #f9fbff;
+      }
+
+      details.advanced summary {
+        cursor: pointer;
+        font-size: 13px;
+        color: #2f4a67;
+        font-weight: 600;
+        list-style: none;
+      }
+
+      details.advanced summary::-webkit-details-marker {
+        display: none;
+      }
+
+      details.advanced[open] summary {
+        margin-bottom: 10px;
+      }
+
       .row {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 12px;
       }
-      .analysts {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      .analysts label {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 13px;
-        color: var(--ink);
-        background: #f7f7f2;
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        padding: 6px 12px;
-      }
-      button.primary {
-        padding: 12px 16px;
-        background: linear-gradient(135deg, #0f766e, #0b568f);
-        color: white;
+
+      .btn-primary {
         border: none;
         border-radius: 12px;
+        padding: 12px 16px;
+        color: #fff;
         font-size: 15px;
         cursor: pointer;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
       }
-      button.primary:disabled {
+
+      .btn-primary:disabled {
         opacity: 0.6;
         cursor: not-allowed;
       }
+
       .status {
-        margin-top: 8px;
-        color: var(--muted);
+        margin-top: 4px;
         font-size: 13px;
+        color: var(--muted);
       }
+
       .actions {
         display: flex;
         gap: 8px;
-        margin: 12px 0 8px;
         flex-wrap: wrap;
+        margin: 0 0 12px;
       }
+
       .actions button {
         border: 1px solid var(--border);
-        background: #fff;
-        padding: 8px 12px;
         border-radius: 10px;
+        padding: 8px 12px;
+        background: #fff;
         font-size: 13px;
         cursor: pointer;
       }
+
       .actions button:disabled {
         opacity: 0.5;
         cursor: not-allowed;
       }
-      .output-grid {
+
+      .output-stack {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
       }
+
       .section {
         border: 1px solid var(--border);
         border-radius: 14px;
         padding: 12px;
-        background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-        animation: fadeIn 500ms ease;
+        background: linear-gradient(180deg, #fff 0%, #fbfdff 100%);
       }
+
       .section.hidden {
         display: none;
       }
+
       .section h3 {
-        margin: 0 0 8px 0;
+        margin: 0 0 8px;
         font-size: 14px;
       }
+
+      .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .progress-stage {
+        font-size: 13px;
+        color: #284464;
+        font-weight: 600;
+      }
+
+      .progress-percent {
+        font-size: 13px;
+        color: #11375f;
+        font-weight: 700;
+      }
+
+      .progress-track {
+        height: 10px;
+        background: #e7eef8;
+        border-radius: 999px;
+        overflow: hidden;
+        margin-bottom: 8px;
+      }
+
+      .progress-fill {
+        width: 0;
+        height: 100%;
+        background: linear-gradient(90deg, #0f766e, #1889d6);
+        transition: width 220ms ease;
+      }
+
       .plain {
         white-space: pre-wrap;
-        font-size: 13px;
         color: var(--muted);
-      }
-      .report-list {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 12px;
-        margin-top: 12px;
-      }
-      .source-list {
-        margin: 0;
-        padding-left: 18px;
         font-size: 13px;
-        color: var(--muted);
       }
-      .meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        font-size: 12px;
+
+      .progress-log {
+        max-height: 220px;
+        overflow: auto;
       }
-      .meta span {
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        padding: 4px 10px;
-        background: #f7f5f0;
-      }
+
       .markdown {
         font-size: 13px;
-        line-height: 1.7;
-        color: #2a2f3a;
+        line-height: 1.72;
+        color: #253347;
       }
-      .markdown h1, .markdown h2, .markdown h3 {
+
+      .markdown h1,
+      .markdown h2,
+      .markdown h3 {
         margin: 0.6em 0 0.4em;
       }
+
       .markdown p {
         margin: 0.4em 0;
       }
-      .markdown ul, .markdown ol {
-        padding-left: 18px;
+
+      .markdown ul,
+      .markdown ol {
         margin: 0.4em 0;
+        padding-left: 18px;
       }
+
       .markdown code {
-        background: #f1eee8;
-        padding: 2px 6px;
+        background: #eff4fb;
         border-radius: 6px;
+        padding: 2px 6px;
         font-size: 12px;
       }
+
       .markdown pre {
-        background: #0b1020;
-        color: #d9e3ff;
+        background: #0d1424;
+        color: #d8e4ff;
         padding: 12px;
         border-radius: 10px;
         overflow: auto;
       }
-      .markdown table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 8px;
+
+      .source-list {
+        margin: 0;
+        padding-left: 18px;
+        font-size: 13px;
+      }
+
+      .source-list li {
+        margin: 6px 0;
+      }
+
+      .source-item {
+        scroll-margin-top: 88px;
+      }
+
+      .source-index {
+        color: #35557e;
+        font-weight: 700;
+        margin-right: 4px;
+      }
+
+      .source-context {
+        color: var(--muted);
         font-size: 12px;
+        margin-left: 6px;
       }
-      .markdown th, .markdown td {
-        border: 1px solid #e0e0e0;
-        padding: 6px 8px;
-        text-align: left;
+
+      .source-cite {
+        margin-left: 2px;
+        vertical-align: super;
+        font-size: 0.78em;
       }
-      .markdown blockquote {
-        border-left: 3px solid var(--accent);
-        margin: 8px 0;
-        padding-left: 10px;
-        color: #55606c;
+
+      .source-cite-link {
+        color: #255f9a;
+        text-decoration: none;
+        font-weight: 700;
       }
+
+      .source-cite-link:hover {
+        text-decoration: underline;
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .meta span {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 12px;
+        background: #f7fafc;
+      }
+
+      .debate-log {
+        max-height: 420px;
+        overflow: auto;
+        border: 1px solid #dce6f2;
+        border-radius: 12px;
+        padding: 10px;
+        background: #f7fbff;
+        display: grid;
+        gap: 10px;
+      }
+
+      .debate-message {
+        display: flex;
+      }
+
+      .debate-left {
+        justify-content: flex-start;
+      }
+
+      .debate-right {
+        justify-content: flex-end;
+      }
+
+      .debate-center {
+        justify-content: center;
+      }
+
+      .debate-bubble {
+        width: fit-content;
+        max-width: min(92%, 760px);
+        border: 1px solid #d5deea;
+        border-radius: 12px;
+        padding: 8px 10px;
+        background: #ffffff;
+      }
+
+      .debate-speaker {
+        font-size: 11px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        letter-spacing: 0.01em;
+      }
+
+      .debate-body {
+        color: #263549;
+      }
+
+      .debate-body > :first-child {
+        margin-top: 0;
+      }
+
+      .debate-body > :last-child {
+        margin-bottom: 0;
+      }
+
+      .debate-theme-bull {
+        background: #eef9f1;
+        border-color: #cce7d4;
+      }
+
+      .debate-theme-bull .debate-speaker {
+        color: #2f6a46;
+      }
+
+      .debate-theme-bear {
+        background: #fff0ef;
+        border-color: #f0cbc7;
+      }
+
+      .debate-theme-bear .debate-speaker {
+        color: #7a3a34;
+      }
+
+      .debate-theme-aggressive {
+        background: #eef4ff;
+        border-color: #cfdcf6;
+      }
+
+      .debate-theme-aggressive .debate-speaker {
+        color: #36558a;
+      }
+
+      .debate-theme-conservative {
+        background: #f5f2ff;
+        border-color: #ddd4f5;
+      }
+
+      .debate-theme-conservative .debate-speaker {
+        color: #5c4a82;
+      }
+
+      .debate-theme-neutral {
+        background: #f4f7fb;
+        border-color: #d5dfea;
+      }
+
+      .debate-theme-neutral .debate-speaker {
+        color: #3e536d;
+      }
+
+      .debate-theme-unknown {
+        background: #ffffff;
+        border-color: #d5deea;
+      }
+
+      .debate-theme-unknown .debate-speaker {
+        color: #4e637e;
+      }
+
       .graph-head {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 8px;
         margin-bottom: 8px;
       }
+
       .graph-pill {
-        border: 1px solid #c9d6e8;
-        background: #eef4fd;
+        border: 1px solid #c7d8ea;
         border-radius: 999px;
         padding: 5px 10px;
         font-size: 12px;
-        color: #254261;
+        background: #edf5ff;
+        color: #274667;
       }
+
       .graph-paths {
         font-size: 13px;
         color: var(--muted);
-        margin-bottom: 10px;
+        margin-bottom: 8px;
       }
+
       .graph-paths ul {
         margin: 0;
         padding-left: 18px;
       }
+
       .graph-table-wrap {
         overflow: auto;
       }
+
       .graph-table {
         width: 100%;
         border-collapse: collapse;
         font-size: 12px;
       }
-      .graph-table th, .graph-table td {
-        border: 1px solid #dde5f0;
+
+      .graph-table th,
+      .graph-table td {
+        border: 1px solid #dbe5f2;
         padding: 6px 8px;
         text-align: left;
         white-space: nowrap;
       }
+
       .graph-table th {
-        background: #f2f7ff;
-        color: #294665;
+        background: #eff5ff;
+        color: #2a4768;
       }
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(6px); }
-        to { opacity: 1; transform: translateY(0); }
+
+      .portfolio-panel {
+        padding: 12px;
       }
-      @media (max-width: 980px) {
-        .layout { grid-template-columns: 1fr; }
-        .row { grid-template-columns: 1fr; }
-        .output-grid { grid-template-columns: 1fr; }
-        .portfolio-frame {
-          min-height: 1100px;
+
+      .portfolio-frame {
+        width: 100%;
+        min-height: 980px;
+        height: 1200px;
+        border: 0;
+        border-radius: 12px;
+        background: #f3efe8;
+      }
+
+      @media (max-width: 1080px) {
+        .layout,
+        .layout.idle {
+          grid-template-columns: 1fr;
+        }
+
+        .row {
+          grid-template-columns: 1fr;
+        }
+
+        .analyst-wheel {
+          width: 220px;
+          height: 220px;
         }
       }
     </style>
@@ -394,7 +681,7 @@
       <div class="hero">
         <div>
           <h1>AlphaNexus</h1>
-          <p>多智能体交易研究界面：实时进度、来源校验、分块报告。</p>
+          <p>多智能体交易研究：过程可视化、来源可追溯、结果可下载。</p>
         </div>
         <div class="hero-actions">
           <div class="view-switch" role="tablist" aria-label="页面切换">
@@ -406,138 +693,178 @@
       </div>
 
       <div id="research_view" class="subpage">
-      <div class="layout">
-        <section class="panel">
-          <h2>Run</h2>
-          <form id="run-form">
-            <div>
-              <label for="ticker">股票代码</label>
-              <input id="ticker" type="text" value="NVDA" />
-            </div>
-            <div>
-              <label for="trade_date">交易日期</label>
-              <input id="trade_date" type="date" />
-            </div>
-            <div>
-              <label for="provider">LLM 供应商</label>
-              <select id="provider">
-                <option value="openai">OpenAI</option>
-                <option value="anthropic">Anthropic (Claude)</option>
-                <option value="google">Google (Gemini)</option>
-                <option value="xai">xAI (Grok)</option>
-                <option value="openrouter">OpenRouter</option>
-                <option value="ollama">Ollama (Local)</option>
-              </select>
-            </div>
-            <div>
-              <label for="api_key">API Key</label>
-              <input id="api_key" type="password" placeholder="仅用于本次请求，不会保存" />
-            </div>
-            <div class="row">
+        <div id="research_layout" class="layout idle">
+          <section class="panel run-panel">
+            <h2>Run</h2>
+            <form id="run-form">
               <div>
-                <label for="deep_model">深度模型</label>
-                <select id="deep_model"></select>
+                <label for="ticker">股票代码 / 公司名称（支持美股热门 50）</label>
+                <input id="ticker" type="text" list="ticker_options" placeholder="如 NVDA / NVIDIA / Apple Inc." value="NVDA" />
+                <datalist id="ticker_options"></datalist>
+                <div id="ticker_hint" class="field-note">可输入代码或公司名，系统会自动识别。</div>
               </div>
-              <div>
-                <label for="quick_model">快速模型</label>
-                <select id="quick_model"></select>
-              </div>
-            </div>
-            <div class="row">
-              <div>
-                <label for="data_vendor">数据源</label>
-                <select id="data_vendor">
-                  <option value="yfinance">yfinance</option>
-                  <option value="alpha_vantage">Alpha Vantage</option>
-                </select>
-              </div>
-              <div>
-                <label for="alpha_key">Alpha Vantage API Key</label>
-                <input id="alpha_key" type="password" placeholder="仅 Alpha Vantage 需要" />
-              </div>
-            </div>
-            <div class="analysts">
-              <label><input type="checkbox" value="market" checked /> 市场分析</label>
-              <label><input type="checkbox" value="social" checked /> 社媒情绪</label>
-              <label><input type="checkbox" value="news" checked /> 新闻宏观</label>
-              <label><input type="checkbox" value="fundamentals" checked /> 基本面</label>
-            </div>
-            <button id="run-btn" class="primary" type="submit">开始分析</button>
-            <div class="status" id="status"></div>
-          </form>
-        </section>
 
-        <section class="panel">
-          <h2>Output</h2>
-          <div class="actions">
-            <button id="download-btn" type="button" disabled>下载报告（Markdown）</button>
-            <button id="download-json-btn" type="button" disabled>下载 JSON</button>
-          </div>
-          <div class="output-grid">
-            <div class="section" id="meta_section">
-              <h3>配置</h3>
-              <div class="meta" id="meta_content"></div>
+              <div>
+                <label for="trade_date">交易日期（美东时间 ET）</label>
+                <input id="trade_date" type="date" />
+                <div id="date_notice" class="field-note">周末及美股主要节假日休市。</div>
+                <div class="date-holiday-list">休市参考：元旦、马丁路德金日、总统日、耶稣受难日、阵亡将士纪念日、六月节、独立日、劳动节、感恩节、圣诞节（含周末顺延休市）。</div>
+              </div>
+
+              <div class="analyst-wrap">
+                <label>分析模块（四选一）</label>
+                <div class="analyst-wheel" id="analyst_wheel" aria-label="分析模块选择">
+                  <button class="wheel-segment active" type="button" data-analyst="market"><span>市场分析</span></button>
+                  <button class="wheel-segment" type="button" data-analyst="social"><span>社媒情绪</span></button>
+                  <button class="wheel-segment" type="button" data-analyst="news"><span>新闻宏观</span></button>
+                  <button class="wheel-segment" type="button" data-analyst="fundamentals"><span>基本面</span></button>
+                </div>
+                <div id="analyst_selected" class="analyst-selected">当前：市场分析</div>
+              </div>
+
+              <details class="advanced" id="advanced_settings">
+                <summary>高级配置（模型 / 供应商 / 数据源 / API Key）</summary>
+
+                <div>
+                  <label for="provider">LLM 供应商</label>
+                  <select id="provider">
+                    <option value="openai">OpenAI</option>
+                    <option value="anthropic">Anthropic (Claude)</option>
+                    <option value="google" selected>Google (Gemini)</option>
+                    <option value="xai">xAI (Grok)</option>
+                    <option value="openrouter">OpenRouter</option>
+                    <option value="ollama">Ollama (Local)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="api_key">LLM API Key</label>
+                  <input id="api_key" type="password" placeholder="可留空；留空自动使用服务端默认 Key（不保存）" />
+                </div>
+
+                <div class="row">
+                  <div>
+                    <label for="deep_model">深度模型</label>
+                    <select id="deep_model"></select>
+                  </div>
+                  <div>
+                    <label for="quick_model">快速模型</label>
+                    <select id="quick_model"></select>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div>
+                    <label for="data_vendor">数据源</label>
+                    <select id="data_vendor">
+                      <option value="alpha_vantage" selected>Alpha Vantage</option>
+                      <option value="yfinance">yfinance</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="alpha_key">Alpha Vantage API Key</label>
+                    <input id="alpha_key" type="password" placeholder="可留空；留空自动使用服务端默认 Key" />
+                  </div>
+                </div>
+              </details>
+
+              <button id="run-btn" class="btn-primary" type="submit">开始分析</button>
+              <div id="status" class="status">准备就绪。</div>
+            </form>
+          </section>
+
+          <section id="output_panel" class="panel output-panel hidden">
+            <h2>Output</h2>
+            <div class="actions">
+              <button id="download-btn" type="button" disabled>下载报告（Markdown）</button>
+              <button id="download-json-btn" type="button" disabled>下载 JSON</button>
             </div>
-            <div class="section" id="progress_section">
-              <h3>进度</h3>
-              <div class="plain" id="progress"></div>
-            </div>
-            <div class="section hidden" id="decision_section">
-              <h3>最终决策</h3>
-              <div class="markdown" id="decision"></div>
-            </div>
-            <div class="section hidden" id="sources_section">
-              <h3>信息来源</h3>
-              <ul class="source-list" id="sources"></ul>
-            </div>
-            <div class="section hidden" id="company_graph_section">
-              <h3>公司关系图谱</h3>
-              <div class="graph-head" id="graph_head"></div>
-              <div class="graph-paths" id="graph_paths"></div>
-              <div class="graph-table-wrap">
-                <table class="graph-table">
-                  <thead>
-                    <tr>
-                      <th>Source</th>
-                      <th>Relation</th>
-                      <th>Target</th>
-                      <th>Hop</th>
-                    </tr>
-                  </thead>
-                  <tbody id="graph_links"></tbody>
-                </table>
+
+            <div class="output-stack">
+              <div class="section" id="progress_section">
+                <h3>进度</h3>
+                <div class="progress-header">
+                  <span id="progress_stage" class="progress-stage">等待开始</span>
+                  <span id="progress_percent" class="progress-percent">0%</span>
+                </div>
+                <div class="progress-track">
+                  <div id="progress_fill" class="progress-fill"></div>
+                </div>
+                <div id="progress" class="plain progress-log"></div>
+              </div>
+
+              <div class="section hidden" id="market_section">
+                <h3>市场分析</h3>
+                <div id="market_report" class="markdown"></div>
+              </div>
+              <div class="section hidden" id="sentiment_section">
+                <h3>社媒情绪</h3>
+                <div id="sentiment_report" class="markdown"></div>
+              </div>
+              <div class="section hidden" id="news_section">
+                <h3>新闻宏观</h3>
+                <div id="news_report" class="markdown"></div>
+              </div>
+              <div class="section hidden" id="fundamentals_section">
+                <h3>基本面</h3>
+                <div id="fundamentals_report" class="markdown"></div>
+              </div>
+
+              <div class="section hidden" id="investment_debate_section">
+                <h3>投资辩论过程（Bull/Bear）</h3>
+                <div id="investment_debate_history" class="debate-log"></div>
+              </div>
+              <div class="section hidden" id="risk_debate_section">
+                <h3>风控辩论过程（Aggressive/Conservative/Neutral）</h3>
+                <div id="risk_debate_history" class="debate-log"></div>
+              </div>
+
+              <div class="section hidden" id="investment_section">
+                <h3>投资计划（Judge）</h3>
+                <div id="investment_plan" class="markdown"></div>
+              </div>
+              <div class="section hidden" id="trader_section">
+                <h3>交易员计划（Trader）</h3>
+                <div id="trader_plan" class="markdown"></div>
+              </div>
+
+              <div class="section hidden" id="company_graph_section">
+                <h3>公司关系图谱</h3>
+                <div id="graph_hint" class="plain">暂无图谱数据。</div>
+                <div id="graph_head" class="graph-head"></div>
+                <div id="graph_paths" class="graph-paths"></div>
+                <div class="graph-table-wrap">
+                  <table class="graph-table">
+                    <thead>
+                      <tr>
+                        <th>来源公司</th>
+                        <th>关系</th>
+                        <th>目标公司</th>
+                        <th>跳数</th>
+                      </tr>
+                    </thead>
+                    <tbody id="graph_links"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="section hidden" id="sources_section">
+                <h3>信息来源</h3>
+                <ul id="sources" class="source-list"></ul>
+              </div>
+
+              <div class="section hidden" id="decision_section">
+                <h3>最终决策</h3>
+                <div id="decision" class="markdown"></div>
+              </div>
+
+              <div class="section hidden" id="meta_section">
+                <h3>运行配置</h3>
+                <div id="meta_content" class="meta"></div>
               </div>
             </div>
-            <div class="section hidden" id="investment_section">
-              <h3>投资计划（Judge）</h3>
-              <div class="markdown" id="investment_plan"></div>
-            </div>
-            <div class="section hidden" id="trader_section">
-              <h3>交易员计划（Trader）</h3>
-              <div class="markdown" id="trader_plan"></div>
-            </div>
-          </div>
-
-          <div class="report-list">
-            <div class="section hidden" id="market_section">
-              <h3>市场分析</h3>
-              <div class="markdown" id="market_report"></div>
-            </div>
-            <div class="section hidden" id="sentiment_section">
-              <h3>社媒情绪</h3>
-              <div class="markdown" id="sentiment_report"></div>
-            </div>
-            <div class="section hidden" id="news_section">
-              <h3>新闻宏观</h3>
-              <div class="markdown" id="news_report"></div>
-            </div>
-            <div class="section hidden" id="fundamentals_section">
-              <h3>基本面</h3>
-              <div class="markdown" id="fundamentals_report"></div>
-            </div>
-          </div>
-        </section>
-      </div>
+          </section>
+        </div>
       </div>
 
       <div id="portfolio_view" class="subpage hidden">
@@ -557,52 +884,275 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
     <script>
+      const POPULAR_US_STOCKS = [
+        { symbol: "AAPL", name: "Apple Inc." },
+        { symbol: "MSFT", name: "Microsoft Corporation" },
+        { symbol: "NVDA", name: "NVIDIA Corporation" },
+        { symbol: "AMZN", name: "Amazon.com, Inc." },
+        { symbol: "GOOGL", name: "Alphabet Inc." },
+        { symbol: "META", name: "Meta Platforms, Inc." },
+        { symbol: "TSLA", name: "Tesla, Inc." },
+        { symbol: "AVGO", name: "Broadcom Inc." },
+        { symbol: "BRK.B", name: "Berkshire Hathaway Inc." },
+        { symbol: "JPM", name: "JPMorgan Chase & Co." },
+        { symbol: "V", name: "Visa Inc." },
+        { symbol: "MA", name: "Mastercard Incorporated" },
+        { symbol: "XOM", name: "Exxon Mobil Corporation" },
+        { symbol: "WMT", name: "Walmart Inc." },
+        { symbol: "UNH", name: "UnitedHealth Group Incorporated" },
+        { symbol: "LLY", name: "Eli Lilly and Company" },
+        { symbol: "JNJ", name: "Johnson & Johnson" },
+        { symbol: "PG", name: "Procter & Gamble Company" },
+        { symbol: "HD", name: "Home Depot, Inc." },
+        { symbol: "COST", name: "Costco Wholesale Corporation" },
+        { symbol: "MRK", name: "Merck & Co., Inc." },
+        { symbol: "ABBV", name: "AbbVie Inc." },
+        { symbol: "PEP", name: "PepsiCo, Inc." },
+        { symbol: "KO", name: "Coca-Cola Company" },
+        { symbol: "ADBE", name: "Adobe Inc." },
+        { symbol: "CRM", name: "Salesforce, Inc." },
+        { symbol: "NFLX", name: "Netflix, Inc." },
+        { symbol: "ORCL", name: "Oracle Corporation" },
+        { symbol: "AMD", name: "Advanced Micro Devices, Inc." },
+        { symbol: "INTC", name: "Intel Corporation" },
+        { symbol: "QCOM", name: "Qualcomm Incorporated" },
+        { symbol: "TXN", name: "Texas Instruments Incorporated" },
+        { symbol: "CSCO", name: "Cisco Systems, Inc." },
+        { symbol: "IBM", name: "International Business Machines Corporation" },
+        { symbol: "NOW", name: "ServiceNow, Inc." },
+        { symbol: "PLTR", name: "Palantir Technologies Inc." },
+        { symbol: "PANW", name: "Palo Alto Networks, Inc." },
+        { symbol: "UBER", name: "Uber Technologies, Inc." },
+        { symbol: "BKNG", name: "Booking Holdings Inc." },
+        { symbol: "MCD", name: "McDonald's Corporation" },
+        { symbol: "DIS", name: "Walt Disney Company" },
+        { symbol: "NKE", name: "Nike, Inc." },
+        { symbol: "BA", name: "Boeing Company" },
+        { symbol: "GE", name: "GE Aerospace" },
+        { symbol: "CAT", name: "Caterpillar Inc." },
+        { symbol: "RTX", name: "RTX Corporation" },
+        { symbol: "SPY", name: "SPDR S&P 500 ETF Trust" },
+        { symbol: "QQQ", name: "Invesco QQQ Trust" },
+        { symbol: "IWM", name: "iShares Russell 2000 ETF" },
+        { symbol: "TSM", name: "Taiwan Semiconductor Manufacturing Company Limited" },
+      ];
+
+      const POPULAR_US_STOCKS_ZH = {
+        "AAPL": "苹果",
+        "MSFT": "微软",
+        "NVDA": "英伟达",
+        "AMZN": "亚马逊",
+        "GOOGL": "谷歌",
+        "META": "Meta",
+        "TSLA": "特斯拉",
+        "AVGO": "博通",
+        "BRK.B": "伯克希尔哈撒韦",
+        "JPM": "摩根大通",
+        "V": "Visa",
+        "MA": "万事达",
+        "XOM": "埃克森美孚",
+        "WMT": "沃尔玛",
+        "UNH": "联合健康",
+        "LLY": "礼来",
+        "JNJ": "强生",
+        "PG": "宝洁",
+        "HD": "家得宝",
+        "COST": "好市多",
+        "MRK": "默沙东",
+        "ABBV": "艾伯维",
+        "PEP": "百事",
+        "KO": "可口可乐",
+        "ADBE": "Adobe",
+        "CRM": "Salesforce",
+        "NFLX": "奈飞",
+        "ORCL": "甲骨文",
+        "AMD": "超威半导体",
+        "INTC": "英特尔",
+        "QCOM": "高通",
+        "TXN": "德州仪器",
+        "CSCO": "思科",
+        "IBM": "IBM",
+        "NOW": "ServiceNow",
+        "PLTR": "Palantir",
+        "PANW": "派拓网络",
+        "UBER": "优步",
+        "BKNG": "Booking",
+        "MCD": "麦当劳",
+        "DIS": "迪士尼",
+        "NKE": "耐克",
+        "BA": "波音",
+        "GE": "GE航空",
+        "CAT": "卡特彼勒",
+        "RTX": "雷神",
+        "SPY": "标普500ETF",
+        "QQQ": "纳指100ETF",
+        "IWM": "罗素2000ETF",
+        "TSM": "台积电",
+      };
+
+      const MARKET_HOLIDAYS_ET = new Set([
+        "2025-01-01", "2025-01-20", "2025-02-17", "2025-04-18", "2025-05-26", "2025-06-19", "2025-07-04", "2025-09-01", "2025-11-27", "2025-12-25",
+        "2026-01-01", "2026-01-19", "2026-02-16", "2026-04-03", "2026-05-25", "2026-06-19", "2026-07-03", "2026-09-07", "2026-11-26", "2026-12-25",
+        "2027-01-01", "2027-01-18", "2027-02-15", "2027-03-26", "2027-05-31", "2027-06-18", "2027-07-05", "2027-09-06", "2027-11-25", "2027-12-24",
+      ]);
+
+      const modelOptions = {
+        openai: ["gpt-5.2", "gpt-5.1", "gpt-5", "gpt-5-mini", "gpt-5-nano", "gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano", "o4-mini", "o3", "o3-mini", "o1", "o1-preview", "gpt-4o", "gpt-4o-mini"],
+        anthropic: ["claude-opus-4-5", "claude-sonnet-4-5", "claude-haiku-4-5", "claude-opus-4-1-20250805", "claude-sonnet-4-20250514", "claude-3-7-sonnet-20250219", "claude-3-5-haiku-20241022", "claude-3-5-sonnet-20241022"],
+        google: ["gemini-3.1-pro-preview", "gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.0-flash-lite"],
+        xai: ["grok-4-1-fast", "grok-4-1-fast-reasoning", "grok-4-1-fast-non-reasoning", "grok-4", "grok-4-0709", "grok-4-fast-reasoning", "grok-4-fast-non-reasoning"],
+        openrouter: ["openai/gpt-5.2", "openai/gpt-5-mini", "anthropic/claude-sonnet-4-5", "google/gemini-2.5-pro"],
+        ollama: ["llama3.1:8b", "llama3.1:70b", "qwen2.5:7b", "qwen2.5:14b", "mistral:7b"],
+      };
+
+      const ANALYST_CONFIG = {
+        market: { label: "市场分析", reportType: "market_report", sectionId: "market" },
+        social: { label: "社媒情绪", reportType: "sentiment_report", sectionId: "sentiment" },
+        news: { label: "新闻宏观", reportType: "news_report", sectionId: "news" },
+        fundamentals: { label: "基本面", reportType: "fundamentals_report", sectionId: "fundamentals" },
+      };
+
+      const PROGRESS_STEP_ORDER = [
+        "analyst_report",
+        "investment_plan",
+        "trader_investment_plan",
+        "investment_debate_state",
+        "risk_debate_state",
+        "final",
+      ];
+
+      const DEBATE_ROLE_STYLES = {
+        bull: { label: "Bull（多头）", align: "right", theme: "bull" },
+        bear: { label: "Bear（空头）", align: "left", theme: "bear" },
+        aggressive: { label: "Aggressive（激进）", align: "right", theme: "aggressive" },
+        conservative: { label: "Conservative（保守）", align: "left", theme: "conservative" },
+        neutral: { label: "Neutral（中性）", align: "center", theme: "neutral" },
+        unknown: { label: "分析员", align: "left", theme: "unknown" },
+      };
+
+      const DEBATE_SPEAKER_TO_ROLE = new Map([
+        ["bull analyst", "bull"],
+        ["bull", "bull"],
+        ["多头分析师", "bull"],
+        ["bear analyst", "bear"],
+        ["bear", "bear"],
+        ["空头分析师", "bear"],
+        ["aggressive analyst", "aggressive"],
+        ["aggressive", "aggressive"],
+        ["激进分析师", "aggressive"],
+        ["conservative analyst", "conservative"],
+        ["conservative", "conservative"],
+        ["保守分析师", "conservative"],
+        ["neutral analyst", "neutral"],
+        ["neutral", "neutral"],
+        ["中性分析师", "neutral"],
+      ]);
+
+      const DEBATE_SPEAKER_REGEX = new RegExp(
+        `^\\s*(${Array.from(DEBATE_SPEAKER_TO_ROLE.keys())
+          .sort((a, b) => b.length - a.length)
+          .map((name) => name.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&"))
+          .join("|")})\\s*[:：]\\s*(.*)$`,
+        "i"
+      );
+
+      const symbolSet = new Set(POPULAR_US_STOCKS.map((item) => item.symbol));
+
+      function canonicalName(text) {
+        return (text || "")
+          .toLowerCase()
+          .replace(/[.,&()]/g, " ")
+          .replace(/\b(inc|incorporated|corp|corporation|company|co|holdings|group|limited|ltd|trust|class)\b/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      const nameToSymbol = new Map();
+      for (const item of POPULAR_US_STOCKS) {
+        nameToSymbol.set(canonicalName(item.name), item.symbol);
+        const zhName = POPULAR_US_STOCKS_ZH[item.symbol];
+        if (zhName) {
+          nameToSymbol.set(zhName, item.symbol);
+          nameToSymbol.set(canonicalName(zhName), item.symbol);
+        }
+      }
+
       const form = document.getElementById("run-form");
+      const researchLayoutEl = document.getElementById("research_layout");
+      const outputPanelEl = document.getElementById("output_panel");
       const statusEl = document.getElementById("status");
       const runBtn = document.getElementById("run-btn");
-      const researchViewEl = document.getElementById("research_view");
-      const portfolioViewEl = document.getElementById("portfolio_view");
-      const portfolioIframeEl = document.getElementById("portfolio_iframe");
-      const viewSwitchButtons = Array.from(document.querySelectorAll(".switch-btn"));
+      const tickerInput = document.getElementById("ticker");
+      const tickerHintEl = document.getElementById("ticker_hint");
+      const tickerOptionsEl = document.getElementById("ticker_options");
       const tradeDateInput = document.getElementById("trade_date");
+      const dateNoticeEl = document.getElementById("date_notice");
+
       const providerEl = document.getElementById("provider");
+      const apiKeyEl = document.getElementById("api_key");
       const deepModelEl = document.getElementById("deep_model");
       const quickModelEl = document.getElementById("quick_model");
       const dataVendorEl = document.getElementById("data_vendor");
       const alphaKeyEl = document.getElementById("alpha_key");
 
+      const analystButtons = Array.from(document.querySelectorAll(".wheel-segment"));
+      const analystSelectedEl = document.getElementById("analyst_selected");
+      let selectedAnalyst = "market";
+
       const metaContentEl = document.getElementById("meta_content");
       const progressEl = document.getElementById("progress");
+      const progressFillEl = document.getElementById("progress_fill");
+      const progressPercentEl = document.getElementById("progress_percent");
+      const progressStageEl = document.getElementById("progress_stage");
+
       const decisionEl = document.getElementById("decision");
       const sourcesEl = document.getElementById("sources");
       const graphHeadEl = document.getElementById("graph_head");
       const graphPathsEl = document.getElementById("graph_paths");
       const graphLinksEl = document.getElementById("graph_links");
+      const graphHintEl = document.getElementById("graph_hint");
       const investmentPlanEl = document.getElementById("investment_plan");
       const traderPlanEl = document.getElementById("trader_plan");
+      const investmentDebateHistoryEl = document.getElementById("investment_debate_history");
+      const riskDebateHistoryEl = document.getElementById("risk_debate_history");
       const marketReportEl = document.getElementById("market_report");
       const sentimentReportEl = document.getElementById("sentiment_report");
       const newsReportEl = document.getElementById("news_report");
       const fundamentalsReportEl = document.getElementById("fundamentals_report");
 
+      const downloadBtn = document.getElementById("download-btn");
+      const downloadJsonBtn = document.getElementById("download-json-btn");
+
       const sections = {
-        decision: document.getElementById("decision_section"),
-        sources: document.getElementById("sources_section"),
-        companyGraph: document.getElementById("company_graph_section"),
-        investment: document.getElementById("investment_section"),
-        trader: document.getElementById("trader_section"),
+        progress: document.getElementById("progress_section"),
         market: document.getElementById("market_section"),
         sentiment: document.getElementById("sentiment_section"),
         news: document.getElementById("news_section"),
         fundamentals: document.getElementById("fundamentals_section"),
+        investment: document.getElementById("investment_section"),
+        trader: document.getElementById("trader_section"),
+        investmentDebate: document.getElementById("investment_debate_section"),
+        riskDebate: document.getElementById("risk_debate_section"),
+        companyGraph: document.getElementById("company_graph_section"),
+        sources: document.getElementById("sources_section"),
+        decision: document.getElementById("decision_section"),
+        meta: document.getElementById("meta_section"),
       };
 
-      const downloadBtn = document.getElementById("download-btn");
-      const downloadJsonBtn = document.getElementById("download-json-btn");
+      const researchViewEl = document.getElementById("research_view");
+      const portfolioViewEl = document.getElementById("portfolio_view");
+      const portfolioIframeEl = document.getElementById("portfolio_iframe");
+      const viewSwitchButtons = Array.from(document.querySelectorAll(".switch-btn"));
 
-      const today = new Date();
-      const pad = (n) => String(n).padStart(2, "0");
-      tradeDateInput.value = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+      let lastResult = null;
+      let streamedFinalDecision = "";
+      let completedSteps = new Set();
+      let progressValue = 0;
+      let lastProgressStage = "";
+      let sourceRegistry = createSourceRegistry("");
+      let streamTradeDate = "";
+      let streamLastEventAt = 0;
+      let progressWatchTimer = null;
 
       if (window.marked) {
         marked.setOptions({ breaks: true, gfm: true });
@@ -612,11 +1162,13 @@
         const isPortfolio = viewName === "portfolio";
         researchViewEl.classList.toggle("hidden", isPortfolio);
         portfolioViewEl.classList.toggle("hidden", !isPortfolio);
+
         viewSwitchButtons.forEach((btn) => {
           const active = btn.dataset.view === viewName;
           btn.classList.toggle("active", active);
           btn.setAttribute("aria-selected", active ? "true" : "false");
         });
+
         if (updateHash) {
           window.history.replaceState(null, "", isPortfolio ? "#portfolio" : "#research");
         }
@@ -636,9 +1188,7 @@
         const payload = event.data || {};
         if (payload.type !== "portfolio-height") return;
         const height = Number(payload.height || 0);
-        if (height > 0) {
-          portfolioIframeEl.style.height = `${Math.max(height + 24, 900)}px`;
-        }
+        if (height > 0) portfolioIframeEl.style.height = `${Math.max(height + 24, 900)}px`;
       });
 
       const initialView = window.location.hash === "#portfolio" ? "portfolio" : "research";
@@ -655,14 +1205,112 @@
         }
       }
 
-      const modelOptions = {
-        openai: ["gpt-5.2", "gpt-5.1", "gpt-5", "gpt-5-mini", "gpt-5-nano", "gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano", "o4-mini", "o3", "o3-mini", "o1", "o1-preview", "gpt-4o", "gpt-4o-mini"],
-        anthropic: ["claude-opus-4-5", "claude-sonnet-4-5", "claude-haiku-4-5", "claude-opus-4-1-20250805", "claude-sonnet-4-20250514", "claude-3-7-sonnet-20250219", "claude-3-5-haiku-20241022", "claude-3-5-sonnet-20241022"],
-        google: ["gemini-3.1-pro-preview", "gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.0-flash-lite"],
-        xai: ["grok-4-1-fast", "grok-4-1-fast-reasoning", "grok-4-1-fast-non-reasoning", "grok-4", "grok-4-0709", "grok-4-fast-reasoning", "grok-4-fast-non-reasoning"],
-        openrouter: ["openai/gpt-5.2", "openai/gpt-5-mini", "anthropic/claude-sonnet-4-5", "google/gemini-2.5-pro"],
-        ollama: ["llama3.1:8b", "llama3.1:70b", "qwen2.5:7b", "qwen2.5:14b", "mistral:7b"],
-      };
+      function initTickerOptions() {
+        tickerOptionsEl.innerHTML = "";
+        for (const item of POPULAR_US_STOCKS) {
+          const zhName = POPULAR_US_STOCKS_ZH[item.symbol] || "";
+          const option = document.createElement("option");
+          option.value = `${item.symbol} - ${item.name}${zhName ? ` / ${zhName}` : ""}`;
+          tickerOptionsEl.appendChild(option);
+        }
+      }
+
+      function resolveTickerSymbol(input) {
+        const raw = (input || "").trim();
+        if (!raw) return null;
+
+        const upper = raw.toUpperCase();
+        if (symbolSet.has(upper)) return upper;
+
+        let match = upper.match(/\(([A-Z][A-Z0-9.\-]{0,9})\)/);
+        if (match && symbolSet.has(match[1])) return match[1];
+
+        match = upper.match(/^([A-Z][A-Z0-9.\-]{0,9})\s*[-|]/);
+        if (match && symbolSet.has(match[1])) return match[1];
+
+        const canonical = canonicalName(raw);
+        if (canonical && nameToSymbol.has(canonical)) {
+          return nameToSymbol.get(canonical);
+        }
+
+        if (canonical) {
+          const fuzzy = POPULAR_US_STOCKS.filter((item) => canonicalName(item.name).includes(canonical));
+          if (fuzzy.length === 1) {
+            return fuzzy[0].symbol;
+          }
+        }
+
+        return null;
+      }
+
+      function updateTickerHint() {
+        const raw = tickerInput.value;
+        const resolved = resolveTickerSymbol(raw);
+        if (!raw.trim()) {
+          tickerHintEl.textContent = "可输入代码或公司名，系统会自动识别。";
+          tickerHintEl.className = "field-note";
+          return;
+        }
+        if (resolved) {
+          const item = POPULAR_US_STOCKS.find((row) => row.symbol === resolved);
+          const zhName = item ? (POPULAR_US_STOCKS_ZH[item.symbol] || "") : "";
+          tickerHintEl.textContent = `识别结果：${resolved}${item ? `（${item.name}${zhName ? ` / ${zhName}` : ""}）` : ""}`;
+          tickerHintEl.className = "field-note";
+        } else {
+          tickerHintEl.textContent = "未匹配预设名单，将按你输入的代码尝试查询。";
+          tickerHintEl.className = "field-note warn";
+        }
+      }
+
+      function etToday() {
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat("en-CA", {
+          timeZone: "America/New_York",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        });
+        return formatter.format(now);
+      }
+
+      function isWeekend(dateStr) {
+        const [y, m, d] = (dateStr || "").split("-").map(Number);
+        if (!y || !m || !d) return false;
+        const dt = new Date(Date.UTC(y, m - 1, d));
+        const day = dt.getUTCDay();
+        return day === 0 || day === 6;
+      }
+
+      function isMarketClosed(dateStr) {
+        if (!dateStr) return false;
+        return isWeekend(dateStr) || MARKET_HOLIDAYS_ET.has(dateStr);
+      }
+
+      function updateDateNotice() {
+        const value = tradeDateInput.value;
+        if (!value) {
+          dateNoticeEl.textContent = "分析按“截至所选日期（ET）”回看，不是只看当天；周末及美股主要节假日休市。";
+          dateNoticeEl.className = "field-note";
+          return;
+        }
+        if (isMarketClosed(value)) {
+          dateNoticeEl.textContent = `该日期（${value}，ET）美股休市；仍可分析。分析窗口截至该日，价格相关数据将参考最近交易日。`;
+          dateNoticeEl.className = "field-note warn";
+        } else {
+          dateNoticeEl.textContent = `已选择日期：${value}（ET），分析窗口截至该日（非仅当天）。`;
+          dateNoticeEl.className = "field-note";
+        }
+      }
+
+      function setAnalyst(value) {
+        selectedAnalyst = value;
+        analystButtons.forEach((btn) => {
+          const active = btn.dataset.analyst === value;
+          btn.classList.toggle("active", active);
+          btn.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+        analystSelectedEl.textContent = `当前：${ANALYST_CONFIG[value].label}`;
+      }
 
       function populateSelect(selectEl, provider, defaultValue) {
         selectEl.innerHTML = "";
@@ -678,7 +1326,10 @@
           opt.textContent = model;
           selectEl.appendChild(opt);
         }
-        if (defaultValue) selectEl.value = defaultValue;
+
+        if (defaultValue) {
+          selectEl.value = defaultValue;
+        }
       }
 
       function refreshModelOptions() {
@@ -687,130 +1338,150 @@
         populateSelect(quickModelEl, provider);
       }
 
-      providerEl.addEventListener("change", refreshModelOptions);
-      refreshModelOptions();
+      function setProgress(percent, stageText, force = false) {
+        let value = Math.max(0, Math.min(100, Math.round(percent)));
+        if (!force && value < progressValue) {
+          value = progressValue;
+        }
+        progressValue = value;
+        progressFillEl.style.width = `${value}%`;
+        progressPercentEl.textContent = `${value}%`;
+        progressStageEl.textContent = stageText || "运行中";
+        if (stageText) {
+          lastProgressStage = stageText;
+        }
+      }
 
-      dataVendorEl.addEventListener("change", () => {
-        alphaKeyEl.disabled = dataVendorEl.value !== "alpha_vantage";
-      });
-      alphaKeyEl.disabled = dataVendorEl.value !== "alpha_vantage";
+      function touchStreamActivity() {
+        streamLastEventAt = Date.now();
+      }
+
+      function stopProgressWatchdog() {
+        if (progressWatchTimer) {
+          clearInterval(progressWatchTimer);
+          progressWatchTimer = null;
+        }
+      }
+
+      function startProgressWatchdog() {
+        stopProgressWatchdog();
+        progressWatchTimer = setInterval(() => {
+          const stalledMs = Date.now() - streamLastEventAt;
+          if (!runBtn.disabled) return;
+          if (progressValue < 90 || progressValue >= 100) return;
+          if (stalledMs < 9000) return;
+          const next = Math.min(99, Math.max(progressValue + 1, 92));
+          setProgress(next, "正在生成最终裁决（此阶段通常较慢）");
+        }, 3000);
+      }
+
+      function pushProgress(message) {
+        if (!message) return;
+        progressEl.textContent += `• ${message}\n`;
+        progressEl.scrollTop = progressEl.scrollHeight;
+      }
+
+      function resetProgress() {
+        completedSteps = new Set();
+        progressEl.textContent = "";
+        progressValue = 0;
+        lastProgressStage = "";
+        setProgress(0, "等待开始", true);
+      }
+
+      function markStep(stepKey, stageText) {
+        if (!PROGRESS_STEP_ORDER.includes(stepKey)) return;
+        completedSteps.add(stepKey);
+        const ratio = completedSteps.size / PROGRESS_STEP_ORDER.length;
+        const percent = stepKey === "final" ? 100 : Math.max(5, Math.round(ratio * 100));
+        setProgress(percent, stageText);
+      }
 
       function showSection(sectionEl) {
         sectionEl.classList.remove("hidden");
       }
 
       function clearOutputs() {
-        progressEl.textContent = "";
         decisionEl.textContent = "";
         sourcesEl.innerHTML = "";
+        sourceRegistry = createSourceRegistry(streamTradeDate || "");
         graphHeadEl.innerHTML = "";
         graphPathsEl.innerHTML = "";
         graphLinksEl.innerHTML = "";
+        graphHintEl.textContent = "暂无图谱数据。";
+
         investmentPlanEl.textContent = "";
         traderPlanEl.textContent = "";
+        investmentDebateHistoryEl.textContent = "";
+        riskDebateHistoryEl.textContent = "";
         marketReportEl.textContent = "";
         sentimentReportEl.textContent = "";
         newsReportEl.textContent = "";
         fundamentalsReportEl.textContent = "";
+        metaContentEl.innerHTML = "";
+
         Object.values(sections).forEach((el) => el.classList.add("hidden"));
+        showSection(sections.progress);
       }
 
       function renderMeta(meta) {
         metaContentEl.innerHTML = "";
         if (!meta) return;
+
+        const llmKeySource =
+          meta.llm_key_source === "request"
+            ? "用户输入"
+            : meta.llm_key_source === "server_env"
+              ? "服务端默认"
+              : "不适用";
+
+        const alphaKeySource =
+          meta.alpha_vantage_key_source === "request"
+            ? "用户输入"
+            : meta.alpha_vantage_key_source === "server_env"
+              ? "服务端默认"
+              : "不适用";
+
         const items = [
           `供应商: ${meta.llm_provider || ""}`,
           `深度模型: ${meta.deep_think_llm || ""}`,
           `快速模型: ${meta.quick_think_llm || ""}`,
           `数据源: ${meta.data_vendor || ""}`,
+          `辩论模式: ${meta.debate_mode || ""}`,
+          `投资辩论轮数范围: ${meta.min_debate_rounds || ""}~${meta.max_debate_rounds || ""}`,
+          `风控辩论轮数范围: ${meta.min_risk_discuss_rounds || ""}~${meta.max_risk_discuss_rounds || ""}`,
+          `LLM Key 来源: ${llmKeySource}`,
+          `Alpha Vantage Key 来源: ${alphaKeySource}`,
         ];
+
         for (const text of items) {
           const span = document.createElement("span");
           span.textContent = text;
           metaContentEl.appendChild(span);
         }
-      }
 
-      function extractUrls(text) {
-        if (!text) return [];
-        const regex = /https?:\/\/[^\s\]\)"'>]+/g;
-        const matches = text.match(regex) || [];
-        return matches.map((m) => m.replace(/[\).,;\]]+$/, ""));
-      }
-
-      function getHostname(url) {
-        try {
-          return new URL(url).hostname.replace(/^www\./, "");
-        } catch (e) {
-          return "unknown";
-        }
-      }
-
-      function shortenText(text, maxLen) {
-        if (!text) return "";
-        if (text.length <= maxLen) return text;
-        return `${text.slice(0, maxLen - 1)}…`;
-      }
-
-      function extractNewsSources(markdown, fallbackDate) {
-        if (!markdown) return [];
-        const lines = markdown.split("\n");
-        let currentTitle = "";
-        let currentSource = "";
-        const results = [];
-        for (const line of lines) {
-          const titleMatch = line.match(/^###\s*(.+?)\s*\(source:\s*(.+?)\)\s*$/i);
-          if (titleMatch) {
-            currentTitle = titleMatch[1].trim();
-            currentSource = titleMatch[2].trim();
-            continue;
-          }
-          const linkMatch = line.match(/Link:\s*(https?:\/\/\S+)/i);
-          if (linkMatch) {
-            const url = linkMatch[1].replace(/[\).,;\]]+$/, "");
-            results.push({
-              title: currentTitle,
-              source: currentSource,
-              url,
-              date: fallbackDate,
-            });
-            currentTitle = "";
-            currentSource = "";
-          }
-        }
-        return results;
-      }
-
-      function buildSourceLabel(entry, fallbackDate) {
-        const date = entry.date || fallbackDate || "";
-        const source = entry.source || (entry.url ? getHostname(entry.url) : "");
-        const title = entry.title ? shortenText(entry.title, 64) : "";
-        const parts = [date, source].filter(Boolean);
-        if (title) parts.push(title);
-        return parts.join(" | ") || entry.url || "来源";
-      }
-
-      function dedupeEntries(entries) {
-        const seen = new Set();
-        return entries.filter((item) => {
-          const key = item.url || `${item.source}|${item.title}|${item.date}`;
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        });
+        showSection(sections.meta);
       }
 
       function renderCompanyGraph(graph) {
         graphHeadEl.innerHTML = "";
         graphPathsEl.innerHTML = "";
         graphLinksEl.innerHTML = "";
-        if (!graph || !Array.isArray(graph.links) || graph.links.length === 0) return;
+
+        if (!graph || !Array.isArray(graph.links) || graph.links.length === 0) {
+          graphHintEl.textContent = "暂无该公司的图谱关系。";
+          showSection(sections.companyGraph);
+          return;
+        }
+
+        graphHintEl.textContent = "";
 
         const headItems = [
           `目标: ${graph.focus_symbol || ""}`,
           `名称: ${graph.focus_name || ""}`,
           `行业: ${graph.focus_industry || ""}`,
         ];
+
         for (const text of headItems) {
           const span = document.createElement("span");
           span.className = "graph-pill";
@@ -844,31 +1515,713 @@
           }
           graphLinksEl.appendChild(tr);
         }
+
         showSection(sections.companyGraph);
       }
 
-      let lastResult = null;
+      function normalizeDebateSpeaker(name) {
+        return (name || "").toLowerCase().trim().replace(/\s+/g, " ");
+      }
+
+      function roleFromSpeaker(name) {
+        const normalized = normalizeDebateSpeaker(name);
+        return DEBATE_SPEAKER_TO_ROLE.get(normalized) || "unknown";
+      }
+
+      function parseDebateMessages(historyText) {
+        const history = (historyText || "").trim();
+        if (!history) return [];
+
+        const lines = history.split("\n");
+        const messages = [];
+        let current = null;
+
+        for (const line of lines) {
+          const match = line.match(DEBATE_SPEAKER_REGEX);
+          if (match) {
+            if (current && current.content.trim()) {
+              messages.push(current);
+            }
+            current = {
+              speaker: match[1].trim(),
+              content: (match[2] || "").trim(),
+            };
+            continue;
+          }
+
+          if (!current) continue;
+          current.content = current.content ? `${current.content}\n${line}` : line;
+        }
+
+        if (current && current.content.trim()) {
+          messages.push(current);
+        }
+
+        if (messages.length === 0) {
+          return [{ speaker: "分析员", content: history }];
+        }
+        return messages;
+      }
+
+      function renderDebateHistory(targetEl, historyText) {
+        targetEl.innerHTML = "";
+        const messages = parseDebateMessages(historyText);
+
+        if (messages.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "plain";
+          empty.textContent = "暂无辩论内容。";
+          targetEl.appendChild(empty);
+          return;
+        }
+
+        for (const message of messages) {
+          const role = roleFromSpeaker(message.speaker);
+          const style = DEBATE_ROLE_STYLES[role] || DEBATE_ROLE_STYLES.unknown;
+
+          const rowEl = document.createElement("div");
+          rowEl.className = `debate-message debate-${style.align}`;
+
+          const bubbleEl = document.createElement("div");
+          bubbleEl.className = `debate-bubble debate-theme-${style.theme}`;
+
+          const speakerEl = document.createElement("div");
+          speakerEl.className = "debate-speaker";
+          speakerEl.textContent = style.label;
+
+          const bodyEl = document.createElement("div");
+          bodyEl.className = "debate-body markdown";
+          renderMarkdown(bodyEl, message.content);
+
+          bubbleEl.appendChild(speakerEl);
+          bubbleEl.appendChild(bodyEl);
+          rowEl.appendChild(bubbleEl);
+          targetEl.appendChild(rowEl);
+        }
+
+        targetEl.scrollTop = targetEl.scrollHeight;
+      }
+
+      function renderDebateHistories(result) {
+        const investmentState = result?.investment_debate_state || {};
+        const riskState = result?.risk_debate_state || {};
+
+        if (investmentState.history) {
+          renderDebateHistory(investmentDebateHistoryEl, investmentState.history);
+          showSection(sections.investmentDebate);
+        }
+
+        if (riskState.history) {
+          renderDebateHistory(riskDebateHistoryEl, riskState.history);
+          showSection(sections.riskDebate);
+        }
+      }
+
+      function extractUrls(text) {
+        if (!text) return [];
+        const regex = /https?:\/\/[^\s\]\)"'>]+/g;
+        const matches = text.match(regex) || [];
+        return matches.map((m) => m.replace(/[\).,;\]]+$/, ""));
+      }
+
+      function getHostname(url) {
+        try {
+          return new URL(url).hostname.replace(/^www\./, "");
+        } catch {
+          return "unknown";
+        }
+      }
+
+      function shortenText(text, maxLen) {
+        if (!text) return "";
+        if (text.length <= maxLen) return text;
+        return `${text.slice(0, maxLen - 1)}…`;
+      }
+
+      function normalizeUrl(url) {
+        return (url || "").trim().replace(/[\).,;\]]+$/, "");
+      }
+
+      function toExternalUrl(url) {
+        const normalized = normalizeUrl(url);
+        if (!normalized) return "";
+        if (/^https?:\/\//i.test(normalized)) return normalized;
+        if (/^\/\//.test(normalized)) return `https:${normalized}`;
+        if (/^[a-z0-9.-]+\.[a-z]{2,}(?:[\/?#].*)?$/i.test(normalized)) {
+          return `https://${normalized}`;
+        }
+        return "";
+      }
+
+      function sourceEntryKey(entry) {
+        return entry.url
+          ? `url:${toExternalUrl(entry.url)}`
+          : `text:${entry.source || ""}|${entry.title || ""}|${entry.date || ""}`;
+      }
+
+      function createSourceRegistry(tradeDate) {
+        return {
+          tradeDate,
+          entries: [],
+          byKey: new Map(),
+          nextId: 1,
+        };
+      }
+
+      function registerSource(registry, entry) {
+        const normalizedEntry = {
+          id: Number(entry.id || 0) || 0,
+          title: (entry.title || "").trim(),
+          source: (entry.source || "").trim(),
+          url: toExternalUrl(entry.url || ""),
+          date: (entry.date || registry.tradeDate || "").trim(),
+          fromSection: (entry.fromSection || "").trim(),
+        };
+
+        if (!normalizedEntry.source && normalizedEntry.url) {
+          normalizedEntry.source = getHostname(normalizedEntry.url);
+        }
+
+        const key = sourceEntryKey(normalizedEntry);
+        const existing = registry.byKey.get(key);
+        if (existing) {
+          return existing.id;
+        }
+
+        if (!normalizedEntry.id) {
+          normalizedEntry.id = registry.nextId;
+        }
+        registry.nextId = Math.max(registry.nextId, normalizedEntry.id + 1);
+
+        registry.entries.push(normalizedEntry);
+        registry.byKey.set(key, normalizedEntry);
+        return normalizedEntry.id;
+      }
+
+      function resolveSourceExternalUrl(sourceId, registry) {
+        const id = Number(sourceId);
+        const entry = registry?.entries?.find((item) => Number(item.id) === id);
+        if (!entry) return "";
+
+        if (entry.url) {
+          return toExternalUrl(entry.url);
+        }
+
+        // 回退：尝试按标题/站点匹配到同一来源的可跳转 URL
+        const byTitle = (entry.title || "").trim().toLowerCase();
+        const bySource = (entry.source || "").trim().toLowerCase();
+        const matched = registry.entries.find((item) => {
+          if (Number(item.id) === id || !item.url) return false;
+          const itemTitle = (item.title || "").trim().toLowerCase();
+          const itemSource = (item.source || "").trim().toLowerCase();
+          if (byTitle && itemTitle && (itemTitle.includes(byTitle) || byTitle.includes(itemTitle))) {
+            return true;
+          }
+          if (bySource && itemSource && itemSource === bySource) {
+            return true;
+          }
+          return false;
+        });
+        return matched ? toExternalUrl(matched.url) : "";
+      }
+
+      function appendCitationToLine(line, sourceIds, registry) {
+        if (!line || !sourceIds.length) return line;
+        let nextLine = line;
+        for (const sourceId of sourceIds) {
+          if (lineHasCitation(nextLine, sourceId)) continue;
+          const entry = registry?.entries?.find((item) => Number(item.id) === Number(sourceId));
+          const sourceUrl = resolveSourceExternalUrl(sourceId, registry);
+          if (sourceUrl) {
+            const safeUrl = sourceUrl.replace(/"/g, "%22");
+            const tip = `打开来源 ${sourceId}：${entry?.source || getHostname(sourceUrl)}`;
+            nextLine += ` <sup class="source-cite"><a class="source-cite-link" data-source-id="${sourceId}" href="${safeUrl}" target="_blank" rel="noreferrer noopener" title="${tip}">[${sourceId}]</a></sup>`;
+            continue;
+          }
+
+          nextLine += ` <sup class="source-cite"><span class="source-cite-link" data-source-id="${sourceId}" title="未找到可跳转来源链接">[${sourceId}]</span></sup>`;
+        }
+        return nextLine;
+      }
+
+      function isSourcesHeadingLine(trimmedLine) {
+        if (!trimmedLine) return false;
+        const normalized = trimmedLine.replace(/[*_`]/g, "").trim();
+        const pattern =
+          /^(?:#{1,6}\s*)?(?:\d+[\.\)]\s*)?(sources?|source|资料来源|信息来源|参考来源|参考文献|引用来源|来源)\s*(?:[（(][^()（）]{0,40}[)）])?\s*[:：]?\s*$/i;
+        return pattern.test(normalized);
+      }
+
+      function isDividerLine(trimmedLine) {
+        if (!trimmedLine) return false;
+        const compact = trimmedLine.replace(/\s+/g, "");
+        return /^([-*_])\1{2,}$/.test(compact);
+      }
+
+      function isAttachableBodyLine(trimmedLine) {
+        if (!trimmedLine) return false;
+        if (trimmedLine.startsWith("#")) return false;
+        if (isDividerLine(trimmedLine)) return false;
+        if (/^\|/.test(trimmedLine)) return false;
+        if (isSourcesHeadingLine(trimmedLine)) return false;
+        if (/^\-?\s*(link|source|url)\s*:/i.test(trimmedLine)) return false;
+        if (/^\s*\[[^\]]+\]\((https?:\/\/[^\s)]+)\)\s*$/i.test(trimmedLine)) return false;
+        return true;
+      }
+
+      function parseMarkdownLinks(line) {
+        const results = [];
+        const regex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/gi;
+        let match = regex.exec(line);
+        while (match) {
+          results.push({
+            title: (match[1] || "").trim(),
+            url: normalizeUrl(match[2] || ""),
+          });
+          match = regex.exec(line);
+        }
+        return results;
+      }
+
+      function extractMatchTerms(text) {
+        const raw = text || "";
+        const en = raw.toLowerCase().match(/[a-z0-9]{3,}/g) || [];
+        const zh = raw.match(/[\u4e00-\u9fff]{2,}/g) || [];
+        const stop = new Set([
+          "https", "http", "www", "com", "org", "net", "news", "report", "analysis", "source",
+          "oracle", "company", "inc", "ltd", "data", "market", "stock", "update", "story",
+          "信息", "来源", "报告", "分析", "新闻", "网站", "公司", "市场", "数据",
+        ]);
+        const terms = [];
+        const seen = new Set();
+        for (const token of [...en, ...zh]) {
+          const t = token.trim().toLowerCase();
+          if (!t || stop.has(t)) continue;
+          if (seen.has(t)) continue;
+          seen.add(t);
+          terms.push(t);
+        }
+        return terms.slice(0, 16);
+      }
+
+      function scoreLineAgainstSource(line, entry) {
+        const normalizedLine = (line || "").toLowerCase();
+        if (!normalizedLine.trim()) return 0;
+        const terms = extractMatchTerms(`${entry.title || ""} ${entry.source || ""}`);
+        let score = 0;
+        for (const term of terms) {
+          if (normalizedLine.includes(term)) {
+            score += term.length >= 6 ? 2 : 1;
+          }
+        }
+        const host = entry.url ? getHostname(entry.url).replace(/\./g, " ") : "";
+        if (host && normalizedLine.includes(host.split(" ")[0])) {
+          score += 1;
+        }
+        return score;
+      }
+
+      function lineHasCitation(line, sourceId) {
+        if (!line) return false;
+        const pattern = new RegExp(`data-source-id=["']${sourceId}["']`);
+        return pattern.test(line);
+      }
+
+      function pickBodyCandidateIndexes(lines) {
+        const indexes = [];
+        for (let i = 0; i < lines.length; i += 1) {
+          const line = lines[i];
+          const trimmed = line.trim();
+          if (!isAttachableBodyLine(trimmed)) continue;
+          indexes.push(i);
+        }
+        return indexes;
+      }
+
+      function annotateMarkdownWithSourceCitations(markdown, reportLabel, registry) {
+        const raw = markdown || "";
+        if (!raw) return raw;
+
+        const lines = raw.split("\n");
+        const outLines = [];
+        let lastAttachIndex = -1;
+        let currentTitle = "";
+        let currentSource = "";
+        let inSourcesBlock = false;
+        const sourceIdsFromBlock = [];
+        const attachedIds = new Set();
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+
+          if (isSourcesHeadingLine(trimmed)) {
+            inSourcesBlock = true;
+            continue;
+          }
+
+          if (inSourcesBlock && trimmed.startsWith("#") && !isSourcesHeadingLine(trimmed)) {
+            inSourcesBlock = false;
+          }
+
+          if (inSourcesBlock) {
+            if (!trimmed) {
+              continue;
+            }
+            const markdownLinks = parseMarkdownLinks(line);
+            const urls = extractUrls(line).map(normalizeUrl).filter(Boolean);
+            if (urls.length > 0) {
+              for (const url of urls) {
+                const linkMeta = markdownLinks.find((item) => item.url === url);
+                const sourceId = registerSource(registry, {
+                  title: (linkMeta?.title || currentTitle || "").trim(),
+                  source: currentSource || getHostname(url),
+                  url,
+                  date: registry.tradeDate,
+                  fromSection: reportLabel,
+                });
+                sourceIdsFromBlock.push(sourceId);
+              }
+            }
+            continue;
+          }
+
+          const headingMatch = line.match(/^###\s*(.+?)\s*\(source:\s*(.+?)\)\s*$/i);
+          if (headingMatch) {
+            currentTitle = headingMatch[1].trim();
+            currentSource = headingMatch[2].trim();
+            outLines.push(line);
+            continue;
+          }
+
+          const urls = extractUrls(line).map(normalizeUrl).filter(Boolean);
+          const markdownLinkMatch = line.match(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/i);
+          if (markdownLinkMatch && !currentTitle) {
+            currentTitle = markdownLinkMatch[1].trim();
+          }
+          const likelySourceLine =
+            urls.length > 0 &&
+            (/^\-?\s*link\s*:/i.test(trimmed) ||
+              /^\-?\s*source\s*:/i.test(trimmed) ||
+              /^\-?\s*url\s*:/i.test(trimmed) ||
+              /^https?:\/\//i.test(trimmed) ||
+              /\[[^\]]+\]\((https?:\/\/[^\s)]+)\)/i.test(trimmed));
+
+          if (likelySourceLine) {
+            const sourceIds = [];
+            for (const url of urls) {
+              const sourceId = registerSource(registry, {
+                title: currentTitle,
+                source: currentSource || getHostname(url),
+                url,
+                date: registry.tradeDate,
+                fromSection: reportLabel,
+              });
+              sourceIds.push(sourceId);
+            }
+
+            let attachIndex = lastAttachIndex;
+            if (
+              attachIndex >= 0 &&
+              !isAttachableBodyLine((outLines[attachIndex] || "").trim())
+            ) {
+              attachIndex = -1;
+            }
+            if (attachIndex < 0 && outLines.length > 0) {
+              for (let i = outLines.length - 1; i >= 0; i -= 1) {
+                if (isAttachableBodyLine((outLines[i] || "").trim())) {
+                  attachIndex = i;
+                  break;
+                }
+              }
+            }
+            if (attachIndex >= 0) {
+              outLines[attachIndex] = appendCitationToLine(outLines[attachIndex], sourceIds, registry);
+              sourceIds.forEach((id) => attachedIds.add(id));
+            }
+            currentTitle = "";
+            currentSource = "";
+            continue;
+          }
+
+          outLines.push(line);
+          if (isAttachableBodyLine(trimmed)) {
+            lastAttachIndex = outLines.length - 1;
+          }
+        }
+
+        const bodyCandidates = pickBodyCandidateIndexes(outLines);
+        const candidatePool = bodyCandidates.length > 0 ? bodyCandidates : outLines.map((_, idx) => idx);
+        const toMap = Array.from(new Set(sourceIdsFromBlock)).filter((id) => !attachedIds.has(id));
+
+        for (const sourceId of toMap) {
+          const entry = registry.entries.find((item) => item.id === sourceId);
+          if (!entry) continue;
+
+          let bestIndex = -1;
+          let bestScore = 0;
+          for (const idx of candidatePool) {
+            if (lineHasCitation(outLines[idx], sourceId)) continue;
+            const score = scoreLineAgainstSource(outLines[idx], entry);
+            if (score > bestScore) {
+              bestScore = score;
+              bestIndex = idx;
+            }
+          }
+
+          if (bestIndex >= 0 && bestScore >= 2) {
+            outLines[bestIndex] = appendCitationToLine(outLines[bestIndex], [sourceId], registry);
+            attachedIds.add(sourceId);
+          }
+        }
+
+        return outLines.join("\n");
+      }
+
+      function buildSourceLabel(entry, fallbackDate) {
+        const date = entry.date || fallbackDate || "";
+        const source = entry.source || (entry.url ? getHostname(entry.url) : "");
+        const title = entry.title ? shortenText(entry.title, 64) : "";
+        const parts = [date, source].filter(Boolean);
+        if (title) parts.push(title);
+        return parts.join(" | ") || entry.url || "来源";
+      }
+
+      function collectFallbackSourceEntries(lastResult, tradeDate) {
+        const urlFallbacks = lastResult?.sources?.length
+          ? lastResult.sources
+          : [
+              ...extractUrls(lastResult?.final_trade_decision || ""),
+              ...extractUrls(lastResult?.investment_plan || ""),
+              ...extractUrls(lastResult?.trader_investment_plan || ""),
+              ...extractUrls(lastResult?.reports?.market_report || ""),
+              ...extractUrls(lastResult?.reports?.sentiment_report || ""),
+              ...extractUrls(lastResult?.reports?.news_report || ""),
+              ...extractUrls(lastResult?.reports?.fundamentals_report || ""),
+            ];
+
+        const entries = urlFallbacks
+          .map((url) => normalizeUrl(url))
+          .filter(Boolean)
+          .map((url) => ({
+            title: "",
+            source: getHostname(url),
+            url,
+            date: tradeDate,
+            fromSection: "",
+          }));
+
+        return entries;
+      }
+
+      function mergeSourceEntries(primaryEntries, fallbackEntries) {
+        const merged = [];
+        const byKey = new Map();
+        let nextId = 1;
+
+        const pushEntry = (entry, preserveId = false) => {
+          const normalized = {
+            id: Number(entry.id || 0) || 0,
+            title: entry.title || "",
+            source: entry.source || "",
+            url: toExternalUrl(entry.url || ""),
+            date: entry.date || "",
+            fromSection: entry.fromSection || "",
+          };
+          if (!normalized.source && normalized.url) {
+            normalized.source = getHostname(normalized.url);
+          }
+          if (!normalized.id || !preserveId) {
+            normalized.id = nextId;
+          }
+          nextId = Math.max(nextId, normalized.id + 1);
+
+          const key = sourceEntryKey(normalized);
+          if (byKey.has(key)) return;
+          byKey.set(key, normalized);
+          merged.push(normalized);
+        };
+
+        for (const entry of primaryEntries || []) {
+          pushEntry(entry, true);
+        }
+        for (const entry of fallbackEntries || []) {
+          pushEntry(entry, false);
+        }
+
+        return merged;
+      }
+
+      function renderReportsWithCitations(lastResult, registry = null) {
+        const tradeDate = lastResult?.trade_date || "";
+        const activeRegistry = registry || createSourceRegistry(tradeDate);
+        if (!activeRegistry.tradeDate) {
+          activeRegistry.tradeDate = tradeDate;
+        }
+
+        const reportSpecs = [
+          { key: "market_report", label: "市场分析", target: marketReportEl, section: sections.market },
+          { key: "sentiment_report", label: "社媒情绪", target: sentimentReportEl, section: sections.sentiment },
+          { key: "news_report", label: "新闻宏观", target: newsReportEl, section: sections.news },
+          { key: "fundamentals_report", label: "基本面", target: fundamentalsReportEl, section: sections.fundamentals },
+        ];
+
+        for (const spec of reportSpecs) {
+          const raw = lastResult?.reports?.[spec.key] || "";
+          if (!raw) continue;
+          // 已取消正文小角标展示，仅保留来源收集与 Sources 区域。
+          annotateMarkdownWithSourceCitations(raw, spec.label, activeRegistry);
+          renderMarkdown(spec.target, raw);
+          showSection(spec.section);
+        }
+
+        return activeRegistry.entries;
+      }
+
+      function renderSources(lastResult, primaryEntries = []) {
+        const tradeDate = lastResult?.trade_date || "";
+        const fallbackEntries = collectFallbackSourceEntries(lastResult, tradeDate);
+        let entries = mergeSourceEntries(primaryEntries, fallbackEntries);
+
+        if (entries.length === 0 && lastResult?.meta?.data_vendor) {
+          entries = [{
+            id: 1,
+            title: "",
+            source: `数据源：${lastResult.meta.data_vendor}`,
+            url: "",
+            date: tradeDate,
+            fromSection: "",
+          }];
+        }
+
+        if (entries.length > 0) {
+          sourcesEl.innerHTML = "";
+          for (const entry of entries) {
+            const li = document.createElement("li");
+            li.className = "source-item";
+            if (entry.id) {
+              li.id = `source-item-${entry.id}`;
+            }
+
+            const label = buildSourceLabel(entry, tradeDate);
+            const sourceUrl = toExternalUrl(entry.url);
+            if (sourceUrl) {
+              const a = document.createElement("a");
+              a.href = sourceUrl;
+              a.target = "_blank";
+              a.rel = "noreferrer";
+              a.textContent = label;
+              li.appendChild(a);
+            } else {
+              const text = document.createElement("span");
+              text.textContent = label;
+              li.appendChild(text);
+            }
+
+            if (entry.fromSection) {
+              const ctx = document.createElement("span");
+              ctx.className = "source-context";
+              ctx.textContent = `来自：${entry.fromSection}`;
+              li.appendChild(ctx);
+            }
+            sourcesEl.appendChild(li);
+          }
+          showSection(sections.sources);
+        }
+      }
+
+      function initializeInputUI() {
+        initTickerOptions();
+        updateTickerHint();
+
+        tradeDateInput.value = etToday();
+        updateDateNotice();
+
+        tickerInput.addEventListener("input", updateTickerHint);
+        tickerInput.addEventListener("blur", updateTickerHint);
+        tradeDateInput.addEventListener("change", updateDateNotice);
+
+        analystButtons.forEach((btn) => {
+          btn.addEventListener("click", () => setAnalyst(btn.dataset.analyst || "market"));
+        });
+
+        setAnalyst("market");
+      }
+
+      function initializeAdvancedSettings() {
+        providerEl.addEventListener("change", refreshModelOptions);
+        refreshModelOptions();
+
+        dataVendorEl.addEventListener("change", () => {
+          alphaKeyEl.disabled = dataVendorEl.value !== "alpha_vantage";
+        });
+        alphaKeyEl.disabled = dataVendorEl.value !== "alpha_vantage";
+      }
+
+      function openOutputPanel() {
+        outputPanelEl.classList.remove("hidden");
+        researchLayoutEl.classList.add("idle");
+      }
+
+      initializeInputUI();
+      initializeAdvancedSettings();
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
+
+        const tickerRaw = tickerInput.value.trim();
+        const resolved = resolveTickerSymbol(tickerRaw);
+        const ticker = resolved || tickerRaw.toUpperCase();
+
+        if (!ticker) {
+          statusEl.textContent = "请先输入股票代码或公司名称。";
+          return;
+        }
+
+        const tradeDate = tradeDateInput.value;
+        if (!tradeDate) {
+          statusEl.textContent = "请选择交易日期（ET）。";
+          return;
+        }
+
+        const closedDay = isMarketClosed(tradeDate);
+
+        if (resolved) {
+          tickerInput.value = resolved;
+          updateTickerHint();
+        }
+
+        openOutputPanel();
+        streamTradeDate = tradeDate;
         clearOutputs();
+        resetProgress();
+        sourceRegistry = createSourceRegistry(tradeDate);
+        touchStreamActivity();
+        startProgressWatchdog();
+
         lastResult = null;
+        streamedFinalDecision = "";
+
         downloadBtn.disabled = true;
         downloadJsonBtn.disabled = true;
-        statusEl.textContent = "运行中，请稍候...";
         runBtn.disabled = true;
 
-        const ticker = document.getElementById("ticker").value.trim();
-        const trade_date = document.getElementById("trade_date").value;
+        statusEl.textContent = closedDay
+          ? "运行中（休市日：价格数据可能采用最近交易日）..."
+          : "运行中，请稍候...";
+        setProgress(5, closedDay ? "任务已提交（休市日模式）" : "任务已提交");
+        if (closedDay) {
+          pushProgress("检测到休市日：继续分析新闻/情绪/基本面，价格数据将回看最近交易日。");
+        }
+        pushProgress(`目标标的：${ticker}`);
+        pushProgress(`已选择模块：${ANALYST_CONFIG[selectedAnalyst].label}`);
+
         const provider = providerEl.value;
-        const api_key = document.getElementById("api_key").value.trim();
+        const api_key = apiKeyEl.value.trim();
         const data_vendor = dataVendorEl.value;
         const alpha_vantage_key = alphaKeyEl.value.trim();
         const deep_think_llm = deepModelEl.value || null;
         const quick_think_llm = quickModelEl.value || null;
-        const selected_analysts = Array.from(
-          document.querySelectorAll('.analysts input[type="checkbox"]:checked')
-        ).map((el) => el.value);
+        const selected_analysts = [selectedAnalyst];
 
         try {
           const res = await fetch("/api/run/stream", {
@@ -876,7 +2229,7 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               ticker,
-              trade_date,
+              trade_date: tradeDate,
               selected_analysts,
               provider,
               api_key,
@@ -891,6 +2244,7 @@
             const errText = await res.text();
             throw new Error(errText || `请求失败: ${res.status}`);
           }
+
           if (!res.body) {
             throw new Error("浏览器不支持流式响应");
           }
@@ -902,24 +2256,49 @@
           while (true) {
             const { value, done } = await reader.read();
             if (done) break;
+
             buffer += decoder.decode(value, { stream: true });
             const parts = buffer.split("\n\n");
             buffer = parts.pop() || "";
+
             for (const part of parts) {
               const lines = part.split("\n");
               const dataLine = lines.find((line) => line.startsWith("data:"));
               if (!dataLine) continue;
+
               const jsonText = dataLine.slice(5).trim();
               if (!jsonText) continue;
+
               const payload = JSON.parse(jsonText);
+              touchStreamActivity();
 
               if (payload.type === "meta") {
                 renderMeta(payload.meta);
-              } else if (payload.type === "status") {
+                continue;
+              }
+
+              if (payload.type === "status") {
                 statusEl.textContent = payload.message || "运行中...";
-                progressEl.textContent += `${payload.message}\n`;
-              } else if (payload.type === "report") {
+                pushProgress(payload.message || "收到状态更新");
+                continue;
+              }
+
+              if (payload.type === "progress") {
+                const stage = payload.stage || "运行中";
+                const prevStage = lastProgressStage;
+                setProgress(Number(payload.percent || 0), stage);
+                if (stage && stage !== prevStage) {
+                  pushProgress(stage);
+                }
+                continue;
+              }
+
+              if (payload.type === "report") {
                 const content = payload.content || "";
+                const sectionLabel = payload.label || "分析报告";
+                // 已取消正文小角标展示，仅保留来源收集与 Sources 区域。
+                annotateMarkdownWithSourceCitations(content, sectionLabel, sourceRegistry);
+
                 if (payload.report_type === "market_report") {
                   renderMarkdown(marketReportEl, content);
                   showSection(sections.market);
@@ -936,158 +2315,168 @@
                   renderMarkdown(fundamentalsReportEl, content);
                   showSection(sections.fundamentals);
                 }
-                progressEl.textContent += `${payload.label} 完成\n`;
-              } else if (payload.type === "summary") {
+                renderSources({ trade_date: streamTradeDate, sources: [], reports: {}, meta: {} }, sourceRegistry.entries);
+
+                pushProgress(`${payload.label} 完成`);
+
+                const expectedReportType = ANALYST_CONFIG[selectedAnalyst].reportType;
+                if (payload.report_type === expectedReportType) {
+                  markStep("analyst_report", `${payload.label} 已完成`);
+                }
+                continue;
+              }
+
+              if (payload.type === "summary") {
                 if (payload.summary_type === "investment_plan") {
                   renderMarkdown(investmentPlanEl, payload.content || "");
                   showSection(sections.investment);
+                  markStep("investment_plan", "投资计划已生成");
+                  pushProgress("投资计划已生成");
                 }
+
                 if (payload.summary_type === "trader_investment_plan") {
                   renderMarkdown(traderPlanEl, payload.content || "");
                   showSection(sections.trader);
+                  markStep("trader_investment_plan", "交易员计划已生成");
+                  pushProgress("交易员计划已生成");
                 }
+
                 if (payload.summary_type === "final_trade_decision") {
-                  renderMarkdown(decisionEl, payload.content || "");
-                  showSection(sections.decision);
+                  streamedFinalDecision = payload.content || "";
                 }
-                progressEl.textContent += `${payload.label} 完成\n`;
-              } else if (payload.type === "final") {
+                continue;
+              }
+
+              if (payload.type === "debate") {
+                if (payload.debate_type === "investment_debate_state") {
+                  renderDebateHistory(investmentDebateHistoryEl, payload.history || "");
+                  showSection(sections.investmentDebate);
+                  markStep("investment_debate_state", "投资辩论完成");
+                  pushProgress("投资辩论阶段完成");
+                  const debateCount = Number(payload.count || 0);
+                  const progressHint = Math.min(82, Math.max(70, 68 + debateCount));
+                  setProgress(progressHint, "投资辩论进行中");
+                }
+
+                if (payload.debate_type === "risk_debate_state") {
+                  renderDebateHistory(riskDebateHistoryEl, payload.history || "");
+                  showSection(sections.riskDebate);
+                  markStep("risk_debate_state", "风控辩论完成");
+                  pushProgress("风控辩论阶段完成");
+                  const debateCount = Number(payload.count || 0);
+                  const progressHint = Math.min(96, Math.max(90, 88 + debateCount));
+                  setProgress(progressHint, "风控辩论进行中");
+                }
+                continue;
+              }
+
+              if (payload.type === "final") {
                 lastResult = payload.data;
-                if (lastResult?.decision) {
-                  renderMarkdown(
-                    decisionEl,
-                    `**核心决策**：${lastResult.decision}\n\n${lastResult.final_trade_decision || ""}`
-                  );
-                  showSection(sections.decision);
-                }
-                const tradeDate = lastResult?.trade_date || "";
-                let entries = [];
-                entries = entries.concat(
-                  extractNewsSources(lastResult?.reports?.news_report || "", tradeDate)
-                );
-                entries = entries.concat(
-                  extractNewsSources(lastResult?.reports?.sentiment_report || "", tradeDate)
-                );
 
-                if (entries.length === 0) {
-                  const urlFallbacks = lastResult?.sources?.length
-                    ? lastResult.sources
-                    : [
-                        ...extractUrls(lastResult?.final_trade_decision || ""),
-                        ...extractUrls(lastResult?.investment_plan || ""),
-                        ...extractUrls(lastResult?.trader_investment_plan || ""),
-                        ...extractUrls(lastResult?.reports?.news_report || ""),
-                        ...extractUrls(lastResult?.reports?.sentiment_report || ""),
-                      ];
-                  entries = urlFallbacks.map((url) => ({
-                    title: "",
-                    source: getHostname(url),
-                    url,
-                    date: tradeDate,
-                  }));
-                }
-
-                if (entries.length === 0 && lastResult?.meta?.data_vendor) {
-                  entries = [{
-                    title: "",
-                    source: `数据源：${lastResult.meta.data_vendor}`,
-                    url: "",
-                    date: tradeDate,
-                  }];
-                }
-
-                entries = dedupeEntries(entries);
-
-                if (entries.length > 0) {
-                  sourcesEl.innerHTML = "";
-                  for (const entry of entries) {
-                    const li = document.createElement("li");
-                    const label = buildSourceLabel(entry, tradeDate);
-                    if (entry.url && entry.url.startsWith("http")) {
-                      const a = document.createElement("a");
-                      a.href = entry.url;
-                      a.target = "_blank";
-                      a.rel = "noreferrer";
-                      a.textContent = label;
-                      li.appendChild(a);
-                    } else {
-                      li.textContent = label;
-                    }
-                    sourcesEl.appendChild(li);
-                  }
-                  showSection(sections.sources);
-                }
+                const citedSourceEntries = renderReportsWithCitations(lastResult, sourceRegistry);
+                renderSources(lastResult, citedSourceEntries);
                 renderCompanyGraph(lastResult?.company_graph);
+                renderDebateHistories(lastResult);
                 renderMeta(lastResult?.meta);
+
+                const decisionText = lastResult?.final_trade_decision || streamedFinalDecision || "";
+                const signal = lastResult?.decision || "";
+                renderMarkdown(
+                  decisionEl,
+                  `**核心决策**：${signal || "N/A"}\n\n${decisionText}`
+                );
+                showSection(sections.decision);
+
+                markStep("final", "分析完成");
+                pushProgress("已生成最终结论。");
+
                 downloadBtn.disabled = false;
                 downloadJsonBtn.disabled = false;
                 statusEl.textContent = "完成";
-              } else if (payload.type === "error") {
+                continue;
+              }
+
+              if (payload.type === "error") {
                 statusEl.textContent = `出错: ${payload.message}`;
-                progressEl.textContent += `出错: ${payload.message}\n`;
+                pushProgress(`出错: ${payload.message}`);
+                setProgress(100, "执行失败", true);
               }
             }
           }
+
+          if (!lastResult) {
+            statusEl.textContent = "出错: 流式连接提前结束，未收到最终结果";
+            pushProgress("出错: 流式连接提前结束，未收到最终结果");
+            setProgress(100, "执行失败", true);
+          }
         } catch (err) {
           statusEl.textContent = `出错: ${err.message}`;
+          pushProgress(`出错: ${err.message}`);
+          setProgress(100, "执行失败", true);
         } finally {
+          stopProgressWatchdog();
           runBtn.disabled = false;
         }
       });
 
       downloadBtn.addEventListener("click", () => {
         if (!lastResult) return;
+
         const fallbackSources = (lastResult.sources && lastResult.sources.length > 0)
           ? lastResult.sources
           : (lastResult.meta?.data_vendor ? [`数据源：${lastResult.meta.data_vendor}`] : []);
+
         const lines = [];
         lines.push("# AlphaNexus Report");
         lines.push(`- Ticker: ${lastResult.ticker || ""}`);
-        lines.push(`- Trade Date: ${lastResult.trade_date || ""}`);
+        lines.push(`- Trade Date (ET): ${lastResult.trade_date || ""}`);
         lines.push("");
-        lines.push("## Decision");
-        lines.push(lastResult.decision || "");
+
+        lines.push("## 过程输出");
+        lines.push("### 分析模块报告");
+        lines.push(lastResult.reports?.market_report || lastResult.reports?.sentiment_report || lastResult.reports?.news_report || lastResult.reports?.fundamentals_report || "");
         lines.push("");
-        lines.push("## Final Trade Decision");
-        lines.push(lastResult.final_trade_decision || "");
-        lines.push("");
-        lines.push("## Investment Plan");
+
+        lines.push("### 投资计划");
         lines.push(lastResult.investment_plan || "");
         lines.push("");
-        lines.push("## Trader Plan");
+
+        lines.push("### 交易员计划");
         lines.push(lastResult.trader_investment_plan || "");
         lines.push("");
-        lines.push("## Sources");
-        fallbackSources.forEach((s) => lines.push(`- ${s}`));
+
+        lines.push("### 投资辩论历史");
+        lines.push(lastResult.investment_debate_state?.history || "");
         lines.push("");
-        lines.push("## Company Graph");
+
+        lines.push("### 风控辩论历史");
+        lines.push(lastResult.risk_debate_state?.history || "");
+        lines.push("");
+
+        lines.push("## 公司关系图谱");
         if (lastResult.company_graph?.links?.length) {
-          lines.push(`- Focus: ${lastResult.company_graph.focus_symbol || ""}`);
-          lines.push(`- Industry: ${lastResult.company_graph.focus_industry || ""}`);
+          lines.push(`- 目标公司: ${lastResult.company_graph.focus_symbol || ""}`);
+          lines.push(`- 行业: ${lastResult.company_graph.focus_industry || ""}`);
           lines.push("");
-          lines.push("### Impact Paths");
+          lines.push("### 影响路径");
           (lastResult.company_graph.impact_paths || []).slice(0, 8).forEach((p) => lines.push(`- ${p}`));
           lines.push("");
-          lines.push("### Links");
+          lines.push("### 关系边");
           (lastResult.company_graph.links || []).slice(0, 20).forEach((link) => {
-            lines.push(`- ${link.source} -> ${link.target} | ${link.relation} | hop=${link.hop}`);
+            lines.push(`- ${link.source} -> ${link.target} | ${link.relation_label || link.relation || ""} | hop=${link.hop}`);
           });
         } else {
-          lines.push("- No graph data");
+          lines.push("- 暂无图谱数据");
         }
         lines.push("");
-        lines.push("## Reports");
-        lines.push("### Market");
-        lines.push(lastResult.reports?.market_report || "");
+
+        lines.push("## 信息来源");
+        fallbackSources.forEach((s) => lines.push(`- ${s}`));
         lines.push("");
-        lines.push("### Sentiment");
-        lines.push(lastResult.reports?.sentiment_report || "");
-        lines.push("");
-        lines.push("### News");
-        lines.push(lastResult.reports?.news_report || "");
-        lines.push("");
-        lines.push("### Fundamentals");
-        lines.push(lastResult.reports?.fundamentals_report || "");
+
+        lines.push("## 最终决策");
+        lines.push(lastResult.decision || "");
+        lines.push(lastResult.final_trade_decision || "");
 
         const blob = new Blob([lines.join("\n")], { type: "text/markdown;charset=utf-8" });
         const url = URL.createObjectURL(blob);

@@ -107,7 +107,13 @@ class AlphaNexusGraph:
         self.tool_nodes = self._create_tool_nodes()
 
         # Initialize components
-        self.conditional_logic = ConditionalLogic()
+        self.conditional_logic = ConditionalLogic(
+            debate_mode=self.config.get("debate_mode", "adaptive"),
+            min_debate_rounds=self.config.get("min_debate_rounds", 2),
+            max_debate_rounds=self.config.get("max_debate_rounds", 4),
+            min_risk_discuss_rounds=self.config.get("min_risk_discuss_rounds", 2),
+            max_risk_discuss_rounds=self.config.get("max_risk_discuss_rounds", 3),
+        )
         self.graph_setup = GraphSetup(
             self.quick_thinking_llm,
             self.deep_thinking_llm,
@@ -120,7 +126,9 @@ class AlphaNexusGraph:
             self.conditional_logic,
         )
 
-        self.propagator = Propagator()
+        self.propagator = Propagator(
+            max_recur_limit=self.config.get("max_recur_limit", 100)
+        )
         self.reflector = Reflector(self.quick_thinking_llm)
         self.signal_processor = SignalProcessor(self.quick_thinking_llm)
 
