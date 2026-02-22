@@ -696,9 +696,14 @@ def _stream_graph(payload: RunRequest):
             yield event
         yield _sse_event({"type": "final", "data": final_payload})
     except HTTPException as exc:
-        yield _sse_event({"type": "error", "message": exc.detail})
+        detail = exc.detail if isinstance(exc.detail, str) else json.dumps(exc.detail, ensure_ascii=False)
+        yield _sse_event({"type": "error", "message": detail, "retryable": exc.status_code >= 500})
     except Exception as exc:
-        yield _sse_event({"type": "error", "message": str(exc)})
+        message = str(exc).strip() or exc.__class__.__name__
+        lower = message.lower()
+        if "connecttimeout" in lower or "connection timed out" in lower or "timed out" in lower:
+            message = "模型服务连接超时，请稍后重试，或切换模型供应商/模型后再试。"
+        yield _sse_event({"type": "error", "message": message, "retryable": True})
 
 
 @app.get("/", response_class=HTMLResponse)

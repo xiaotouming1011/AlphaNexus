@@ -1625,6 +1625,8 @@
       }
 
       function getHostname(url) {
+        let streamFailed = false;
+
         try {
           return new URL(url).hostname.replace(/^www\./, "");
         } catch {
@@ -2397,14 +2399,25 @@
               }
 
               if (payload.type === "error") {
+                streamFailed = true;
                 statusEl.textContent = `出错: ${payload.message}`;
                 pushProgress(`出错: ${payload.message}`);
                 setProgress(100, "执行失败", true);
+                break;
               }
+            }
+
+            if (streamFailed) {
+              try {
+                await reader.cancel();
+              } catch (_) {
+                // ignore cancel failures
+              }
+              break;
             }
           }
 
-          if (!lastResult) {
+          if (!lastResult && !streamFailed) {
             statusEl.textContent = "出错: 流式连接提前结束，未收到最终结果";
             pushProgress("出错: 流式连接提前结束，未收到最终结果");
             setProgress(100, "执行失败", true);
