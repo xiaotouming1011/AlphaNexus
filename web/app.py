@@ -252,7 +252,7 @@ def _prepare_config(payload: RunRequest):
         or (payload.config_overrides or {}).get("llm_provider")
         or "google"
     ).lower()
-    allowed_providers = {"openai", "anthropic", "google", "xai", "openrouter", "ollama"}
+    allowed_providers = {"openai", "anthropic", "google", "xai", "openrouter", "ollama", "deepseek"}
     if provider not in allowed_providers:
         raise HTTPException(status_code=400, detail="不支持的 LLM 供应商")
 
@@ -270,6 +270,7 @@ def _prepare_config(payload: RunRequest):
             "xai": ("grok-4", "grok-4-1-fast"),
             "openrouter": ("openai/gpt-5.2", "openai/gpt-5-mini"),
             "ollama": ("llama3.1:8b", "llama3.1:8b"),
+            "deepseek": ("deepseek-reasoner", "deepseek-chat"),
         }
         if provider in default_models:
             config["deep_think_llm"], config["quick_think_llm"] = default_models[provider]
@@ -352,6 +353,7 @@ def _prepare_config(payload: RunRequest):
             "google": "GOOGLE_API_KEY",
             "xai": "XAI_API_KEY",
             "openrouter": "OPENROUTER_API_KEY",
+            "deepseek": "DEEPSEEK_API_KEY",
         }
         env_var = env_keys.get(provider)
         fallback_key = (os.environ.get(env_var, "") if env_var else "").strip()
