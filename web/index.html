@@ -1625,8 +1625,6 @@
       }
 
       function getHostname(url) {
-        let streamFailed = false;
-
         try {
           return new URL(url).hostname.replace(/^www\./, "");
         } catch {
@@ -2224,6 +2222,7 @@
         const deep_think_llm = deepModelEl.value || null;
         const quick_think_llm = quickModelEl.value || null;
         const selected_analysts = [selectedAnalyst];
+        let streamFailed = false;
 
         try {
           const res = await fetch("/api/run/stream", {
