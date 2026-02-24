@@ -38,9 +38,13 @@ class GoogleClient(BaseLLMClient):
         """Return configured ChatGoogleGenerativeAI instance."""
         llm_kwargs = {"model": self.model}
 
-        for key in ("timeout", "max_retries", "google_api_key", "callbacks"):
+        for key in ("timeout", "max_retries", "google_api_key", "callbacks", "transport"):
             if key in self.kwargs:
                 llm_kwargs[key] = self.kwargs[key]
+
+        # Default to REST transport to avoid gRPC connectivity issues in proxy-only networks.
+        # Callers can still override via kwargs["transport"].
+        llm_kwargs.setdefault("transport", "rest")
 
         # Map thinking_level to appropriate API param based on model
         # Gemini 3 Pro: low, high

@@ -266,7 +266,7 @@ def _prepare_config(payload: RunRequest):
         default_models = {
             "openai": ("gpt-5.2", "gpt-5-mini"),
             "anthropic": ("claude-sonnet-4-5", "claude-haiku-4-5"),
-            "google": ("gemini-3.1-pro-preview", "gemini-3.1-pro-preview"),
+            "google": ("gemini-2.5-pro", "gemini-2.5-flash"),
             "xai": ("grok-4", "grok-4-1-fast"),
             "openrouter": ("openai/gpt-5.2", "openai/gpt-5-mini"),
             "ollama": ("llama3.1:8b", "llama3.1:8b"),
@@ -774,4 +774,4 @@ async def portfolio_refresh(payload: PortfolioRequest) -> JSONResponse:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("web.app:app", host="0.0.0.0", port=8000, reload=False)
+    uvicorn.run("web.app:app", host="0.0.0.0", port=8002, reload=False)

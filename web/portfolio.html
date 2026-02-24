@@ -10,19 +10,26 @@
       }
     </script>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Serif+SC:wght@500;700&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@500;700&display=swap");
 
       :root {
         --bg: #f3efe8;
         --panel: #ffffff;
         --ink: #1f2a38;
         --muted: #5b6470;
-        --accent: #126e82;
-        --accent-2: #f08a24;
+        --accent: #0f766e;
+        --accent-2: #0b568f;
+        --accent-warm: #f08a24;
         --danger: #d64545;
         --ok: #1f8a5b;
         --line: #e6dfd2;
-        --shadow: 0 18px 36px rgba(24, 38, 56, 0.12);
+        --border: #e6dfd2;
+        --shadow: 0 14px 32px rgba(12, 33, 65, 0.12);
+        --shadow-hover: 0 18px 40px rgba(12, 33, 65, 0.16);
+        --radius-sm: 10px;
+        --radius-md: 14px;
+        --radius-lg: 18px;
+        --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
       }
 
       * {
@@ -32,7 +39,7 @@
       body {
         margin: 0;
         color: var(--ink);
-        font-family: "Space Grotesk", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+        font-family: "IBM Plex Sans", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
         background:
           radial-gradient(circle at 8% 4%, #fff6dd 0, transparent 38%),
           radial-gradient(circle at 90% 12%, #dff6f2 0, transparent 40%),
@@ -90,6 +97,12 @@
         padding: 7px 12px;
         font-size: 12px;
         text-decoration: none;
+        transition: border-color 0.2s var(--ease), background 0.2s var(--ease), color 0.2s var(--ease);
+      }
+      .pill:hover {
+        border-color: var(--accent);
+        background: #f4f9ff;
+        color: var(--accent);
       }
 
       .layout {
@@ -101,11 +114,18 @@
       .panel {
         background: var(--panel);
         border: 1px solid var(--line);
-        border-radius: 16px;
+        border-radius: var(--radius-lg);
         box-shadow: var(--shadow);
         padding: 16px;
+        transition: box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
+      }
+      .panel:hover {
+        box-shadow: var(--shadow-hover);
       }
       html.embed-mode .panel {
+        box-shadow: none;
+      }
+      html.embed-mode .panel:hover {
         box-shadow: none;
       }
 
@@ -138,10 +158,16 @@
       input {
         width: 100%;
         border: 1px solid var(--line);
-        border-radius: 10px;
+        border-radius: var(--radius-sm);
         padding: 10px 12px;
         font-size: 14px;
         background: #fffefb;
+        transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+      }
+      input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
       }
 
       .btn-row {
@@ -158,14 +184,28 @@
       }
 
       .primary {
-        background: linear-gradient(135deg, var(--accent), #159f7f);
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
         color: #fff;
+        transition: transform 0.2s var(--ease), box-shadow 0.25s var(--ease);
+      }
+      .primary:hover:not(:disabled) {
+        transform: scale(1.02);
+        box-shadow: 0 6px 20px rgba(15, 118, 110, 0.35);
+      }
+      .primary:active:not(:disabled) {
+        transform: scale(0.98);
       }
 
       .secondary {
         background: #f2f6fb;
         color: #33465c;
         border: 1px solid #d9e1ec;
+        transition: border-color 0.2s var(--ease), background 0.2s var(--ease), color 0.2s var(--ease);
+      }
+      .secondary:hover:not(:disabled) {
+        border-color: var(--accent);
+        background: #eef6fc;
+        color: var(--accent);
       }
 
       button:disabled {
@@ -205,9 +245,13 @@
 
       .summary .item {
         border: 1px solid var(--line);
-        border-radius: 12px;
+        border-radius: var(--radius-md);
         background: #fff;
         padding: 10px;
+        transition: box-shadow 0.2s var(--ease);
+      }
+      .summary .item:hover {
+        box-shadow: 0 4px 12px rgba(12, 33, 65, 0.08);
       }
 
       .summary .k {
@@ -225,10 +269,14 @@
 
       .chart-card {
         border: 1px solid var(--line);
-        border-radius: 14px;
+        border-radius: var(--radius-md);
         background: #fff;
         padding: 12px;
         margin-top: 10px;
+        transition: box-shadow 0.2s var(--ease);
+      }
+      .chart-card:hover {
+        box-shadow: 0 4px 14px rgba(12, 33, 65, 0.08);
       }
 
       .chart-head {
@@ -476,7 +524,7 @@
               type: "line",
               smooth: true,
               showSymbol: false,
-              lineStyle: { width: 3, color: "#126e82" },
+              lineStyle: { width: 3, color: "#0f766e" },
               data: data.timeline.map((x) => x.total_value),
             },
           ];
@@ -531,7 +579,7 @@
           smooth: true,
           showSymbol: false,
           yAxisIndex: 1,
-          lineStyle: { width: 2.6, color: "#f08a24" },
+          lineStyle: { width: 2.6, color: "#e07c1f" },
           data: data.timeline.map((x) => x.total_value),
         });
 
