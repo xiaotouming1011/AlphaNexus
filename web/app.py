@@ -136,6 +136,31 @@ POPULAR_US_STOCKS_ZH: dict[str, str] = {
     "TSM": "台积电",
 }
 
+RISK_PROFILE_CHOICES: dict[str, str] = {
+    "very_conservative": "非常保守",
+    "conservative": "比较保守",
+    "balanced": "适中",
+    "aggressive": "比较激进",
+    "very_aggressive": "非常激进",
+}
+
+_RISK_PROFILE_ALIASES: dict[str, str] = {
+    "very_conservative": "very_conservative",
+    "conservative": "conservative",
+    "balanced": "balanced",
+    "aggressive": "aggressive",
+    "very_aggressive": "very_aggressive",
+    "very-conservative": "very_conservative",
+    "very aggressive": "very_aggressive",
+    "very-aggressive": "very_aggressive",
+    "moderate": "balanced",
+    "非常保守": "very_conservative",
+    "比较保守": "conservative",
+    "适中": "balanced",
+    "比较激进": "aggressive",
+    "非常激进": "very_aggressive",
+}
+
 _SYMBOL_BY_NAME: dict[str, str] = {
     name.lower(): symbol for symbol, name in POPULAR_US_STOCKS.items()
 }
@@ -203,6 +228,7 @@ def _normalize_ticker_input(raw: str) -> str:
 class RunRequest(BaseModel):
     ticker: str = Field(..., min_length=1)
     trade_date: str
+    risk_profile: str | None = None
     provider: str | None = None
     api_key: str | None = None
     data_vendor: str | None = None
@@ -223,6 +249,24 @@ class PortfolioRequest(BaseModel):
     allocation: dict[str, float] | None = None
     total_value: float = Field(default=200000.0, gt=0)
     alpha_vantage_key: str | None = None
+
+
+def _normalize_risk_profile(raw: str | None) -> str:
+    value = (raw or "").strip().lower()
+    if not value:
+        return "balanced"
+
+    normalized = _RISK_PROFILE_ALIASES.get(value)
+    if normalized and normalized in RISK_PROFILE_CHOICES:
+        return normalized
+
+    raise HTTPException(
+        status_code=400,
+        detail=(
+            "risk_profile 仅支持 very_conservative/conservative/"
+            "balanced/aggressive/very_aggressive（或对应中文）"
+        ),
+    )
 
 
 def _prepare_config(payload: RunRequest):
@@ -392,12 +436,15 @@ def _prepare_config(payload: RunRequest):
                 alpha_key_source = "server_env"
 
     data_vendor = config.get("data_vendors", {}).get("core_stock_apis", "yfinance")
+    risk_profile = _normalize_risk_profile(payload.risk_profile)
     meta = {
         "llm_provider": provider,
         "deep_think_llm": config.get("deep_think_llm"),
         "quick_think_llm": config.get("quick_think_llm"),
         "data_vendor": data_vendor,
         "selected_analysts": selected,
+        "risk_profile": risk_profile,
+        "risk_profile_label": RISK_PROFILE_CHOICES.get(risk_profile, "适中"),
         "debate_mode": config.get("debate_mode"),
         "min_debate_rounds": config.get("min_debate_rounds"),
         "max_debate_rounds": config.get("max_debate_rounds"),
@@ -468,6 +515,7 @@ def _build_response(final_state: dict, decision: str, meta: dict) -> dict:
         "market_report": final_state.get("market_report"),
         "sentiment_report": final_state.get("sentiment_report"),
         "news_report": final_state.get("news_report"),
+        "news_report_ui": final_state.get("news_report_ui"),
         "fundamentals_report": final_state.get("fundamentals_report"),
     }
     sources = _extract_sources(
@@ -478,6 +526,7 @@ def _build_response(final_state: dict, decision: str, meta: dict) -> dict:
             reports.get("market_report", ""),
             reports.get("sentiment_report", ""),
             reports.get("news_report", ""),
+            reports.get("news_report_ui", ""),
             reports.get("fundamentals_report", ""),
         ]
     )
@@ -500,6 +549,7 @@ def _build_response(final_state: dict, decision: str, meta: dict) -> dict:
 def _run_graph(payload: RunRequest) -> dict:
     config, selected, meta = _prepare_config(payload)
     ticker = _normalize_ticker_input(payload.ticker)
+    risk_profile = meta.get("risk_profile", "balanced")
 
     graph = AlphaNexusGraph(
         selected_analysts=selected,
@@ -507,7 +557,11 @@ def _run_graph(payload: RunRequest) -> dict:
         config=config,
     )
 
-    final_state, decision = graph.propagate(ticker, payload.trade_date)
+    final_state, decision = graph.propagate(
+        ticker,
+        payload.trade_date,
+        risk_profile=risk_profile,
+    )
 
     return _build_response(final_state, decision, meta)
 
@@ -588,7 +642,9 @@ def _stream_graph(payload: RunRequest):
             yield event
 
         init_state = graph.propagator.create_initial_state(
-            ticker, payload.trade_date
+            ticker,
+            payload.trade_date,
+            risk_profile=meta.get("risk_profile", "balanced"),
         )
         args = graph.propagator.get_graph_args()
 
@@ -598,6 +654,7 @@ def _stream_graph(payload: RunRequest):
             "market_report": "市场分析",
             "sentiment_report": "社媒情绪",
             "news_report": "新闻宏观",
+            "news_report_ui": f"新闻宏观（投资风格：{meta.get('risk_profile_label', '适中')}）",
             "fundamentals_report": "基本面",
         }
         chunk_count = 0

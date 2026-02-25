@@ -426,6 +426,65 @@
         background: rgba(255, 255, 255, 0.42);
       }
 
+      .run-project-intro {
+        margin-top: 16px;
+        padding: 14px 14px 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: rgba(255, 255, 255, 0.44);
+      }
+
+      .run-project-intro h3 {
+        margin: 0 0 8px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #4f473d;
+      }
+
+      .run-project-intro p {
+        margin: 0 0 8px;
+        font-size: 12px;
+        line-height: 1.65;
+        color: #615a51;
+      }
+
+      .run-project-intro p:last-child {
+        margin-bottom: 0;
+      }
+
+      .run-risk-profile {
+        margin-top: 0;
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: rgba(255, 255, 255, 0.46);
+      }
+
+      .run-risk-profile h3 {
+        margin: 0 0 8px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #4f473d;
+      }
+
+      .run-risk-profile label {
+        margin-bottom: 6px;
+        font-size: 12px;
+        color: #5e574d;
+      }
+
+      .run-risk-hint {
+        margin-top: 8px;
+        margin-bottom: 0;
+        font-size: 12px;
+        line-height: 1.55;
+        color: #655f56;
+      }
+
       .field-stack {
         display: grid;
         gap: 14px;
@@ -1201,7 +1260,7 @@
 
       <div class="hero reveal">
         <h1 class="serif-text editorial-title">AlphaNexus 综合研究控制台</h1>
-        <p>Combined Research Dashboard for multi-agent trading analysis: 可视化过程、可追溯来源、可下载结论。</p>
+        <p>AlphaNexus 通过多智能体协作完成投研闭环：市场、社媒、新闻、基本面四类分析员并行产出观点，经投资辩论与风控辩论交叉校验后，输出可追溯、可下载的交易结论。</p>
       </div>
 
       <div class="stage-strip reveal">
@@ -1217,15 +1276,23 @@
             <div class="run-shell">
               <div class="run-top-grid">
                 <div class="run-intro">
-                  <h2 class="serif-text">分析发现与日期</h2>
-                  <p>
-                    Configure your assets and timeframe first, then launch an integrated multi-agent run.
-                    该页面将自动归一化输入并串联研究、辩论、风控与结论流程。
-                  </p>
-                  <span class="run-tagline">
-                    <span class="material-icons-outlined" aria-hidden="true">explore</span>
-                    Discovery & Date Selection
-                  </span>
+                  <div class="run-risk-profile" aria-label="投资风格">
+                    <h3>投资风格 Investment Style</h3>
+                    <label for="risk_profile">用户投资风格（仅影响新闻筛选）</label>
+                    <select id="risk_profile">
+                      <option value="very_conservative">非常保守</option>
+                      <option value="conservative">比较保守</option>
+                      <option value="balanced" selected>适中</option>
+                      <option value="aggressive">比较激进</option>
+                      <option value="very_aggressive">非常激进</option>
+                    </select>
+                    <p id="risk_profile_hint" class="run-risk-hint">当前：适中。新闻会均衡展示利好与利空，不倾向单一方向。</p>
+                  </div>
+                  <div class="run-project-intro" aria-label="项目介绍">
+                    <h3>项目介绍 Project Intro</h3>
+                    <p>中文：AlphaNexus 是一个多智能体股票研究平台，整合资产识别、分析、辩论与风控流程，输出可追溯的投资结论。</p>
+                    <p>EN: AlphaNexus is a multi-agent equity research platform that unifies asset parsing, analysis, debate, and risk controls into traceable investment conclusions.</p>
+                  </div>
                 </div>
 
                 <form id="run-form">
@@ -1233,7 +1300,7 @@
                     <div class="field-block">
                       <div class="field-title">资产选择 Assets</div>
                       <label for="ticker">股票代码 / 公司名称（支持美股热门 50）</label>
-                      <input id="ticker" type="text" list="ticker_options" placeholder="如 NVDA / NVIDIA / Apple Inc." value="NVDA" />
+                      <input id="ticker" type="text" list="ticker_options" placeholder="如 NVDA / NVIDIA / Apple Inc." />
                       <datalist id="ticker_options"></datalist>
                       <div id="ticker_hint" class="field-note">可输入代码或公司名，系统会自动识别。</div>
                     </div>
@@ -1615,6 +1682,22 @@
         fundamentals: { label: "基本面", reportType: "fundamentals_report", sectionId: "fundamentals" },
       };
 
+      const RISK_PROFILE_LABELS = {
+        very_conservative: "非常保守",
+        conservative: "比较保守",
+        balanced: "适中",
+        aggressive: "比较激进",
+        very_aggressive: "非常激进",
+      };
+
+      const RISK_PROFILE_HINTS = {
+        very_conservative: "当前：非常保守。新闻优先突出下行风险、回撤风险与不确定性信息。",
+        conservative: "当前：比较保守。新闻偏重风险控制，同时保留少量高确定性利好。",
+        balanced: "当前：适中。新闻会均衡展示利好与利空，不倾向单一方向。",
+        aggressive: "当前：比较激进。新闻偏重上行催化、成长预期与事件驱动机会。",
+        very_aggressive: "当前：非常激进。新闻重点突出高弹性机会，并保留关键风险提醒。",
+      };
+
       const PROGRESS_STEP_ORDER = [
         "analyst_report",
         "investment_plan",
@@ -1690,6 +1773,8 @@
       const tickerOptionsEl = document.getElementById("ticker_options");
       const tradeDateInput = document.getElementById("trade_date");
       const dateNoticeEl = document.getElementById("date_notice");
+      const riskProfileEl = document.getElementById("risk_profile");
+      const riskProfileHintEl = document.getElementById("risk_profile_hint");
 
       const providerEl = document.getElementById("provider");
       const apiKeyEl = document.getElementById("api_key");
@@ -1938,6 +2023,12 @@
         }
       }
 
+      function updateRiskProfileHint() {
+        if (!riskProfileEl || !riskProfileHintEl) return;
+        const value = riskProfileEl.value || "balanced";
+        riskProfileHintEl.textContent = RISK_PROFILE_HINTS[value] || RISK_PROFILE_HINTS.balanced;
+      }
+
       function setAnalyst(value) {
         selectedAnalyst = value;
         analystButtons.forEach((btn) => {
@@ -2086,6 +2177,7 @@
           `深度模型: ${meta.deep_think_llm || ""}`,
           `快速模型: ${meta.quick_think_llm || ""}`,
           `数据源: ${meta.data_vendor || ""}`,
+          `投资风格: ${meta.risk_profile_label || RISK_PROFILE_LABELS[meta.risk_profile] || "适中"}`,
           `辩论模式: ${meta.debate_mode || ""}`,
           `投资辩论轮数范围: ${meta.min_debate_rounds || ""}~${meta.max_debate_rounds || ""}`,
           `风控辩论轮数范围: ${meta.min_risk_discuss_rounds || ""}~${meta.max_risk_discuss_rounds || ""}`,
@@ -2634,6 +2726,7 @@
               ...extractUrls(lastResult?.trader_investment_plan || ""),
               ...extractUrls(lastResult?.reports?.market_report || ""),
               ...extractUrls(lastResult?.reports?.sentiment_report || ""),
+              ...extractUrls(lastResult?.reports?.news_report_ui || ""),
               ...extractUrls(lastResult?.reports?.news_report || ""),
               ...extractUrls(lastResult?.reports?.fundamentals_report || ""),
             ];
@@ -2700,12 +2793,20 @@
         const reportSpecs = [
           { key: "market_report", label: "市场分析", target: marketReportEl, section: sections.market },
           { key: "sentiment_report", label: "社媒情绪", target: sentimentReportEl, section: sections.sentiment },
-          { key: "news_report", label: "新闻宏观", target: newsReportEl, section: sections.news },
+          {
+            key: "news_report",
+            label: lastResult?.reports?.news_report_ui ? "新闻宏观（风险偏好）" : "新闻宏观",
+            target: newsReportEl,
+            section: sections.news,
+            resolveRaw: (reports) => reports?.news_report_ui || reports?.news_report || "",
+          },
           { key: "fundamentals_report", label: "基本面", target: fundamentalsReportEl, section: sections.fundamentals },
         ];
 
         for (const spec of reportSpecs) {
-          const raw = lastResult?.reports?.[spec.key] || "";
+          const raw = spec.resolveRaw
+            ? spec.resolveRaw(lastResult?.reports)
+            : (lastResult?.reports?.[spec.key] || "");
           if (!raw) continue;
           // 已取消正文小角标展示，仅保留来源收集与 Sources 区域。
           annotateMarkdownWithSourceCitations(raw, spec.label, activeRegistry);
@@ -2771,6 +2872,7 @@
       function initializeInputUI() {
         initTickerOptions();
         updateTickerHint();
+        updateRiskProfileHint();
 
         tradeDateInput.value = etToday();
         updateDateNotice();
@@ -2778,6 +2880,7 @@
         tickerInput.addEventListener("input", updateTickerHint);
         tickerInput.addEventListener("blur", updateTickerHint);
         tradeDateInput.addEventListener("change", updateDateNotice);
+        riskProfileEl.addEventListener("change", updateRiskProfileHint);
 
         analystButtons.forEach((btn) => {
           btn.addEventListener("click", () => setAnalyst(btn.dataset.analyst || "market"));
@@ -2853,6 +2956,8 @@
         }
         pushProgress(`目标标的：${ticker}`);
         pushProgress(`已选择模块：${ANALYST_CONFIG[selectedAnalyst].label}`);
+        const risk_profile = riskProfileEl.value || "balanced";
+        pushProgress(`投资风格：${RISK_PROFILE_LABELS[risk_profile] || "适中"}（仅影响新闻筛选）`);
 
         const provider = providerEl.value;
         const api_key = apiKeyEl.value.trim();
@@ -2870,6 +2975,7 @@
             body: JSON.stringify({
               ticker,
               trade_date: tradeDate,
+              risk_profile,
               selected_analysts,
               provider,
               api_key,
@@ -2947,7 +3053,7 @@
                   renderMarkdown(sentimentReportEl, content);
                   showSection(sections.sentiment);
                 }
-                if (payload.report_type === "news_report") {
+                if (payload.report_type === "news_report" || payload.report_type === "news_report_ui") {
                   renderMarkdown(newsReportEl, content);
                   showSection(sections.news);
                 }
@@ -2960,7 +3066,10 @@
                 pushProgress(`${payload.label} 完成`);
 
                 const expectedReportType = ANALYST_CONFIG[selectedAnalyst].reportType;
-                if (payload.report_type === expectedReportType) {
+                const isNewsExpected =
+                  expectedReportType === "news_report" &&
+                  (payload.report_type === "news_report" || payload.report_type === "news_report_ui");
+                if (payload.report_type === expectedReportType || isNewsExpected) {
                   markStep("analyst_report", `${payload.label} 已完成`);
                 }
                 continue;
@@ -3085,7 +3194,7 @@
 
         lines.push("## 过程输出");
         lines.push("### 分析模块报告");
-        lines.push(lastResult.reports?.market_report || lastResult.reports?.sentiment_report || lastResult.reports?.news_report || lastResult.reports?.fundamentals_report || "");
+        lines.push(lastResult.reports?.market_report || lastResult.reports?.sentiment_report || lastResult.reports?.news_report_ui || lastResult.reports?.news_report || lastResult.reports?.fundamentals_report || "");
         lines.push("");
 
         lines.push("### 投资计划");
