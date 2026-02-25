@@ -575,7 +575,7 @@
 
       .preview-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
         gap: 16px;
       }
 
@@ -601,34 +601,127 @@
         color: #70675b;
       }
 
-      .market-bars {
-        height: 112px;
-        display: grid;
-        grid-template-columns: repeat(12, 1fr);
-        align-items: end;
-        gap: 4px;
+      .market-preview-card {
+        padding: 18px;
+        background: rgba(255, 255, 255, 0.52);
       }
 
-      .market-bars i {
-        display: block;
-        width: 100%;
-        border-radius: 3px 3px 0 0;
-        background: linear-gradient(180deg, #9b8770, #766350);
+      .market-preview-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
       }
 
-      .sentiment-curve {
+      .market-preview-quote {
+        text-align: right;
+        min-width: 150px;
+      }
+
+      .market-preview-price {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: 34px;
+        line-height: 1;
+        color: #1b1713;
+      }
+
+      .market-preview-change {
+        margin: 6px 0 0;
+        font-size: 13px;
+        font-weight: 500;
+        color: #5c5449;
+      }
+
+      .market-preview-change.pos {
+        color: #1d7a4f;
+      }
+
+      .market-preview-change.neg {
+        color: #b23933;
+      }
+
+      .market-range-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .market-range-btn {
+        border: 1px solid rgba(17, 17, 17, 0.12);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.64);
+        color: #4c4338;
+        padding: 6px 14px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s var(--ease-apple);
+      }
+
+      .market-range-btn:hover {
+        background: rgba(250, 250, 250, 0.96);
+        border-color: rgba(17, 17, 17, 0.2);
+      }
+
+      .market-range-btn.active {
+        background: #171513;
+        color: #f7f2ea;
+        border-color: #171513;
+      }
+
+      .market-chart-shell {
         position: relative;
-        height: 112px;
-        border-radius: 10px;
-        background: linear-gradient(180deg, rgba(140, 120, 97, 0.28), rgba(140, 120, 97, 0.04));
+        height: 336px;
+        border: 1px solid rgba(17, 17, 17, 0.08);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.74);
         overflow: hidden;
       }
 
-      .sentiment-curve svg {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
+      #market_preview_chart {
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      .market-preview-status {
+        margin: 10px 0 0;
+        font-size: 12px;
+        color: #6d6458;
+      }
+
+      .market-preview-status.error {
+        color: #b23933;
+      }
+
+      .market-metrics {
+        margin-top: 12px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 24px;
+        row-gap: 0;
+      }
+
+      .market-metric {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 0;
+        border-top: 1px solid rgba(17, 17, 17, 0.08);
+      }
+
+      .market-metric-label {
+        color: #71685d;
+        font-size: 13px;
+      }
+
+      .market-metric-value {
+        color: #1f1a16;
+        font-size: 15px;
+        font-weight: 520;
+        letter-spacing: 0.01em;
       }
 
       details.advanced {
@@ -1211,6 +1304,28 @@
           grid-template-columns: 1fr;
         }
 
+        .market-preview-head {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .market-preview-quote {
+          text-align: left;
+          min-width: 0;
+        }
+
+        .market-preview-price {
+          font-size: 28px;
+        }
+
+        .market-chart-shell {
+          height: 276px;
+        }
+
+        .market-metrics {
+          grid-template-columns: 1fr;
+        }
+
         .footer-logo {
           font-size: 30px;
         }
@@ -1394,24 +1509,38 @@
                 </form>
               </div>
 
-              <div class="preview-grid" aria-hidden="true">
-                <article class="preview-card">
-                  <h3>市场实时预览</h3>
-                  <p class="preview-sub">Market Real-time Preview · NVDA</p>
-                  <div class="market-bars">
-                    <i style="height:22%"></i><i style="height:38%"></i><i style="height:31%"></i><i style="height:53%"></i>
-                    <i style="height:47%"></i><i style="height:70%"></i><i style="height:61%"></i><i style="height:84%"></i>
-                    <i style="height:76%"></i><i style="height:45%"></i><i style="height:57%"></i><i style="height:33%"></i>
+              <div id="market_preview_panel" class="preview-grid" aria-live="polite" hidden>
+                <article class="preview-card market-preview-card">
+                  <div class="market-preview-head">
+                    <div>
+                      <h3>市场实时预览</h3>
+                      <p id="market_preview_sub" class="preview-sub">Market Real-time Preview</p>
+                    </div>
+                    <div class="market-preview-quote">
+                      <p id="market_preview_price" class="market-preview-price">--</p>
+                      <p id="market_preview_change" class="market-preview-change">--</p>
+                    </div>
                   </div>
-                </article>
-                <article class="preview-card">
-                  <h3>社交情绪评分</h3>
-                  <p class="preview-sub">Social Sentiment Score</p>
-                  <div class="sentiment-curve">
-                    <svg viewBox="0 0 100 40" preserveAspectRatio="none">
-                      <path d="M0,30 C18,30 25,10 42,15 C60,20 72,6 100,12" fill="none" stroke="#8c7861" stroke-width="1.6"></path>
-                    </svg>
+
+                  <div id="market_preview_ranges" class="market-range-tabs" role="tablist" aria-label="行情区间">
+                    <button class="market-range-btn" type="button" data-range="1d">1天</button>
+                    <button class="market-range-btn" type="button" data-range="1w">1周</button>
+                    <button class="market-range-btn" type="button" data-range="1m">1个月</button>
+                    <button class="market-range-btn" type="button" data-range="3m">3个月</button>
+                    <button class="market-range-btn" type="button" data-range="6m">6个月</button>
+                    <button class="market-range-btn" type="button" data-range="ytd">年初至今</button>
+                    <button class="market-range-btn active" type="button" data-range="1y">1年</button>
+                    <button class="market-range-btn" type="button" data-range="2y">2年</button>
+                    <button class="market-range-btn" type="button" data-range="5y">5年</button>
+                    <button class="market-range-btn" type="button" data-range="10y">10年</button>
+                    <button class="market-range-btn" type="button" data-range="all">全部</button>
                   </div>
+
+                  <div class="market-chart-shell">
+                    <canvas id="market_preview_chart" aria-label="市场价格图（可悬浮查看日期与股价）"></canvas>
+                  </div>
+                  <p id="market_preview_status" class="market-preview-status">点击“开始分析”后自动加载。</p>
+                  <div id="market_preview_metrics" class="market-metrics"></div>
                 </article>
               </div>
             </div>
@@ -1550,6 +1679,7 @@
       </footer>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
     <script>
@@ -1698,6 +1828,35 @@
         very_aggressive: "当前：非常激进。新闻重点突出高弹性机会，并保留关键风险提醒。",
       };
 
+      const MARKET_PREVIEW_RANGE_LABELS = {
+        "1d": "1天",
+        "1w": "1周",
+        "1m": "1个月",
+        "3m": "3个月",
+        "6m": "6个月",
+        ytd: "年初至今",
+        "1y": "1年",
+        "2y": "2年",
+        "5y": "5年",
+        "10y": "10年",
+        all: "全部",
+      };
+
+      const MARKET_PREVIEW_METRICS = [
+        { key: "today_open", label: "今日开盘价", format: "price" },
+        { key: "week52_high", label: "52周最高价", format: "price" },
+        { key: "today_high", label: "今日最高价", format: "price" },
+        { key: "week52_low", label: "52周最低价", format: "price" },
+        { key: "today_low", label: "今日最低价", format: "price" },
+        { key: "avg_volume", label: "平均成交量", format: "volume" },
+        { key: "volume", label: "成交量", format: "volume" },
+        { key: "dividend_yield", label: "收益率", format: "percent_from_decimal" },
+        { key: "pe_ratio", label: "市盈率", format: "number" },
+        { key: "beta", label: "贝塔系数", format: "number" },
+        { key: "market_cap", label: "市值", format: "market_cap" },
+        { key: "eps", label: "每股收益", format: "number" },
+      ];
+
       const PROGRESS_STEP_ORDER = [
         "analyst_report",
         "investment_plan",
@@ -1807,6 +1966,14 @@
       const sentimentReportEl = document.getElementById("sentiment_report");
       const newsReportEl = document.getElementById("news_report");
       const fundamentalsReportEl = document.getElementById("fundamentals_report");
+      const marketPreviewPanelEl = document.getElementById("market_preview_panel");
+      const marketPreviewSubEl = document.getElementById("market_preview_sub");
+      const marketPreviewPriceEl = document.getElementById("market_preview_price");
+      const marketPreviewChangeEl = document.getElementById("market_preview_change");
+      const marketPreviewChartEl = document.getElementById("market_preview_chart");
+      const marketPreviewStatusEl = document.getElementById("market_preview_status");
+      const marketPreviewMetricsEl = document.getElementById("market_preview_metrics");
+      const marketRangeButtons = Array.from(document.querySelectorAll(".market-range-btn"));
 
       const downloadBtn = document.getElementById("download-btn");
       const downloadJsonBtn = document.getElementById("download-json-btn");
@@ -1874,6 +2041,11 @@
       let streamTradeDate = "";
       let streamLastEventAt = 0;
       let progressWatchTimer = null;
+      let marketPreviewChart = null;
+      let marketPreviewTimer = null;
+      let marketPreviewCurrentTicker = "";
+      let marketPreviewCurrentRange = "1y";
+      let marketPreviewDataSource = "";
 
       if (window.marked) {
         marked.setOptions({ breaks: true, gfm: true });
@@ -2027,6 +2199,305 @@
         if (!riskProfileEl || !riskProfileHintEl) return;
         const value = riskProfileEl.value || "balanced";
         riskProfileHintEl.textContent = RISK_PROFILE_HINTS[value] || RISK_PROFILE_HINTS.balanced;
+      }
+
+      function toFiniteNumber(value) {
+        const num = Number(value);
+        return Number.isFinite(num) ? num : null;
+      }
+
+      function formatPrice(value, digits = 2) {
+        const num = toFiniteNumber(value);
+        if (num === null) return "--";
+        return num.toLocaleString("en-US", {
+          minimumFractionDigits: digits,
+          maximumFractionDigits: digits,
+        });
+      }
+
+      function formatLargeNumber(value) {
+        const num = toFiniteNumber(value);
+        if (num === null) return "--";
+        const abs = Math.abs(num);
+        if (abs >= 1e12) return `${(num / 1e12).toFixed(2)}万亿`;
+        if (abs >= 1e8) return `${(num / 1e8).toFixed(2)}亿`;
+        if (abs >= 1e4) return `${(num / 1e4).toFixed(2)}万`;
+        return Math.round(num).toLocaleString("en-US");
+      }
+
+      function formatMetricValue(value, format) {
+        const num = toFiniteNumber(value);
+        if (num === null) return "--";
+
+        if (format === "price") return formatPrice(num, 2);
+        if (format === "volume") return formatLargeNumber(num);
+        if (format === "market_cap") return formatLargeNumber(num);
+        if (format === "percent") return `${num.toFixed(2)}%`;
+        if (format === "percent_from_decimal") return `${(num * 100).toFixed(2)}%`;
+        return num.toLocaleString("en-US", {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2,
+        });
+      }
+
+      function setMarketPreviewStatus(text, isError = false) {
+        if (!marketPreviewStatusEl) return;
+        marketPreviewStatusEl.textContent = text || "";
+        marketPreviewStatusEl.classList.toggle("error", Boolean(isError));
+      }
+
+      function setActiveMarketRange(rangeKey) {
+        marketRangeButtons.forEach((btn) => {
+          const active = btn.dataset.range === rangeKey;
+          btn.classList.toggle("active", active);
+          btn.setAttribute("aria-selected", active ? "true" : "false");
+        });
+      }
+
+      function renderMarketMetrics(metrics) {
+        if (!marketPreviewMetricsEl) return;
+        marketPreviewMetricsEl.innerHTML = "";
+
+        for (const item of MARKET_PREVIEW_METRICS) {
+          const row = document.createElement("div");
+          row.className = "market-metric";
+
+          const label = document.createElement("span");
+          label.className = "market-metric-label";
+          label.textContent = item.label;
+
+          const value = document.createElement("span");
+          value.className = "market-metric-value";
+          value.textContent = formatMetricValue(metrics?.[item.key], item.format);
+
+          row.appendChild(label);
+          row.appendChild(value);
+          marketPreviewMetricsEl.appendChild(row);
+        }
+      }
+
+      function ensureMarketPreviewChart() {
+        if (marketPreviewChart) return marketPreviewChart;
+        if (!marketPreviewChartEl || !window.Chart) return null;
+
+        const ctx = marketPreviewChartEl.getContext("2d");
+        if (!ctx) return null;
+
+        marketPreviewChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: [],
+            datasets: [
+              {
+                type: "line",
+                label: "股价",
+                yAxisID: "price",
+                data: [],
+                borderColor: "#e24a44",
+                backgroundColor: "rgba(226,74,68,0.18)",
+                borderWidth: 2.4,
+                tension: 0.18,
+                fill: true,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                pointHoverBorderWidth: 2,
+                pointHoverBackgroundColor: "#fff",
+                pointHoverBorderColor: "#e24a44",
+              },
+              {
+                type: "bar",
+                label: "成交量",
+                yAxisID: "volume",
+                data: [],
+                backgroundColor: "rgba(129,118,102,0.45)",
+                borderRadius: 2,
+                maxBarThickness: 7,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              mode: "index",
+              intersect: false,
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: "rgba(24, 21, 18, 0.92)",
+                titleColor: "#f7efe5",
+                bodyColor: "#f7efe5",
+                displayColors: false,
+                callbacks: {
+                  title(items) {
+                    return items?.[0]?.label || "";
+                  },
+                  label(context) {
+                    if (context.dataset?.yAxisID === "volume") {
+                      const vol = toFiniteNumber(context.parsed?.y);
+                      if (vol === null) return "成交量: --";
+                      return `成交量: ${Math.round(vol).toLocaleString("en-US")}`;
+                    }
+                    const price = toFiniteNumber(context.parsed?.y);
+                    if (price === null) return "股价: --";
+                    return `股价: ${formatPrice(price, 4)}`;
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                grid: { color: "rgba(17,17,17,0.07)" },
+                ticks: {
+                  color: "#6b6154",
+                  maxTicksLimit: 8,
+                },
+              },
+              price: {
+                position: "right",
+                grid: { color: "rgba(17,17,17,0.07)" },
+                ticks: {
+                  color: "#3e372f",
+                  callback(value) {
+                    return formatPrice(value, 2);
+                  },
+                },
+              },
+              volume: {
+                display: false,
+                position: "left",
+                beginAtZero: true,
+              },
+            },
+          },
+        });
+
+        return marketPreviewChart;
+      }
+
+      function renderMarketPreviewData(payload) {
+        const data = payload || {};
+        marketPreviewDataSource = data.data_source || "";
+        const metrics = data.metrics || {};
+        const latestPrice = toFiniteNumber(data.latest_price);
+        const change = toFiniteNumber(data.change);
+        const changePercent = toFiniteNumber(data.change_percent);
+
+        marketPreviewSubEl.textContent = `Market Real-time Preview · ${data.ticker || marketPreviewCurrentTicker} · ${
+          MARKET_PREVIEW_RANGE_LABELS[data.range] || data.range || marketPreviewCurrentRange
+        } · 更新 ${data.updated_at_et || "--"} ET`;
+
+        marketPreviewPriceEl.textContent = latestPrice === null ? "--" : formatPrice(latestPrice, 2);
+
+        marketPreviewChangeEl.className = "market-preview-change";
+        if (change === null || changePercent === null) {
+          marketPreviewChangeEl.textContent = "--";
+        } else {
+          const sign = change >= 0 ? "+" : "";
+          marketPreviewChangeEl.textContent = `${sign}${formatPrice(change, 2)} (${sign}${changePercent.toFixed(2)}%)`;
+          if (change > 0) marketPreviewChangeEl.classList.add("pos");
+          if (change < 0) marketPreviewChangeEl.classList.add("neg");
+        }
+
+        renderMarketMetrics(metrics);
+
+        const points = Array.isArray(data.points) ? data.points : [];
+        const chart = ensureMarketPreviewChart();
+        if (chart) {
+          chart.data.labels = points.map((point) => point.label || "");
+          chart.data.datasets[0].data = points.map((point) => toFiniteNumber(point.close));
+          chart.data.datasets[1].data = points.map((point) => toFiniteNumber(point.volume));
+          chart.update("none");
+        }
+      }
+
+      async function loadMarketPreview(rangeKey = marketPreviewCurrentRange, silent = false) {
+        if (!marketPreviewCurrentTicker) return;
+        marketPreviewCurrentRange = rangeKey || "1y";
+        setActiveMarketRange(marketPreviewCurrentRange);
+        if (!silent) {
+          setMarketPreviewStatus("正在加载市场实时预览...");
+        }
+
+        try {
+          const res = await fetch(
+            `/api/market/preview?ticker=${encodeURIComponent(marketPreviewCurrentTicker)}&range=${encodeURIComponent(marketPreviewCurrentRange)}`
+          );
+          if (!res.ok) {
+            let message = `请求失败: ${res.status}`;
+            try {
+              const err = await res.json();
+              if (typeof err?.detail === "string") {
+                message = err.detail;
+              } else if (err?.detail?.message) {
+                message = err.detail.message;
+              }
+            } catch (_) {
+              // ignore parse errors
+            }
+            throw new Error(message);
+          }
+
+          const payload = await res.json();
+          const data = payload?.data || payload;
+          if (!data || !Array.isArray(data.points) || data.points.length === 0) {
+            throw new Error("行情数据为空");
+          }
+          renderMarketPreviewData(data);
+          if ((data.data_source || "").toLowerCase() === "yfinance") {
+            startMarketPreviewPolling();
+            setMarketPreviewStatus(`已更新：${data.updated_at_et || "--"} ET`);
+          } else {
+            stopMarketPreviewPolling();
+            setMarketPreviewStatus(`已更新：${data.updated_at_et || "--"} ET（Alpha Vantage）`);
+          }
+        } catch (err) {
+          const message = err?.message || "加载失败";
+          stopMarketPreviewPolling();
+          setMarketPreviewStatus(`加载失败：${message}`, true);
+        }
+      }
+
+      function stopMarketPreviewPolling() {
+        if (marketPreviewTimer) {
+          clearInterval(marketPreviewTimer);
+          marketPreviewTimer = null;
+        }
+      }
+
+      function startMarketPreviewPolling() {
+        stopMarketPreviewPolling();
+        marketPreviewTimer = setInterval(() => {
+          if (!marketPreviewCurrentTicker) return;
+          loadMarketPreview(marketPreviewCurrentRange, true);
+        }, 45000);
+      }
+
+      function activateMarketPreview(ticker) {
+        if (!marketPreviewPanelEl) return;
+        marketPreviewCurrentTicker = ticker;
+        marketPreviewCurrentRange = "1y";
+        marketPreviewDataSource = "";
+        marketPreviewPanelEl.hidden = false;
+        if (window.revealOne) {
+          window.revealOne(marketPreviewPanelEl);
+        }
+        renderMarketMetrics({});
+        setActiveMarketRange(marketPreviewCurrentRange);
+        loadMarketPreview(marketPreviewCurrentRange);
+      }
+
+      function initializeMarketPreviewUI() {
+        renderMarketMetrics({});
+        setActiveMarketRange(marketPreviewCurrentRange);
+        marketRangeButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const range = btn.dataset.range || "1y";
+            if (!marketPreviewCurrentTicker) return;
+            loadMarketPreview(range);
+          });
+        });
       }
 
       function setAnalyst(value) {
@@ -2906,6 +3377,7 @@
 
       initializeInputUI();
       initializeAdvancedSettings();
+      initializeMarketPreviewUI();
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -2933,6 +3405,7 @@
         }
 
         openOutputPanel();
+        activateMarketPreview(ticker);
         streamTradeDate = tradeDate;
         clearOutputs();
         resetProgress();
@@ -3175,6 +3648,7 @@
           setProgress(100, "执行失败", true);
         } finally {
           stopProgressWatchdog();
+          stopMarketPreviewPolling();
           runBtn.disabled = false;
         }
       });

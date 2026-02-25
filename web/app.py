@@ -2,14 +2,16 @@ import copy
 import json
 import os
 import re
-from datetime import date
+from datetime import date, datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
+import yfinance as yf
 
 from alphanexus.graph.trading_graph import AlphaNexusGraph
 from alphanexus.default_config import DEFAULT_CONFIG
@@ -18,6 +20,7 @@ from alphanexus.dataflows.errors import (
     DataflowBadRequestError,
     DataflowError,
 )
+from alphanexus.dataflows.alpha_vantage_common import _make_api_request
 from alphanexus.knowledge import get_company_graph_store
 from web.portfolio_service import build_portfolio_timeseries
 
@@ -161,6 +164,20 @@ _RISK_PROFILE_ALIASES: dict[str, str] = {
     "非常激进": "very_aggressive",
 }
 
+MARKET_PREVIEW_RANGE_CONFIG: dict[str, dict[str, str]] = {
+    "1d": {"period": "1d", "interval": "5m"},
+    "1w": {"period": "5d", "interval": "30m"},
+    "1m": {"period": "1mo", "interval": "1d"},
+    "3m": {"period": "3mo", "interval": "1d"},
+    "6m": {"period": "6mo", "interval": "1d"},
+    "ytd": {"period": "ytd", "interval": "1d"},
+    "1y": {"period": "1y", "interval": "1d"},
+    "2y": {"period": "2y", "interval": "1d"},
+    "5y": {"period": "5y", "interval": "1wk"},
+    "10y": {"period": "10y", "interval": "1wk"},
+    "all": {"period": "max", "interval": "1mo"},
+}
+
 _SYMBOL_BY_NAME: dict[str, str] = {
     name.lower(): symbol for symbol, name in POPULAR_US_STOCKS.items()
 }
@@ -223,6 +240,378 @@ def _normalize_ticker_input(raw: str) -> str:
 
     # Fallback: keep original symbol-style input and let upstream validate.
     return upper
+
+
+def _as_float(value):
+    if value is None:
+        return None
+    try:
+        if hasattr(value, "item"):
+            value = value.item()
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _safe_get(mapping, *keys):
+    if mapping is None:
+        return None
+    for key in keys:
+        try:
+            if isinstance(mapping, dict):
+                value = mapping.get(key)
+            elif hasattr(mapping, "get"):
+                value = mapping.get(key)
+            else:
+                value = getattr(mapping, key, None)
+        except Exception:
+            value = None
+        if value is not None:
+            return value
+    return None
+
+
+def _downsample_points(points: list[dict], max_points: int = 1200) -> list[dict]:
+    if len(points) <= max_points:
+        return points
+    step = max(1, (len(points) + max_points - 1) // max_points)
+    sampled = points[::step]
+    if sampled and sampled[-1] != points[-1]:
+        sampled.append(points[-1])
+    return sampled
+
+
+def _range_start_date(range_norm: str, end_date: date) -> date:
+    if range_norm == "1d":
+        return end_date - timedelta(days=1)
+    if range_norm == "1w":
+        return end_date - timedelta(days=7)
+    if range_norm == "1m":
+        return end_date - timedelta(days=31)
+    if range_norm == "3m":
+        return end_date - timedelta(days=93)
+    if range_norm == "6m":
+        return end_date - timedelta(days=186)
+    if range_norm == "ytd":
+        return date(end_date.year, 1, 1)
+    if range_norm == "1y":
+        return end_date - timedelta(days=365)
+    if range_norm == "2y":
+        return end_date - timedelta(days=730)
+    if range_norm == "5y":
+        return end_date - timedelta(days=365 * 5)
+    if range_norm == "10y":
+        return end_date - timedelta(days=365 * 10)
+    return date(1970, 1, 1)
+
+
+def _load_alpha_vantage_json(function_name: str, params: dict) -> dict:
+    payload = _make_api_request(function_name, params)
+    if isinstance(payload, dict):
+        return payload
+    if isinstance(payload, str):
+        try:
+            parsed = json.loads(payload)
+        except json.JSONDecodeError as exc:
+            raise HTTPException(status_code=502, detail=f"{function_name} 返回非 JSON") from exc
+        if isinstance(parsed, dict):
+            return parsed
+    raise HTTPException(status_code=502, detail=f"{function_name} 返回格式异常")
+
+
+def _build_market_preview_alpha_vantage(symbol: str, range_norm: str) -> dict:
+    try:
+        daily_payload = _load_alpha_vantage_json(
+            "TIME_SERIES_DAILY",
+            {"symbol": symbol, "outputsize": "full"},
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Alpha Vantage 获取日线失败: {exc}") from exc
+
+    time_series = daily_payload.get("Time Series (Daily)") or {}
+    if not time_series:
+        message = daily_payload.get("Note") or daily_payload.get("Information") or "日线数据为空"
+        raise HTTPException(status_code=502, detail=f"Alpha Vantage 返回异常: {message}")
+
+    rows: list[dict] = []
+    for date_text, values in time_series.items():
+        try:
+            dt = datetime.strptime(date_text, "%Y-%m-%d").date()
+        except ValueError:
+            continue
+
+        close = _as_float(_safe_get(values, "4. close", "close"))
+        if close is None:
+            continue
+        rows.append(
+            {
+                "date": dt,
+                "open": _as_float(_safe_get(values, "1. open", "open")),
+                "high": _as_float(_safe_get(values, "2. high", "high")),
+                "low": _as_float(_safe_get(values, "3. low", "low")),
+                "close": close,
+                "volume": _as_float(_safe_get(values, "5. volume", "volume")),
+            }
+        )
+
+    rows.sort(key=lambda item: item["date"])
+    if not rows:
+        raise HTTPException(status_code=404, detail=f"未获取到 {symbol} 的可用行情数据")
+
+    end_date = rows[-1]["date"]
+    start_date = _range_start_date(range_norm, end_date)
+    filtered_rows = [item for item in rows if item["date"] >= start_date]
+    if not filtered_rows:
+        filtered_rows = rows[-60:]
+
+    tz_et = ZoneInfo("America/New_York")
+    points = [
+        {
+            "ts": int(datetime.combine(item["date"], datetime.min.time(), tz_et).timestamp() * 1000),
+            "label": item["date"].strftime("%Y-%m-%d"),
+            "close": round(item["close"], 4),
+            "volume": int(item["volume"]) if item["volume"] is not None else None,
+        }
+        for item in filtered_rows
+    ]
+    points = _downsample_points(points)
+
+    quote: dict = {}
+    overview: dict = {}
+    try:
+        quote_payload = _load_alpha_vantage_json("GLOBAL_QUOTE", {"symbol": symbol})
+        quote = quote_payload.get("Global Quote") or {}
+    except Exception:
+        quote = {}
+    try:
+        overview = _load_alpha_vantage_json("OVERVIEW", {"symbol": symbol})
+    except Exception:
+        overview = {}
+
+    latest_price = _as_float(_safe_get(quote, "05. price")) or points[-1]["close"]
+    prev_close = _as_float(_safe_get(quote, "08. previous close"))
+    if prev_close is None and len(points) > 1:
+        prev_close = points[-2]["close"]
+
+    change = None
+    change_pct = None
+    if prev_close not in (None, 0):
+        change = latest_price - prev_close
+        change_pct = (change / prev_close) * 100
+
+    last_row = filtered_rows[-1]
+    today_open = _as_float(_safe_get(quote, "02. open")) or last_row.get("open")
+    today_high = _as_float(_safe_get(quote, "03. high")) or last_row.get("high")
+    today_low = _as_float(_safe_get(quote, "04. low")) or last_row.get("low")
+    day_volume = _as_float(_safe_get(quote, "06. volume")) or last_row.get("volume")
+
+    market_cap = _as_float(_safe_get(overview, "MarketCapitalization"))
+    week52_high = _as_float(_safe_get(overview, "52WeekHigh"))
+    week52_low = _as_float(_safe_get(overview, "52WeekLow"))
+    dividend_yield = _as_float(_safe_get(overview, "DividendYield"))
+    pe_ratio = _as_float(_safe_get(overview, "PERatio"))
+    beta = _as_float(_safe_get(overview, "Beta"))
+    eps = _as_float(_safe_get(overview, "EPS"))
+    shares_outstanding = _as_float(_safe_get(overview, "SharesOutstanding"))
+
+    volume_samples = [item.get("volume") for item in rows[-30:] if item.get("volume") is not None]
+    avg_volume = (sum(volume_samples) / len(volume_samples)) if volume_samples else None
+
+    turnover_rate = None
+    if day_volume not in (None, 0) and shares_outstanding not in (None, 0):
+        turnover_rate = (day_volume / shares_outstanding) * 100
+
+    return {
+        "ticker": symbol,
+        "range": range_norm,
+        "interval": "1d",
+        "updated_at_et": points[-1]["label"],
+        "latest_price": round(latest_price, 4) if latest_price is not None else None,
+        "change": round(change, 4) if change is not None else None,
+        "change_percent": round(change_pct, 4) if change_pct is not None else None,
+        "points": points,
+        "metrics": {
+            "today_open": today_open,
+            "today_high": today_high,
+            "today_low": today_low,
+            "volume": day_volume,
+            "turnover_rate": turnover_rate,
+            "market_cap": market_cap,
+            "week52_high": week52_high,
+            "week52_low": week52_low,
+            "avg_volume": avg_volume,
+            "dividend_yield": dividend_yield,
+            "pe_ratio": pe_ratio,
+            "beta": beta,
+            "eps": eps,
+        },
+        "data_source": "alpha_vantage",
+    }
+
+
+def _build_market_preview(symbol: str, range_key: str) -> dict:
+    range_norm = (range_key or "1y").strip().lower()
+    if range_norm not in MARKET_PREVIEW_RANGE_CONFIG:
+        raise HTTPException(
+            status_code=400,
+            detail="range 仅支持 1d/1w/1m/3m/6m/ytd/1y/2y/5y/10y/all",
+        )
+
+    cfg = MARKET_PREVIEW_RANGE_CONFIG[range_norm]
+    ticker_obj = yf.Ticker(symbol)
+    yfinance_error: str | None = None
+
+    try:
+        history_df = ticker_obj.history(
+            period=cfg["period"],
+            interval=cfg["interval"],
+            auto_adjust=False,
+            prepost=False,
+        )
+    except Exception as exc:
+        yfinance_error = str(exc)
+        history_df = None
+
+    if history_df is None or history_df.empty:
+        try:
+            return _build_market_preview_alpha_vantage(symbol, range_norm)
+        except HTTPException as av_exc:
+            detail = (
+                f"获取行情失败（yfinance: {yfinance_error or '无可用数据'}; "
+                f"alpha_vantage: {av_exc.detail}）"
+            )
+            raise HTTPException(status_code=502, detail=detail) from av_exc
+
+    history_df = history_df.dropna(subset=["Close"])
+    if history_df.empty:
+        try:
+            return _build_market_preview_alpha_vantage(symbol, range_norm)
+        except HTTPException as av_exc:
+            detail = f"获取行情失败（yfinance: 行情数据为空; alpha_vantage: {av_exc.detail}）"
+            raise HTTPException(status_code=502, detail=detail) from av_exc
+
+    tz_et = ZoneInfo("America/New_York")
+    include_time = range_norm in {"1d", "1w"}
+    points: list[dict] = []
+
+    for ts, row in history_df.iterrows():
+        close = _as_float(row.get("Close"))
+        if close is None:
+            continue
+        volume = _as_float(row.get("Volume"))
+
+        if hasattr(ts, "to_pydatetime"):
+            dt = ts.to_pydatetime()
+        elif isinstance(ts, datetime):
+            dt = ts
+        else:
+            continue
+
+        if dt.tzinfo is not None:
+            dt_et = dt.astimezone(tz_et)
+        else:
+            dt_et = dt.replace(tzinfo=tz_et)
+
+        label = dt_et.strftime("%m-%d %H:%M") if include_time else dt_et.strftime("%Y-%m-%d")
+        points.append(
+            {
+                "ts": int(dt_et.timestamp() * 1000),
+                "label": label,
+                "close": round(close, 4),
+                "volume": int(volume) if volume is not None else None,
+            }
+        )
+
+    if not points:
+        try:
+            return _build_market_preview_alpha_vantage(symbol, range_norm)
+        except HTTPException as av_exc:
+            detail = f"获取行情失败（yfinance: 无可用行情点; alpha_vantage: {av_exc.detail}）"
+            raise HTTPException(status_code=502, detail=detail) from av_exc
+
+    try:
+        fast_info = dict(ticker_obj.fast_info)
+    except Exception:
+        fast_info = ticker_obj.fast_info if hasattr(ticker_obj, "fast_info") else {}
+
+    try:
+        info = ticker_obj.info or {}
+    except Exception:
+        info = {}
+
+    latest_price = _as_float(_safe_get(fast_info, "lastPrice", "regularMarketPrice"))
+    if latest_price is None:
+        latest_price = points[-1]["close"]
+
+    prev_close = _as_float(_safe_get(fast_info, "previousClose", "regularMarketPreviousClose"))
+    if prev_close is None and len(points) > 1:
+        prev_close = points[-2]["close"]
+
+    change = None
+    change_pct = None
+    if prev_close not in (None, 0):
+        change = latest_price - prev_close
+        change_pct = (change / prev_close) * 100
+
+    last_row = history_df.iloc[-1]
+    today_open = _as_float(_safe_get(fast_info, "open", "regularMarketOpen"))
+    if today_open is None:
+        today_open = _as_float(last_row.get("Open"))
+
+    today_high = _as_float(_safe_get(fast_info, "dayHigh", "regularMarketDayHigh"))
+    if today_high is None:
+        today_high = _as_float(last_row.get("High"))
+
+    today_low = _as_float(_safe_get(fast_info, "dayLow", "regularMarketDayLow"))
+    if today_low is None:
+        today_low = _as_float(last_row.get("Low"))
+
+    day_volume = _as_float(_safe_get(fast_info, "lastVolume", "regularMarketVolume"))
+    if day_volume is None:
+        day_volume = _as_float(last_row.get("Volume"))
+
+    market_cap = _as_float(_safe_get(fast_info, "marketCap")) or _as_float(_safe_get(info, "marketCap"))
+    week52_high = _as_float(_safe_get(fast_info, "yearHigh")) or _as_float(_safe_get(info, "fiftyTwoWeekHigh"))
+    week52_low = _as_float(_safe_get(fast_info, "yearLow")) or _as_float(_safe_get(info, "fiftyTwoWeekLow"))
+    avg_volume = _as_float(_safe_get(fast_info, "tenDayAverageVolume", "threeMonthAverageVolume")) or _as_float(
+        _safe_get(info, "averageVolume")
+    )
+    dividend_yield = _as_float(_safe_get(info, "dividendYield"))
+    pe_ratio = _as_float(_safe_get(info, "trailingPE", "forwardPE"))
+    beta = _as_float(_safe_get(info, "beta"))
+    eps = _as_float(_safe_get(info, "trailingEps"))
+
+    shares_outstanding = _as_float(_safe_get(info, "sharesOutstanding"))
+    turnover_rate = None
+    if day_volume not in (None, 0) and shares_outstanding not in (None, 0):
+        turnover_rate = (day_volume / shares_outstanding) * 100
+
+    return {
+        "ticker": symbol,
+        "range": range_norm,
+        "interval": cfg["interval"],
+        "updated_at_et": points[-1]["label"],
+        "latest_price": round(latest_price, 4) if latest_price is not None else None,
+        "change": round(change, 4) if change is not None else None,
+        "change_percent": round(change_pct, 4) if change_pct is not None else None,
+        "points": points,
+        "metrics": {
+            "today_open": today_open,
+            "today_high": today_high,
+            "today_low": today_low,
+            "volume": day_volume,
+            "turnover_rate": turnover_rate,
+            "market_cap": market_cap,
+            "week52_high": week52_high,
+            "week52_low": week52_low,
+            "avg_volume": avg_volume,
+            "dividend_yield": dividend_yield,
+            "pe_ratio": pe_ratio,
+            "beta": beta,
+            "eps": eps,
+        },
+        "data_source": "yfinance",
+    }
 
 
 class RunRequest(BaseModel):
@@ -795,6 +1184,16 @@ async def run_stream(payload: RunRequest) -> StreamingResponse:
 @app.get("/api/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+@app.get("/api/market/preview")
+async def market_preview(
+    ticker: str = Query(..., min_length=1),
+    range_key: str = Query("1y", alias="range"),
+) -> JSONResponse:
+    symbol = _normalize_ticker_input(ticker)
+    payload = await run_in_threadpool(_build_market_preview, symbol, range_key)
+    return JSONResponse(content={"ok": True, "data": payload})
 
 
 @app.get("/api/company-graph/{ticker}")
