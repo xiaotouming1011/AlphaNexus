@@ -15,15 +15,34 @@ from .errors import (
 API_BASE_URL = "https://www.alphavantage.co/query"
 REQUEST_TIMEOUT_SECONDS = 15
 
-def get_api_key() -> str:
-    """Retrieve the API key for Alpha Vantage from environment variables."""
-    api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
-    if not api_key:
+def _dedupe_keep_order(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for item in items:
+        if item and item not in seen:
+            ordered.append(item)
+            seen.add(item)
+    return ordered
+
+
+def get_api_keys() -> list[str]:
+    """Retrieve one or many Alpha Vantage keys from env.
+
+    Supported env vars:
+    - ALPHA_VANTAGE_API_KEY: single key
+    - ALPHA_VANTAGE_API_KEYS: multiple keys, split by comma/semicolon/newline
+    """
+    single = (os.getenv("ALPHA_VANTAGE_API_KEY") or "").strip()
+    multi_raw = os.getenv("ALPHA_VANTAGE_API_KEYS") or ""
+    normalized = multi_raw.replace(";", ",").replace("\n", ",")
+    multi = [part.strip() for part in normalized.split(",") if part.strip()]
+    keys = _dedupe_keep_order(([single] if single else []) + multi)
+    if not keys:
         raise DataflowAuthError(
-            "ALPHA_VANTAGE_API_KEY environment variable is not set.",
+            "ALPHA_VANTAGE_API_KEY/ALPHA_VANTAGE_API_KEYS is not set.",
             vendor="alpha_vantage",
         )
-    return api_key
+    return keys
 
 def format_datetime_for_api(date_input) -> str:
     """Convert various date formats to YYYYMMDDTHHMM format required by Alpha Vantage API."""
@@ -106,7 +125,6 @@ def _make_api_request(function_name: str, params: dict) -> dict | str:
     api_params = params.copy()
     api_params.update({
         "function": function_name,
-        "apikey": get_api_key(),
         "source": "trading_agents",
     })
     
@@ -120,63 +138,80 @@ def _make_api_request(function_name: str, params: dict) -> dict | str:
         # Remove entitlement if it's None or empty
         api_params.pop("entitlement", None)
     
-    try:
-        response = requests.get(
-            API_BASE_URL,
-            params=api_params,
-            timeout=REQUEST_TIMEOUT_SECONDS,
-        )
-    except requests.Timeout as exc:
-        raise DataflowTimeoutError(
-            f"Alpha Vantage timeout for {function_name}",
-            vendor="alpha_vantage",
-            method=function_name,
-        ) from exc
-    except requests.RequestException as exc:
-        raise DataflowUpstreamError(
-            f"Alpha Vantage request failed for {function_name}: {exc}",
-            vendor="alpha_vantage",
-            method=function_name,
-            retryable=True,
-        ) from exc
+    last_exc: Exception | None = None
+    for api_key in get_api_keys():
+        attempt_params = api_params.copy()
+        attempt_params["apikey"] = api_key
+        try:
+            response = requests.get(
+                API_BASE_URL,
+                params=attempt_params,
+                timeout=REQUEST_TIMEOUT_SECONDS,
+            )
+        except requests.Timeout as exc:
+            last_exc = DataflowTimeoutError(
+                f"Alpha Vantage timeout for {function_name}",
+                vendor="alpha_vantage",
+                method=function_name,
+            )
+            continue
+        except requests.RequestException as exc:
+            last_exc = DataflowUpstreamError(
+                f"Alpha Vantage request failed for {function_name}: {exc}",
+                vendor="alpha_vantage",
+                method=function_name,
+                retryable=True,
+            )
+            continue
 
-    if response.status_code == 429:
-        raise AlphaVantageRateLimitError(
-            f"Alpha Vantage rate limit exceeded for {function_name} (HTTP 429)"
-        )
-    if response.status_code in (401, 403):
-        raise DataflowAuthError(
-            f"Alpha Vantage auth error for {function_name} (HTTP {response.status_code})",
-            vendor="alpha_vantage",
-            method=function_name,
-        )
-    if response.status_code >= 500:
-        raise DataflowUpstreamError(
-            f"Alpha Vantage upstream failure for {function_name} (HTTP {response.status_code})",
-            vendor="alpha_vantage",
-            method=function_name,
-            retryable=True,
-        )
-    if response.status_code >= 400:
-        raise DataflowBadRequestError(
-            f"Alpha Vantage request rejected for {function_name} (HTTP {response.status_code})",
-            vendor="alpha_vantage",
-            method=function_name,
-        )
+        if response.status_code == 429:
+            last_exc = AlphaVantageRateLimitError(
+                f"Alpha Vantage rate limit exceeded for {function_name} (HTTP 429)"
+            )
+            continue
+        if response.status_code in (401, 403):
+            last_exc = DataflowAuthError(
+                f"Alpha Vantage auth error for {function_name} (HTTP {response.status_code})",
+                vendor="alpha_vantage",
+                method=function_name,
+            )
+            continue
+        if response.status_code >= 500:
+            last_exc = DataflowUpstreamError(
+                f"Alpha Vantage upstream failure for {function_name} (HTTP {response.status_code})",
+                vendor="alpha_vantage",
+                method=function_name,
+                retryable=True,
+            )
+            continue
+        if response.status_code >= 400:
+            raise DataflowBadRequestError(
+                f"Alpha Vantage request rejected for {function_name} (HTTP {response.status_code})",
+                vendor="alpha_vantage",
+                method=function_name,
+            )
 
-    response_text = response.text
-    
-    # Check if response is JSON (error responses are typically JSON)
-    try:
-        response_json = json.loads(response_text)
-        parsed_error = _parse_alpha_vantage_json_error(function_name, response_json)
-        if parsed_error:
-            raise parsed_error
-    except json.JSONDecodeError:
-        # Response is not JSON (likely CSV data), which is normal
-        pass
+        response_text = response.text
+        try:
+            response_json = json.loads(response_text)
+            parsed_error = _parse_alpha_vantage_json_error(function_name, response_json)
+            if parsed_error:
+                if isinstance(parsed_error, (AlphaVantageRateLimitError, DataflowAuthError)):
+                    last_exc = parsed_error
+                    continue
+                raise parsed_error
+        except json.JSONDecodeError:
+            pass
+        return response_text
 
-    return response_text
+    if last_exc:
+        raise last_exc
+    raise DataflowUpstreamError(
+        f"Alpha Vantage failed for {function_name} with no usable key",
+        vendor="alpha_vantage",
+        method=function_name,
+        retryable=True,
+    )
 
 
 

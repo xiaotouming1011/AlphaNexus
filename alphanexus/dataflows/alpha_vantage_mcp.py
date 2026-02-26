@@ -26,15 +26,29 @@ DEFAULT_MCP_ENTRYPOINT = os.getenv("ALPHA_VANTAGE_MCP_ENTRYPOINT", "av-mcp")
 DEFAULT_CALL_TIMEOUT_SECONDS = int(os.getenv("ALPHA_VANTAGE_MCP_TIMEOUT", "25"))
 
 
-def _get_api_key(api_key: str | None = None) -> str:
-    key = (api_key or os.getenv("ALPHA_VANTAGE_API_KEY") or "").strip()
-    if not key:
+def _dedupe_keep_order(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for item in items:
+        if item and item not in seen:
+            ordered.append(item)
+            seen.add(item)
+    return ordered
+
+
+def _get_api_keys(api_key: str | None = None) -> list[str]:
+    single = (api_key or os.getenv("ALPHA_VANTAGE_API_KEY") or "").strip()
+    multi_raw = os.getenv("ALPHA_VANTAGE_API_KEYS") or ""
+    normalized = multi_raw.replace(";", ",").replace("\n", ",")
+    multi = [part.strip() for part in normalized.split(",") if part.strip()]
+    keys = _dedupe_keep_order(([single] if single else []) + multi)
+    if not keys:
         raise DataflowAuthError(
             "Missing Alpha Vantage API key for MCP adapter",
             vendor="alpha_vantage_mcp",
             method="TIME_SERIES_DAILY",
         )
-    return key
+    return keys
 
 
 def _parse_tool_result_to_json(raw: Any) -> dict[str, Any]:
@@ -195,39 +209,52 @@ async def fetch_time_series_daily_mcp_async(
             method="TIME_SERIES_DAILY",
         )
 
-    key = _get_api_key(api_key)
-    server = StdioServerParameters(command=command, args=[entrypoint, key])
-
-    try:
-        async with stdio_client(server) as (read_stream, write_stream):
-            async with ClientSession(read_stream, write_stream) as session:
-                await session.initialize()
-                result = await session.call_tool(
-                    "TOOL_CALL",
-                    {
-                        "tool_name": "TIME_SERIES_DAILY",
-                        "arguments": {
-                            "symbol": symbol,
-                            "outputsize": outputsize,
-                            "datatype": "json",
+    last_exc: Exception | None = None
+    for key in _get_api_keys(api_key):
+        server = StdioServerParameters(command=command, args=[entrypoint, key])
+        try:
+            async with stdio_client(server) as (read_stream, write_stream):
+                async with ClientSession(read_stream, write_stream) as session:
+                    await session.initialize()
+                    result = await session.call_tool(
+                        "TOOL_CALL",
+                        {
+                            "tool_name": "TIME_SERIES_DAILY",
+                            "arguments": {
+                                "symbol": symbol,
+                                "outputsize": outputsize,
+                                "datatype": "json",
+                            },
                         },
-                    },
-                    read_timeout_seconds=timedelta(seconds=DEFAULT_CALL_TIMEOUT_SECONDS),
-                )
-    except TimeoutError as exc:
-        raise DataflowTimeoutError(
-            f"Alpha Vantage MCP timed out for {symbol}",
-            vendor="alpha_vantage_mcp",
-            method="TIME_SERIES_DAILY",
-        ) from exc
-    except Exception as exc:
-        raise normalize_dataflow_error(
-            exc, vendor="alpha_vantage_mcp", method="TIME_SERIES_DAILY"
-        ) from exc
+                        read_timeout_seconds=timedelta(seconds=DEFAULT_CALL_TIMEOUT_SECONDS),
+                    )
+            text = _extract_text_content(result)
+            payload = _parse_tool_result_to_json(text)
+            return _normalize_daily_payload(symbol, payload)
+        except TimeoutError:
+            last_exc = DataflowTimeoutError(
+                f"Alpha Vantage MCP timed out for {symbol}",
+                vendor="alpha_vantage_mcp",
+                method="TIME_SERIES_DAILY",
+            )
+            continue
+        except Exception as exc:
+            normalized_exc = normalize_dataflow_error(
+                exc, vendor="alpha_vantage_mcp", method="TIME_SERIES_DAILY"
+            )
+            if isinstance(normalized_exc, (DataflowRateLimitError, DataflowAuthError)):
+                last_exc = normalized_exc
+                continue
+            raise normalized_exc from exc
 
-    text = _extract_text_content(result)
-    payload = _parse_tool_result_to_json(text)
-    return _normalize_daily_payload(symbol, payload)
+    if last_exc:
+        raise last_exc
+    raise DataflowUpstreamError(
+        f"Alpha Vantage MCP failed for {symbol} with no usable key",
+        vendor="alpha_vantage_mcp",
+        method="TIME_SERIES_DAILY",
+        retryable=True,
+    )
 
 
 def fetch_time_series_daily_mcp(
