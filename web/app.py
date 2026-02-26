@@ -28,12 +28,21 @@ from web.portfolio_service import build_portfolio_timeseries
 load_dotenv()
 
 APP_DIR = Path(__file__).resolve().parent
-INDEX_HTML = (APP_DIR / "index.html").read_text(encoding="utf-8")
-PORTFOLIO_HTML = (APP_DIR / "portfolio.html").read_text(encoding="utf-8")
-INTRO_LIQUIDETHER_JS = (APP_DIR / "intro_liquidether_module.js").read_text(encoding="utf-8")
-INTRO_LIQUIDETHER_CSS = (APP_DIR / "intro_liquidether.css").read_text(encoding="utf-8")
-INTRO_LIGHTPILLAR_JS = (APP_DIR / "intro_components" / "LightPillar.module.js").read_text(encoding="utf-8")
-INTRO_LIGHTPILLAR_CSS = (APP_DIR / "intro_components" / "LightPillar.css").read_text(encoding="utf-8")
+
+
+def _read_text_or_default(path: Path, default: str = "") -> str:
+    try:
+        return path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return default
+
+
+INDEX_HTML = _read_text_or_default(APP_DIR / "index.html")
+PORTFOLIO_HTML = _read_text_or_default(APP_DIR / "portfolio.html")
+INTRO_LIQUIDETHER_JS = _read_text_or_default(APP_DIR / "intro_liquidether_module.js")
+INTRO_LIQUIDETHER_CSS = _read_text_or_default(APP_DIR / "intro_liquidether.css")
+INTRO_LIGHTPILLAR_JS = _read_text_or_default(APP_DIR / "intro_components" / "LightPillar.module.js")
+INTRO_LIGHTPILLAR_CSS = _read_text_or_default(APP_DIR / "intro_components" / "LightPillar.css")
 ANTINERTIA_DIST_DIR = APP_DIR / "antinertia_frontend" / "dist"
 ANTINERTIA_INDEX_FILE = ANTINERTIA_DIST_DIR / "index.html"
 ANTINERTIA_ASSETS_DIR = ANTINERTIA_DIST_DIR / "assets"
