@@ -8,7 +8,8 @@ from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query, Response
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 import yfinance as yf
@@ -29,8 +30,19 @@ load_dotenv()
 APP_DIR = Path(__file__).resolve().parent
 INDEX_HTML = (APP_DIR / "index.html").read_text(encoding="utf-8")
 PORTFOLIO_HTML = (APP_DIR / "portfolio.html").read_text(encoding="utf-8")
+INTRO_LIQUIDETHER_JS = (APP_DIR / "intro_liquidether_module.js").read_text(encoding="utf-8")
+INTRO_LIQUIDETHER_CSS = (APP_DIR / "intro_liquidether.css").read_text(encoding="utf-8")
+INTRO_LIGHTPILLAR_JS = (APP_DIR / "intro_components" / "LightPillar.module.js").read_text(encoding="utf-8")
+INTRO_LIGHTPILLAR_CSS = (APP_DIR / "intro_components" / "LightPillar.css").read_text(encoding="utf-8")
+ANTINERTIA_DIST_DIR = APP_DIR / "antinertia_frontend" / "dist"
+ANTINERTIA_INDEX_FILE = ANTINERTIA_DIST_DIR / "index.html"
+ANTINERTIA_ASSETS_DIR = ANTINERTIA_DIST_DIR / "assets"
+ANTINERTIA_VITE_SVG = ANTINERTIA_DIST_DIR / "vite.svg"
 
 app = FastAPI(title="AlphaNexus Web")
+
+if ANTINERTIA_ASSETS_DIR.exists():
+    app.mount("/assets", StaticFiles(directory=str(ANTINERTIA_ASSETS_DIR)), name="frontend-assets")
 
 
 POPULAR_US_STOCKS: dict[str, str] = {
@@ -1156,6 +1168,13 @@ def _stream_graph(payload: RunRequest):
 
 @app.get("/", response_class=HTMLResponse)
 def index() -> HTMLResponse:
+    if ANTINERTIA_INDEX_FILE.exists():
+        return HTMLResponse(content=ANTINERTIA_INDEX_FILE.read_text(encoding="utf-8"))
+    return HTMLResponse(content=INDEX_HTML)
+
+
+@app.get("/console", response_class=HTMLResponse)
+def console_page() -> HTMLResponse:
     return HTMLResponse(content=INDEX_HTML)
 
 
@@ -1163,6 +1182,33 @@ def index() -> HTMLResponse:
 def favicon() -> Response:
     # 浏览器会自动请求 favicon。此处返回 204，避免日志里出现无意义 404。
     return Response(status_code=204)
+
+
+@app.get("/vite.svg", include_in_schema=False)
+def vite_svg() -> Response:
+    if ANTINERTIA_VITE_SVG.exists():
+        return FileResponse(str(ANTINERTIA_VITE_SVG), media_type="image/svg+xml")
+    return Response(status_code=404)
+
+
+@app.get("/intro/liquidether.js")
+def intro_liquidether_js() -> Response:
+    return Response(content=INTRO_LIQUIDETHER_JS, media_type="text/javascript; charset=utf-8")
+
+
+@app.get("/intro/liquidether.css")
+def intro_liquidether_css() -> Response:
+    return Response(content=INTRO_LIQUIDETHER_CSS, media_type="text/css; charset=utf-8")
+
+
+@app.get("/intro/lightpillar.js")
+def intro_lightpillar_js() -> Response:
+    return Response(content=INTRO_LIGHTPILLAR_JS, media_type="text/javascript; charset=utf-8")
+
+
+@app.get("/intro/lightpillar.css")
+def intro_lightpillar_css() -> Response:
+    return Response(content=INTRO_LIGHTPILLAR_CSS, media_type="text/css; charset=utf-8")
 
 
 @app.get("/portfolio", response_class=HTMLResponse)
