@@ -54,6 +54,170 @@
         -webkit-font-smoothing: antialiased;
       }
 
+      body.intro-active {
+        overflow: hidden;
+      }
+
+      .intro-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        background: radial-gradient(circle at 15% -10%, #16337f 0%, transparent 30%),
+          radial-gradient(circle at 85% 0%, #2e1d73 0%, transparent 35%),
+          linear-gradient(180deg, #03061b 0%, #080a2a 48%, #1a0630 100%);
+        overflow: hidden;
+        transition: opacity 0.8s var(--ease-out), visibility 0.8s var(--ease-out);
+      }
+
+      .intro-screen.is-hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .liquid-ether-container {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+
+      .intro-anti-bg {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .intro-anti-aurora {
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(80px);
+        opacity: 0.6;
+      }
+
+      .intro-anti-aurora-a {
+        width: min(44rem, 80vw);
+        height: min(22rem, 45vw);
+        left: -15%;
+        top: 18%;
+        background: linear-gradient(110deg, rgba(93, 206, 255, 0.75), rgba(108, 118, 255, 0.45));
+      }
+
+      .intro-anti-aurora-b {
+        width: min(34rem, 70vw);
+        height: min(34rem, 70vw);
+        right: -12%;
+        bottom: -14%;
+        background: radial-gradient(circle, rgba(178, 92, 255, 0.6), rgba(111, 73, 220, 0.18));
+      }
+
+      .intro-anti-aurora-c {
+        width: min(26rem, 52vw);
+        height: min(24rem, 48vw);
+        right: 10%;
+        top: 15%;
+        background: radial-gradient(circle, rgba(84, 115, 255, 0.45), rgba(84, 115, 255, 0));
+      }
+
+      .intro-anti-waves {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.85;
+      }
+
+      .intro-anti-waves path {
+        fill: none;
+        stroke-width: 2.4;
+        stroke-linecap: round;
+        stroke: rgba(124, 162, 255, 0.66);
+        filter: drop-shadow(0 0 12px rgba(97, 149, 255, 0.45));
+        animation: intro-wavePulse 6s ease-in-out infinite alternate;
+      }
+
+      .intro-anti-waves path:nth-child(2) {
+        stroke-width: 2.8;
+        stroke: rgba(113, 178, 255, 0.66);
+        animation-delay: 0.6s;
+      }
+
+      .intro-anti-waves path:nth-child(3) {
+        stroke-width: 3.1;
+        stroke: rgba(154, 128, 255, 0.72);
+        animation-delay: 1.2s;
+      }
+
+      .intro-anti-waves path:nth-child(4),
+      .intro-anti-waves path:nth-child(5) {
+        stroke-width: 1.7;
+        stroke: rgba(128, 111, 255, 0.35);
+      }
+
+      @keyframes intro-wavePulse {
+        from { opacity: 0.55; transform: translateY(0); }
+        to { opacity: 1; transform: translateY(8px); }
+      }
+
+      .intro-anti-hero {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 24px;
+        color: #f2f5ff;
+      }
+
+      .intro-anti-title {
+        margin: 0 0 10px;
+        font-size: clamp(2.1rem, 7vw, 4rem);
+        line-height: 1.08;
+        letter-spacing: -0.05em;
+        font-family: "Sora", "Inter", sans-serif;
+      }
+
+      .intro-anti-subtitle {
+        margin: 0 0 22px;
+        font-size: clamp(0.98rem, 2.6vw, 1.2rem);
+        line-height: 1.8;
+        color: #a7add0;
+      }
+
+      .intro-start-btn {
+        position: static;
+        z-index: 8;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        padding: 0.9rem 1.6rem;
+        background: #e8edf7;
+        color: #11162a;
+        font-size: 1.05rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        cursor: pointer;
+        transition: transform 0.24s var(--ease-out), box-shadow 0.24s var(--ease-out), background 0.24s var(--ease-out);
+        box-shadow: 0 15px 35px rgba(3, 8, 34, 0.45);
+      }
+
+      .intro-start-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 22px 45px rgba(3, 8, 34, 0.55);
+        background: #f3f6fb;
+      }
+
+      .intro-start-btn:active {
+        transform: translateY(0);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .intro-screen { transition: opacity 0.4s linear, visibility 0.4s linear; }
+      }
+
       .serif-text {
         font-family: var(--font-display);
       }
@@ -1233,6 +1397,10 @@
       }
 
       @media (max-width: 1080px) {
+        .intro-start-btn {
+          bottom: 28px;
+        }
+
         .topbar {
           flex-wrap: wrap;
           gap: 14px;
@@ -1286,6 +1454,13 @@
       }
 
       @media (max-width: 700px) {
+        .intro-start-btn {
+          width: calc(100% - 32px);
+          max-width: 320px;
+          padding: 10px 16px;
+          font-size: 14px;
+        }
+
         .shell {
           padding: 16px 16px 64px;
         }
@@ -1350,7 +1525,28 @@
       }
     </style>
   </head>
-  <body>
+  <body class="intro-active">
+    <section id="intro_screen" class="intro-screen" aria-label="项目前置介绍页">
+      <div class="intro-anti-bg" aria-hidden="true">
+        <div class="intro-anti-aurora intro-anti-aurora-a"></div>
+        <div class="intro-anti-aurora intro-anti-aurora-b"></div>
+        <div class="intro-anti-aurora intro-anti-aurora-c"></div>
+        <svg class="intro-anti-waves" viewBox="0 0 1600 900" preserveAspectRatio="none">
+          <path d="M-80 250 C 240 370, 560 80, 900 220 C 1140 320, 1320 440, 1680 650" />
+          <path d="M-60 295 C 220 410, 580 130, 930 280 C 1170 380, 1370 520, 1680 760" />
+          <path d="M-30 350 C 250 450, 620 200, 960 350 C 1220 470, 1410 620, 1690 860" />
+          <path d="M1180 40 C 1240 240, 1100 470, 1260 760" />
+          <path d="M1300 10 C 1360 220, 1260 480, 1430 860" />
+        </svg>
+      </div>
+      <div class="intro-anti-hero">
+        <div>
+          <h1 class="intro-anti-title">Build what matters.</h1>
+          <p class="intro-anti-subtitle">Turn signal into decisions.</p>
+          <button id="intro_start_btn" class="intro-start-btn" type="button">进入控制台</button>
+        </div>
+      </div>
+    </section>
     <div class="shell">
       <header class="topbar reveal">
         <div class="topbar-left">
@@ -1556,6 +1752,7 @@
             <div class="output-stack">
               <div class="section reveal" id="progress_section">
                 <h3>进度</h3>
+                <p class="meta-note">由于篇幅较长通常完全生成需两到三分钟，在等待时间可以先看看上方的市场实时预览。</p>
                 <div class="progress-header">
                   <span id="progress_stage" class="progress-stage">等待开始</span>
                   <span id="progress_percent" class="progress-percent">0%</span>
@@ -1923,6 +2120,8 @@
       }
 
       const form = document.getElementById("run-form");
+      const introScreenEl = document.getElementById("intro_screen");
+      const introStartBtnEl = document.getElementById("intro_start_btn");
       const researchLayoutEl = document.getElementById("research_layout");
       const outputPanelEl = document.getElementById("output_panel");
       const statusEl = document.getElementById("status");
@@ -2086,6 +2285,31 @@
 
       const initialView = window.location.hash === "#portfolio" ? "portfolio" : "research";
       switchView(initialView, false);
+      function initializeIntroScreen() {
+        if (!introScreenEl || !introStartBtnEl) return;
+        function enterConsole() {
+          if (introScreenEl.classList.contains("is-hidden")) return;
+          introScreenEl.classList.add("is-hidden");
+          document.body.classList.remove("intro-active");
+          switchView("research");
+
+          window.setTimeout(() => {
+            introScreenEl.setAttribute("aria-hidden", "true");
+            introScreenEl.style.display = "none";
+            if (tickerInput) {
+              tickerInput.focus();
+            }
+          }, 820);
+        }
+
+        introStartBtnEl.addEventListener("click", enterConsole);
+        introStartBtnEl.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            enterConsole();
+          }
+        });
+      }
 
       function renderMarkdown(target, text) {
         if (!target) return;
@@ -3377,6 +3601,7 @@
 
       initializeInputUI();
       initializeAdvancedSettings();
+      initializeIntroScreen();
       initializeMarketPreviewUI();
 
       form.addEventListener("submit", async (e) => {
