@@ -1,0 +1,19 @@
+[Unit]
+Description=AlphaNexus FastAPI Web Service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=alphanexus
+Group=alphanexus
+WorkingDirectory=/opt/alphanexus/current
+EnvironmentFile=/etc/alphanexus.env
+ExecStart=/opt/alphanexus/venv/bin/uvicorn web.app:app --host 127.0.0.1 --port 8002 --workers 1 --timeout-keep-alive 75
+Restart=always
+RestartSec=5
+KillSignal=SIGINT
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

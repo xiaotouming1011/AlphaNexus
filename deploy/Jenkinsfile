@@ -1,0 +1,107 @@
+pipeline {
+  agent any
+
+  parameters {
+    booleanParam(
+      name: 'REQUIRE_APPROVAL',
+      defaultValue: false,
+      description: '是否在部署前需要人工确认'
+    )
+  }
+
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+  }
+
+  environment {
+    DEPLOY_CMD = '/usr/local/bin/alphanexus-deploy'
+    ROLLBACK_CMD = '/usr/local/bin/alphanexus-rollback'
+    HEALTH_URL = 'http://127.0.0.1:8002/api/health'
+  }
+
+  triggers {
+    githubPush()
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+        sh 'git rev-parse --abbrev-ref HEAD'
+        sh 'git rev-parse --short HEAD'
+      }
+    }
+
+    stage('Prepare') {
+      steps {
+        script {
+          env.RELEASE_ID = sh(
+            returnStdout: true,
+            script: "date +%Y%m%d%H%M%S"
+          ).trim()
+        }
+        echo "Release ID: ${env.RELEASE_ID}"
+      }
+    }
+
+    stage('Validate') {
+      steps {
+        sh '''
+          set -eu
+          python3 -m py_compile \
+            web/app.py \
+            web/portfolio_service.py \
+            alphanexus/default_config.py \
+            alphanexus/graph/trading_graph.py \
+            alphanexus/graph/conditional_logic.py
+        '''
+      }
+    }
+
+    stage('Manual Approval') {
+      when {
+        expression { return params.REQUIRE_APPROVAL }
+      }
+      steps {
+        timeout(time: 30, unit: 'MINUTES') {
+          input message: "Deploy release ${env.RELEASE_ID} to production?"
+        }
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        sh '''
+          set -eu
+          # 生产密钥统一放在服务器 /etc/alphanexus.env，不再依赖 Jenkins 密文覆盖
+          sudo "${DEPLOY_CMD}" "${RELEASE_ID}" "${WORKSPACE}"
+        '''
+      }
+    }
+
+    stage('Health Check') {
+      steps {
+        sh '''
+          set -eu
+          curl -fsS --max-time 10 "${HEALTH_URL}"
+        '''
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "Deployment succeeded: ${env.RELEASE_ID}"
+    }
+    failure {
+      echo "Deployment failed, trying rollback..."
+      sh '''
+        set +e
+        sudo "${ROLLBACK_CMD}"
+        exit 0
+      '''
+    }
+  }
+}
