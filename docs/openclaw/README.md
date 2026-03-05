@@ -1,4 +1,4 @@
-# evaluation-openclaw
+# openclaw
 
 本目录是 AlphaNexus 的 OpenClaw 评测工作区。
 
@@ -21,3 +21,8 @@
 
 - 新增评测内容请优先更新 `content/README_v0.2.md`
 - badcase 修复后必须回灌到 `content/datasets/l2_regression_eval_dataset_v0.2.csv`
+
+## 后续约定（2026-03-05）
+
+- 后续所有评测相关内容统一存放在 `docs/openclaw/`。
+- 评测产出优先通过子 agent `gemini` 生成与迭代，减少手工直写。
