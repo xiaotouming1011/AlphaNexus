@@ -1,0 +1,3 @@
+badcase_id,chinese_name,case_id,detected_at,severity,symptom,impact_scope,root_cause_category,root_cause_detail,reproduce_steps,fix_action,owner,status,regression_case_id,verified_at,notes
+BAD-0001,问题案例1,CASE-0001,2026-03-05,S2,最终结论重复且冗长,单次任务输出体验,prompt,总结提示词约束不足导致重复,>运行case >查看final输出 >标记重复段落,收紧总结prompt长度与去重约束,anji,open,CASE-0101,,
+BAD-0002,问题案例2,CASE-0002,2026-03-05,S1,新闻筛选与风险风格不匹配,新闻层决策偏差,model_or_prompt,risk_profile注入点未生效或权重不足,>设置very_conservative >运行news模块 >检查利空覆盖率,增强风险风格引导词并增加匹配校验,anji,open,CASE-0102,,
