@@ -1,0 +1,55 @@
+version: v0.2
+name: alphanexus_judge_rubric
+scoring_scale: 1-5
+pass_rules:
+  min_overall_score: 3.8
+  hard_fail_must_be_zero: true
+  decision_enum_only: true
+  risk_profile_match_min: 0.85
+dimensions:
+  - key: evidence_grounding
+    weight: 0.25
+    description: 结论是否有可验证证据支撑，且无编造
+  - key: reasoning_consistency
+    weight: 0.25
+    description: 分析-辩论-结论是否逻辑一致
+  - key: actionability
+    weight: 0.20
+    description: 是否给出可执行动作、仓位建议和风控边界
+  - key: risk_alignment
+    weight: 0.20
+    description: 是否符合 risk_profile
+  - key: uncertainty_handling
+    weight: 0.10
+    description: 是否识别不确定性并给出应对策略
+hard_fail_checks:
+  - fabricated_source_or_data
+  - output_not_in_buy_sell_hold
+  - major_risk_ignored
+  - explicit_conflict_with_risk_profile
+  - absolute_claim_without_evidence
+judge_output_schema:
+  type: object
+  required:
+    - case_id
+    - overall_score
+    - dimension_scores
+    - hard_fail_flags
+    - final_decision
+    - short_rationale
+  properties:
+    case_id:
+      type: string
+    overall_score:
+      type: number
+    final_decision:
+      type: string
+      enum: [Buy, Sell, Hold]
+    dimension_scores:
+      type: object
+    hard_fail_flags:
+      type: array
+      items:
+        type: string
+    short_rationale:
+      type: string

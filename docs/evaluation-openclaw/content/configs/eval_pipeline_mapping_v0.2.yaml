@@ -1,0 +1,33 @@
+version: v0.2
+datasets:
+  l1:
+    file: docs/evaluation/datasets/l1_smoke_eval_dataset_v0.2.csv
+    target_count: 50
+    trigger: pr
+    blocking: true
+  l2:
+    file: docs/evaluation/datasets/l2_regression_eval_dataset_v0.2.csv
+    target_count: 500
+    trigger: nightly
+    blocking: true
+  l3:
+    file: docs/evaluation/datasets/l3_challenge_eval_dataset_v0.2.csv
+    target_count: 100
+    trigger: weekly_or_major_release
+    blocking: false
+quality_gates:
+  l1:
+    format_success_min: 0.995
+    decision_enum_rate: 1.0
+    p95_latency_sec_max: 15
+  l2:
+    source_accuracy_min: 0.95
+    risk_match_min: 0.85
+    contradiction_rate_max: 0.05
+  l3:
+    judge_win_rate_min: 0.55
+    hard_fail_rate_max: 0.01
+owners:
+  qa: QA Team
+  algo: Algo Team
+  eng: Backend Team

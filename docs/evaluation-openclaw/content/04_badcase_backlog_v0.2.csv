@@ -1,0 +1,11 @@
+badcase_id,case_id,detected_at,severity,symptom,impact_scope,root_cause_category,root_cause_detail,reproduce_steps,fix_action,owner,status,regression_case_id,verified_at,notes
+BAD-1001,L2-0042,2026-03-05,P1,最终结论非枚举值,决策层,workflow_orchestration,决策节点未做枚举断言,运行case并检查final decision字段,增加Buy/Sell/Hold枚举校验与失败回退,anji,open,L2-0501,,
+BAD-1002,L2-0078,2026-03-05,P1,忽略重大利空新闻,新闻层,information_extraction,事件时间戳过滤阈值过严导致遗漏,回放news模块并对比原始新闻流,放宽窗口并增加利空关键词兜底,anji,open,L2-0502,,
+BAD-1003,L1-0015,2026-03-05,P2,输出重复段落,展示层,prompt_design,总结模板缺少去重指令,重复运行并比对输出段落哈希,加入去重约束与最大句数限制,anji,open,L2-0503,,
+BAD-1004,L2-0113,2026-03-05,P0,编造价格数据,生成层,hallucination,缺少证据绑定检查,回放同case并检查数值来源,启用数值必须带来源规则并硬拦截,anji,open,L2-0504,,
+BAD-1005,L3-0009,2026-03-05,P1,风险偏好不匹配,个性化层,risk_profile_logic,risk_profile注入被覆盖,设置very_conservative后运行并审查仓位,提高risk_profile优先级并添加回归断言,anji,open,L2-0505,,
+BAD-1006,L2-0201,2026-03-05,P2,缺少反方观点,辩论层,debaters_prompt,多空提示词缺少强制反驳槽位,重放debate阶段查看轮次,增加反方最少2点反驳约束,anji,open,L2-0506,,
+BAD-1007,L3-0033,2026-03-05,P1,波动场景仓位过高,风控层,risk_manager_logic,未根据波动率动态收缩仓位,回放challenge case并审阅仓位建议,引入高波动仓位上限规则,anji,open,L2-0507,,
+BAD-1008,L2-0277,2026-03-05,P2,证据引用与结论脱节,可解释性层,citation_alignment,引用粒度过粗导致错配,检查引用片段与结论语义匹配,改为句级证据绑定,anji,open,L2-0508,,
+BAD-1009,L1-0036,2026-03-05,P2,TTFT超阈值,工程层,latency,工具调用串行导致阻塞,压测并查看trace,改为并行获取新闻与行情,anji,open,L2-0509,,
+BAD-1010,L3-0061,2026-03-05,P1,挑战场景中结论摇摆,决策层,decision_stability,冲突信号聚合策略不稳定,多次运行同case并比较决策漂移,加入冲突信号优先级与稳定化规则,anji,open,L2-0510,,
