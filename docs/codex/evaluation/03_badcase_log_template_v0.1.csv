@@ -1,3 +1,9 @@
 badcase_id,chinese_name,case_id,detected_at,severity,symptom,impact_scope,root_cause_category,root_cause_detail,reproduce_steps,fix_action,owner,status,regression_case_id,verified_at,notes
-BAD-0001,问题案例1,CASE-0001,2026-03-05,S2,最终结论重复且冗长,单次任务输出体验,prompt,总结提示词约束不足导致重复,>运行case >查看final输出 >标记重复段落,收紧总结prompt长度与去重约束,anji,open,CASE-0101,,
-BAD-0002,问题案例2,CASE-0002,2026-03-05,S1,新闻筛选与风险风格不匹配,新闻层决策偏差,model_or_prompt,risk_profile注入点未生效或权重不足,>设置very_conservative >运行news模块 >检查利空覆盖率,增强风险风格引导词并增加匹配校验,anji,open,CASE-0102,,
+BAD-0001,问题案例1,CASE-0002,2026-03-05,S1,Gemini供应商调用失败,分析中断/降级,infra_network,代理链路不稳定导致连接中断,选择Gemini并运行news样本,增加供应商健康探测与自动切换提示,anji,open,CASE-0101,,待修复
+BAD-0002,问题案例2,CASE-0002,2026-03-05,S1,风险风格匹配偏离,新闻筛选偏差,prompt,very_conservative下利空权重不足,运行CASE-0002并检查新闻摘要,增强风格提示词约束并加关键词校验,anji,open,CASE-0102,,待修复
+BAD-0003,问题案例3,CASE-0007,2026-03-05,S2,总结段重复,可读性下降,prompt,总结提示词去重约束不足,运行CASE-0007查看final段,缩短总结长度并加“去重”硬性规则,anji,open,CASE-0103,,处理中
+BAD-0004,问题案例4,CASE-0017,2026-03-05,S2,工具调用成功率偏低,基本面模块稳定性波动,data_vendor,alpha_vantage限流触发回退频繁,高峰期重复运行CASE-0017,增加key轮换与请求节流,anji,open,CASE-0104,,处理中
+BAD-0005,问题案例5,CASE-0006,2026-03-05,S2,证据覆盖不足,社媒分析可信度下降,model_or_prompt,社媒观点缺少链接化证据,运行CASE-0006检查来源段,强化来源引用模板,anji,open,CASE-0105,,待修复
+BAD-0006,问题案例6,CASE-0011,2026-03-05,S3,术语中英混用不统一,阅读体验一般,frontend_copy,展示层字段命名不统一,查看news报告与导出json,统一中英术语映射表,anji,open,CASE-0106,,待排期
+BAD-0007,问题案例7,CASE-0004,2026-03-05,S2,高波动场景矛盾句出现,结论可信度下降,reasoning,多段推理未统一风险前提,运行CASE-0004检查结论段,在总结前增加一致性检查,anji,open,CASE-0107,,待修复
+BAD-0008,问题案例8,CASE-0019,2026-03-05,S3,响应偏慢,等待体验一般,performance,辩论与总结串行耗时偏长,运行CASE-0019记录耗时,优化总结提示词并减少重复表述,anji,open,CASE-0108,,待排期
