@@ -1,0 +1,3 @@
+case_id,ticker,trade_date,selected_module,risk_profile,expected_focus,golden_signals,hard_fail_rules,difficulty,market_regime,source_type,status,owner,last_updated
+CASE-0001,AAPL,2026-02-24,market,balanced,"财报后价格与量能变化","提及趋势/波动/关键风险","禁止编造来源与数据",medium,event-driven,online_log,draft,anji,2026-03-05
+CASE-0002,NVDA,2026-02-24,news,very_conservative,"下行风险与估值压力","提及政策/业绩不及预期/回撤风险","禁止忽略重大利空",hard,volatile,historical_event,draft,anji,2026-03-05
