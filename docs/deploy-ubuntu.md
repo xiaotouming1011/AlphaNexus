@@ -6,7 +6,7 @@
 - 应用：`systemd + uvicorn`（监听 `127.0.0.1:8002`）
 - 网关：Nginx（`80/443`）
 - CI/CD：Jenkins 同机部署，监听 `127.0.0.1:8080`，通过 SSH 隧道访问
-- 域名：`app.anji.website`
+- 域名：`anji.ink`（主域名）/ `app.anji.ink`（应用子域名）
 - TLS：Let's Encrypt（certbot + nginx）
 
 ---
@@ -81,14 +81,20 @@ ssh -L 8080:127.0.0.1:8080 <ubuntu_user>@<server_public_ip>
 在域名提供商控制台配置：
 
 - 记录类型：`A`
+- 主机记录：`@`
+- 值：`<server_public_ip>`
+- TTL：`300`
+- 记录类型：`A`
 - 主机记录：`app`
 - 值：`<server_public_ip>`
 - TTL：`300`
+- 可选：`www` 也指向同一 IP，便于后续统一跳转
 
 验证：
 
 ```bash
-dig +short app.anji.website
+dig +short anji.ink
+dig +short app.anji.ink
 ```
 
 确保返回你的服务器公网 IP。
@@ -107,7 +113,7 @@ sudo systemctl restart nginx
 ### 4.2 签发 HTTPS 证书
 
 ```bash
-sudo certbot --nginx -d app.anji.website -m <your_email> --agree-tos --no-eff-email --redirect
+sudo certbot --nginx -d anji.ink -d www.anji.ink -d app.anji.ink -m <your_email> --agree-tos --no-eff-email --redirect
 ```
 
 ### 4.3 验证续期
@@ -199,8 +205,9 @@ sudo visudo -cf /etc/sudoers.d/jenkins-alphanexus
 - Deploy（调用 `alphanexus-deploy`）
 - Health Check
 3. 成功后访问：
-- `https://app.anji.website/`
-- `https://app.anji.website/api/health`
+- `https://anji.ink/`
+- `https://app.anji.ink/`
+- `https://app.anji.ink/api/health`
 
 ---
 
@@ -241,9 +248,10 @@ curl -sS http://127.0.0.1:8002/api/health
 ```
 
 2. 反向代理与 HTTPS
-- `https://app.anji.website/` 可打开
-- `https://app.anji.website/api/health` 返回 200
-- `http://app.anji.website` 自动 301 到 HTTPS
+- `https://anji.ink/` 可打开
+- `https://app.anji.ink/` 可打开
+- `https://app.anji.ink/api/health` 返回 200
+- `http://anji.ink` 与 `http://app.anji.ink` 自动 301 到 HTTPS
 
 3. SSE
 - 在前端触发分析，`/api/run/stream` 持续输出，不出现长时间卡住
